@@ -1,8 +1,9 @@
-# generated: 2025-11-04
-# project: numerologist-ai
-# project_key: numerologist-ai
-# tracking_system: file-system
-# story_location: "{project-root}/docs/stories"
+# Sprint Status - Numerologist AI
+# Generated: 2025-11-04
+# Project: numerologist-ai
+# Project Key: numerologist-ai
+# Tracking System: file-system
+# Story Location: {project-root}/docs/stories
 
 # STATUS DEFINITIONS:
 # ==================
@@ -36,104 +37,129 @@ tracking_system: file-system
 story_location: "{project-root}/docs/stories"
 
 development_status:
-  # ========== EPIC 1: Foundation & Infrastructure Setup ==========
+  # ============================================================================
+  # EPIC 1: Foundation & Project Setup
+  # ============================================================================
   epic-1: backlog
   1-1-initialize-monorepo-structure: backlog
   1-2-setup-backend-with-uv-fastapi: backlog
-  1-3-setup-frontend-with-react-native-expo: backlog
-  1-4-setup-docker-development-environment: backlog
-  1-5-setup-database-with-alembic-migrations: backlog
-  1-6-setup-environment-configuration-secrets: backlog
-  1-7-create-development-convenience-commands-makefile: backlog
-  1-8-setup-github-actions-ci-pipeline-basic: backlog
-  1-9-verify-end-to-end-development-setup: backlog
+  1-3-setup-frontend-with-expo-typescript: backlog
+  1-4-docker-compose-for-local-services: backlog
+  1-5-database-connection-first-migration: backlog
+  1-6-frontend-api-service-setup: backlog
+  1-7-makefile-development-workflow: backlog
   epic-1-retrospective: optional
 
-  # ========== EPIC 2: User Management & Authentication ==========
+  # ============================================================================
+  # EPIC 2: User Authentication & Profile
+  # ============================================================================
   epic-2: backlog
-  2-1-implement-user-registration-api: backlog
-  2-2-implement-user-login-api: backlog
-  2-3-implement-jwt-token-refresh: backlog
-  2-4-implement-authentication-middleware: backlog
-  2-5-create-user-profile-management-endpoints: backlog
-  2-6-build-frontend-login-screen: backlog
-  2-7-build-frontend-registration-screen: backlog
-  2-8-build-frontend-user-profile-screen: backlog
+  2-1-user-model-database-schema: backlog
+  2-2-password-hashing-security-utilities: backlog
+  2-3-user-registration-api-endpoint: backlog
+  2-4-user-login-api-endpoint: backlog
+  2-5-get-current-user-endpoint-protected: backlog
+  2-6-frontend-auth-state-management-zustand: backlog
+  2-7-login-screen-ui: backlog
+  2-8-register-screen-ui: backlog
+  2-9-profile-screen-ui: backlog
+  2-10-auth-navigation-flow: backlog
   epic-2-retrospective: optional
 
-  # ========== EPIC 3: Voice Pipeline Integration ==========
+  # ============================================================================
+  # EPIC 3: Voice Infrastructure & Basic Conversation
+  # ============================================================================
   epic-3: backlog
-  3-1-setup-pipecat-ai-framework-dependencies: backlog
-  3-2-implement-pipecat-bot-framework-with-deepgram-stt: backlog
-  3-3-integrate-azure-openai-llm-into-voice-pipeline: backlog
-  3-4-setup-numerology-function-calling-for-llm: backlog
-  3-5-integrate-elevenlabs-tts-into-voice-pipeline: backlog
-  3-6-create-daily-co-room-management-service: backlog
-  3-7-create-conversation-start-endpoint: backlog
-  3-8-create-conversation-end-endpoint: backlog
-  3-9-build-frontend-voice-conversation-screen: backlog
-  3-10-implement-frontend-daily-co-connection-audio-handling: backlog
+  3-1-add-voice-pipeline-dependencies: backlog
+  3-2-daily-co-room-management-service: backlog
+  3-3-basic-pipecat-bot-with-greeting: backlog
+  3-4-conversation-model-start-endpoint: backlog
+  3-5-frontend-conversation-state-zustand: backlog
+  3-6-microphone-permission-setup: backlog
+  3-7-conversation-screen-ui: backlog
+  3-8-daily-co-react-native-integration: backlog
+  3-9-end-conversation-cleanup: backlog
+  3-10-end-to-end-voice-test: backlog
   epic-3-retrospective: optional
 
-  # ========== EPIC 4: Numerology Engine ==========
+  # ============================================================================
+  # EPIC 4: Numerology Engine Integration
+  # ============================================================================
   epic-4: backlog
-  4-1-create-numerology-calculation-service-core-math: backlog
-  4-2-seed-numerology-interpretations-database: backlog
-  4-3-create-numerology-retrieval-endpoints-get-interpretations: backlog
-  4-4-create-numerology-calculation-endpoints: backlog
-  4-5-build-frontend-display-of-numerology-numbers: backlog
+  4-1-numerology-calculation-functions: backlog
+  4-2-numerology-knowledge-base-schema-seeding: backlog
+  4-3-gpt-function-calling-definitions: backlog
+  4-4-function-call-handler-implementation: backlog
+  4-5-numerology-system-prompt: backlog
+  4-6-update-conversation-endpoint-with-user-context: backlog
+  4-7-test-numerology-conversation-end-to-end: backlog
   epic-4-retrospective: optional
 
-  # ========== EPIC 5: Mobile App UI & Voice UX ==========
+  # ============================================================================
+  # EPIC 5: Conversation History & Context Retention
+  # ============================================================================
   epic-5: backlog
-  5-1-build-conversation-history-screen: backlog
-  5-2-build-onboarding-flow-for-new-users: backlog
-  5-3-build-settings-screen-with-preferences: backlog
-  5-4-implement-live-transcription-display-component: backlog
-  5-5-create-microphone-button-component-with-visual-feedback: backlog
-  5-6-build-voice-amplitude-visualization-component: backlog
+  5-1-conversation-message-model-saving: backlog
+  5-2-get-conversation-history-endpoint: backlog
+  5-3-frontend-history-screen-ui: backlog
+  5-4-conversation-detail-view: backlog
+  5-5-load-conversation-context-for-ai: backlog
+  5-6-test-context-retention-end-to-end: backlog
   epic-5-retrospective: optional
 
-  # ========== EPIC 6: Conversation Management & Context Retention ==========
+  # ============================================================================
+  # EPIC 6: Voice UX Polish & Visual Feedback
+  # ============================================================================
   epic-6: backlog
-  6-1-store-conversation-messages-in-database: backlog
-  6-2-implement-conversation-context-caching-in-redis: backlog
-  6-3-include-context-in-pipecat-system-prompt: backlog
-  6-4-implement-conversation-summary-generation: backlog
+  6-1-voice-amplitude-visualization-component: backlog
+  6-2-live-transcription-display: backlog
+  6-3-numerology-number-display-cards: backlog
+  6-4-loading-states-animations: backlog
+  6-5-error-handling-user-feedback: backlog
+  6-6-settings-screen-with-voice-preferences: backlog
   epic-6-retrospective: optional
 
-  # ========== EPIC 7: Testing, Quality & Performance ==========
+  # ============================================================================
+  # EPIC 7: Data Privacy & Security
+  # ============================================================================
   epic-7: backlog
-  7-1-implement-api-integration-tests: backlog
-  7-2-implement-voice-pipeline-component-tests: backlog
-  7-3-implement-mobile-app-component-tests: backlog
-  7-4-create-performance-testing-script-for-voice-latency: backlog
-  7-5-create-load-testing-setup-for-concurrent-conversations: backlog
-  7-6-implement-end-to-end-integration-test: backlog
+  7-1-api-rate-limiting-with-redis: backlog
+  7-2-data-export-gdpr-compliance: backlog
+  7-3-account-deletion-right-to-be-forgotten: backlog
+  7-4-environment-variable-security: backlog
+  7-5-https-security-headers: backlog
+  7-6-audit-logging-for-sensitive-operations: backlog
   epic-7-retrospective: optional
 
-  # ========== EPIC 8: Deployment & Operations ==========
+  # ============================================================================
+  # EPIC 8: Performance Optimization & Deployment
+  # ============================================================================
   epic-8: backlog
-  8-1-create-dockerfile-for-backend: backlog
-  8-2-create-docker-compose-for-local-development: backlog
-  8-3-setup-github-actions-for-docker-build-publish: backlog
-  8-4-deploy-backend-to-azure-container-apps: backlog
-  8-5-deploy-frontend-to-azure-static-web-apps-pwa: backlog
-  8-6-setup-monitoring-logging-infrastructure: backlog
-  8-7-create-runbook-for-common-operations: backlog
+  8-1-redis-caching-layer: backlog
+  8-2-database-query-optimization: backlog
+  8-3-voice-pipeline-latency-optimization: backlog
+  8-4-frontend-bundle-optimization: backlog
+  8-5-backend-deployment-to-azure: backlog
+  8-6-frontend-deployment-pwa-android: backlog
+  8-7-monitoring-alerting-setup: backlog
+  8-8-production-testing-launch-checklist: backlog
   epic-8-retrospective: optional
 
-# ========== SUMMARY STATISTICS ==========
+# SUMMARY
+# =======
 # Total Epics: 8
-# Total Stories: 65+
-# Epics Contexted: 0
-# Stories In Progress: 0
-# Stories Completed: 0
+# Total Stories: 58
+# Total Retrospectives: 8
 #
-# Recommended Next Steps:
-# 1. Start with Epic 1 (Foundation & Infrastructure Setup)
-# 2. Run sprint-planning workflow again to refresh statuses as stories progress
-# 3. Update story status through dedicated workflows:
-#    - /bmad:bmm:workflows:create-story → move to 'drafted'
-#    - /bmad:bmm:workflows:story-ready → move to 'ready-for-dev'
-#    - /bmad:bmm:workflows:dev-story → move to 'in-progress'/'review'/'done'
+# Epic Breakdown:
+#   - Epic 1: 7 stories (Foundation)
+#   - Epic 2: 10 stories (Authentication)
+#   - Epic 3: 10 stories (Voice)
+#   - Epic 4: 7 stories (Numerology)
+#   - Epic 5: 6 stories (History)
+#   - Epic 6: 6 stories (Polish)
+#   - Epic 7: 6 stories (Security)
+#   - Epic 8: 8 stories (Deployment)
+#
+# Initial Status: All items in backlog
+# Ready for development planning and story creation
