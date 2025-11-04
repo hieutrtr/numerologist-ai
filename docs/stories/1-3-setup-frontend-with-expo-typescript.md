@@ -1,6 +1,6 @@
 # Story 1.3: Setup Frontend with Expo TypeScript
 
-**Status:** in-progress
+**Status:** review
 
 **Story ID:** 1.3
 
