@@ -1,0 +1,58 @@
+# Docker Compose Configuration for Numerologist AI Local Development
+# Provides PostgreSQL database and Redis cache for local development
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: numerologist-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: numerologist_dev_password
+      POSTGRES_DB: numerologist
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - numerologist-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: numerologist-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - numerologist-network
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# Network for service communication
+networks:
+  numerologist-network:
+    driver: bridge
+
+# Note: Additional services (backend API, mobile app) run locally during development
+# Backend runs via: uv run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+# Mobile runs via: npm start (Expo)
+# All services communicate via localhost on their specified ports
