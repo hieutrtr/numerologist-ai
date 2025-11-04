@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/1-1" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <storyKey>1-1-initialize-monorepo-structure</storyKey>
+    <title>Initialize Monorepo Structure</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-1-initialize-monorepo-structure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a clean monorepo structure with backend and mobile folders</iWant>
+    <soThat>I can organize code logically and get started with development</soThat>
+    <tasks>
+      <task id="1" title="Create directory structure">
+        <subtask>Create backend/ directory</subtask>
+        <subtask>Create mobile/ directory</subtask>
+        <subtask>Verify directory structure with tree or ls -la</subtask>
+      </task>
+      <task id="2" title="Create .gitignore">
+        <subtask>Add Python patterns: __pycache__/, *.pyc, .env, .venv/, *.egg-info/, dist/, build/</subtask>
+        <subtask>Add Node.js patterns: node_modules/, .expo/, .next/, dist/, build/</subtask>
+        <subtask>Add IDE patterns: .vscode/, .idea/, *.swp, *.swo</subtask>
+        <subtask>Add OS patterns: .DS_Store, Thumbs.db</subtask>
+      </task>
+      <task id="3" title="Create README.md">
+        <subtask>Add project title: Numerologist AI</subtask>
+        <subtask>Add brief description of what the app does</subtask>
+        <subtask>Add tech stack overview (Python/FastAPI, React Native/Expo)</subtask>
+        <subtask>Add quick-start instructions</subtask>
+        <subtask>Add link to documentation structure</subtask>
+      </task>
+      <task id="4" title="Initialize Git repository">
+        <subtask>Run git init in root directory</subtask>
+        <subtask>Run git add .gitignore README.md backend/ mobile/</subtask>
+        <subtask>Create initial commit</subtask>
+        <subtask>Verify .git directory exists</subtask>
+      </task>
+      <task id="5" title="Create placeholder files">
+        <subtask>Create empty Makefile in root</subtask>
+        <subtask>Create placeholder docker-compose.yml</subtask>
+        <subtask>Verify both files exist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Root directory `numerologist-ai/` exists with proper structure</criterion>
+    <criterion id="2">.gitignore configured for Python (__pycache__, *.pyc, .env) and Node.js (node_modules/, .expo/)</criterion>
+    <criterion id="3">README.md created with project overview and setup instructions</criterion>
+    <criterion id="4">Git repository initialized with initial commit</criterion>
+    <criterion id="5">Directory structure matches architecture document</criterion>
+    <criterion id="6">backend/ folder created (empty, will be populated in Story 1.2)</criterion>
+    <criterion id="7">mobile/ folder created (empty, will be populated in Story 1.3)</criterion>
+    <criterion id="8">Root-level files: Makefile, docker-compose.yml placeholders (content added in later stories)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Project Structure</section>
+        <snippet>Root monorepo with backend and mobile folders. Backend uses Python FastAPI + PostgreSQL + Redis. Frontend uses React Native + Expo.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Project Initialization</section>
+        <snippet>First implementation story initializes project foundation using Expo starter template for frontend and FastAPI starter for backend.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Numerologist AI - Epic Breakdown</title>
+        <section>Epic 1: Foundation &amp; Project Setup</section>
+        <snippet>Story 1.1 establishes monorepo structure, git initialization, and directory organization for all subsequent development.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Numerologist AI - Epic Breakdown</title>
+        <section>Story 1.1: Initialize Monorepo Structure</section>
+        <snippet>Creates root directory structure, .gitignore for Python/Node.js, README.md with project overview, and initializes Git repository with initial commit.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>.gitignore</path>
+        <kind>configuration</kind>
+        <symbol>Git ignore rules</symbol>
+        <reason>Prevents accidental commits of Python (__pycache__, .env, .venv), Node.js (node_modules, .expo), IDE (.vscode, .idea), and OS files (.DS_Store)</reason>
+      </artifact>
+      <artifact>
+        <path>README.md</path>
+        <kind>documentation</kind>
+        <symbol>Project README</symbol>
+        <reason>Provides project overview, tech stack description, and quick-start instructions for new developers</reason>
+      </artifact>
+      <artifact>
+        <path>Makefile</path>
+        <kind>configuration</kind>
+        <symbol>Development commands</symbol>
+        <reason>Placeholder for make targets that will be populated in Story 1.7. Foundation for dev workflow automation.</reason>
+      </artifact>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>Docker services</symbol>
+        <reason>Placeholder for local development services (PostgreSQL, Redis). Will be detailed in Story 1.4.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <note>Story 1.1 has no code dependencies. It creates the structure that subsequent stories will populate.</note>
+      <framework>Git - Version control system (initialize with git init)</framework>
+      <framework>Bash/Shell - For running git commands and creating directories</framework>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <name>Monorepo Pattern</name>
+      <description>Backend and frontend must be in single repository under root/backend and root/mobile respectively. Shared concerns managed via Makefile and Docker Compose.</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+    <constraint>
+      <name>Version Control from Day One</name>
+      <description>Git repository must be initialized in first story. All subsequent development tracked via Git commits. Enable code history and team collaboration.</description>
+      <source>docs/architecture.md#Project-Initialization</source>
+    </constraint>
+    <constraint>
+      <name>.gitignore Completeness</name>
+      <description>Must include patterns for both Python (__pycache__, .pyc, .env, .venv, build artifacts) and Node.js (node_modules, .expo, build artifacts) to prevent accidental commits of generated/sensitive files.</description>
+      <source>docs/epics.md#Story-1.1-Initialize-Monorepo-Structure</source>
+    </constraint>
+    <constraint>
+      <name>Directory Structure Alignment</name>
+      <description>Directory structure created must match architecture.md Project Structure diagram. Enables all subsequent stories to find expected directories and modules.</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <note>Story 1.1 creates foundational structure. No APIs or code interfaces yet - all defined in subsequent stories.</note>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Manual verification for foundational tasks: shell commands (ls, tree, git log) confirm directory structure, files exist, and git history is established.
+      No automated tests needed for infrastructure setup - visual inspection and command output verification sufficient.
+    </standards>
+    <locations>
+      Manual testing via terminal commands. No test files created in Story 1.1.
+    </locations>
+    <ideas>
+      <idea acId="1">Verify directory structure exists: run `ls -la` from project root, confirm backend/ and mobile/ directories present</idea>
+      <idea acId="2">Verify .gitignore patterns: open .gitignore file, confirm Python, Node.js, IDE, and OS patterns present</idea>
+      <idea acId="3">Verify README exists: read README.md file, confirm title, description, tech stack, and quick-start sections</idea>
+      <idea acId="4">Verify Git initialized: run `git log` command, confirm initial commit message present</idea>
+      <idea acId="5">Verify structure matches architecture: compare created directories with docs/architecture.md#Project-Structure section</idea>
+      <idea acId="8">Verify placeholder files: confirm Makefile and docker-compose.yml exist in root directory</idea>
+    </ideas>
+  </tests>
+
+  <devNotes>
+    <note type="first-story">This is Story 1.1 (first story in Epic 1). No previous story learnings or context from prior implementation.</note>
+    <note type="architecture">Monorepo pattern centralizes configuration and simplifies team onboarding. Backend and frontend developers can work in parallel within same repo.</note>
+    <note type="tech-stack">Tech stack summary from docs/architecture.md:
+      - Backend: FastAPI, PostgreSQL, Redis (managed services on Azure)
+      - Frontend: React Native + Expo for cross-platform (Web PWA + Android)
+      - Voice Pipeline: Pipecat-ai, Deepgram (STT), Azure OpenAI (LLM), ElevenLabs (TTS)
+    </note>
+    <note type="git-patterns">Use standard .gitignore patterns for Python and Node.js. Resources available at github.com/github/gitignore for latest recommendations.</note>
+    <note type="next-story">Story 1.2 (Setup Backend with uv &amp; FastAPI) will:
+      - Initialize Python project with `uv init` in backend/ folder
+      - Configure pyproject.toml with dependencies
+      - Create FastAPI starter structure
+      - This story creates the backend/ directory that 1.2 will populate
+    </note>
+    <note type="next-story">Story 1.3 (Setup Frontend with Expo TypeScript) will:
+      - Initialize React Native project with `npx create-expo-app` in mobile/ folder
+      - Configure TypeScript and Expo Router
+      - Create mobile app starter structure
+      - This story creates the mobile/ directory that 1.3 will populate
+    </note>
+  </devNotes>
+
+  <references>
+    <reference type="epic">
+      <title>Epic Breakdown - Numerologist AI</title>
+      <path>docs/epics.md</path>
+      <section>Epic 1: Foundation &amp; Project Setup</section>
+      <notes>Complete epic overview, all 7 stories in Epic 1, sequencing and dependencies</notes>
+    </reference>
+    <reference type="story">
+      <title>Story 1.1: Initialize Monorepo Structure</title>
+      <path>docs/epics.md</path>
+      <section>Story 1.1</section>
+      <notes>Complete acceptance criteria (8 items) and technical approach</notes>
+    </reference>
+    <reference type="architecture">
+      <title>Architecture - Numerologist AI</title>
+      <path>docs/architecture.md</path>
+      <section>Project Structure</section>
+      <notes>Detailed directory structure diagram showing all folders and files</notes>
+    </reference>
+    <reference type="architecture">
+      <title>Architecture - Numerologist AI</title>
+      <path>docs/architecture.md</path>
+      <section>Project Initialization</section>
+      <notes>Tech stack decisions and starter templates</notes>
+    </reference>
+  </references>
+
+</story-context>
