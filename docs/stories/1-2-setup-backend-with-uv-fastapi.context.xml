@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<storyContext>
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.2</storyId>
+    <title>Setup Backend with uv &amp; FastAPI</title>
+    <status>ready-for-dev</status>
+    <generatedDate>2025-11-04</generatedDate>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>a uv-managed FastAPI project with fast dependency management</iWant>
+    <soThat>I can start building API endpoints with a solid foundation</soThat>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">`backend/` folder initialized with uv (`uv init`)</criterion>
+    <criterion id="AC2">`pyproject.toml` configured with FastAPI, Uvicorn, SQLModel, Alembic</criterion>
+    <criterion id="AC3">Dependencies organized: main dependencies + optional dev dependencies</criterion>
+    <criterion id="AC4">`src/` folder structure created: `main.py`, `api/`, `core/`, `models/`, `services/`</criterion>
+    <criterion id="AC5">Basic FastAPI app in `src/main.py` with root endpoint</criterion>
+    <criterion id="AC6">`uv sync` installs all dependencies successfully</criterion>
+    <criterion id="AC7">`uv run uvicorn src.main:app --reload` starts server at localhost:8000</criterion>
+    <criterion id="AC8">Visiting `http://localhost:8000` returns `{"message": "Numerologist AI API"}`</criterion>
+    <criterion id="AC9">API docs available at `http://localhost:8000/docs`</criterion>
+  </acceptanceCriteria>
+
+  <tasks>
+    <task id="1" status="pending">
+      <description>Initialize uv project</description>
+      <acceptanceCriteria>AC1</acceptanceCriteria>
+      <subtasks>
+        <subtask>Navigate to backend directory</subtask>
+        <subtask>Run `uv init` in backend folder</subtask>
+        <subtask>Verify `pyproject.toml` and `.python-version` are created</subtask>
+      </subtasks>
+    </task>
+    <task id="2" status="pending">
+      <description>Configure dependencies in pyproject.toml</description>
+      <acceptanceCriteria>AC2, AC3</acceptanceCriteria>
+      <subtasks>
+        <subtask>Add main dependencies: FastAPI (>=0.109.0), Uvicorn[standard] (>=0.27.0), SQLModel (>=0.0.14), Alembic (>=1.13.0), Pydantic (>=2.5.0), python-jose[cryptography] (>=3.3.0), bcrypt (>=4.1.0), redis (>=5.0.0)</subtask>
+        <subtask>Add dev dependencies: pytest (>=7.4.0), black (>=24.1.0), ruff (>=0.1.0)</subtask>
+        <subtask>Verify `requires-python = ">=3.10"` is set</subtask>
+        <subtask>Update project metadata: name="numerologist-api", version="0.1.0", description="Numerologist AI Backend"</subtask>
+      </subtasks>
+    </task>
+    <task id="3" status="pending">
+      <description>Create source folder structure</description>
+      <acceptanceCriteria>AC4</acceptanceCriteria>
+      <subtasks>
+        <subtask>Create `src/` directory inside backend/</subtask>
+        <subtask>Create `src/api/` directory</subtask>
+        <subtask>Create `src/core/` directory</subtask>
+        <subtask>Create `src/models/` directory</subtask>
+        <subtask>Create `src/services/` directory</subtask>
+        <subtask>Create `src/__init__.py` for Python package</subtask>
+      </subtasks>
+    </task>
+    <task id="4" status="pending">
+      <description>Implement basic FastAPI app</description>
+      <acceptanceCriteria>AC5</acceptanceCriteria>
+      <subtasks>
+        <subtask>Create `src/main.py` with FastAPI app instance</subtask>
+        <subtask>Add root endpoint that returns `{"message": "Numerologist AI API"}`</subtask>
+        <subtask>Configure CORS if needed for frontend integration</subtask>
+        <subtask>Add lifespan event handlers for startup/shutdown</subtask>
+      </subtasks>
+    </task>
+    <task id="5" status="pending">
+      <description>Install dependencies</description>
+      <acceptanceCriteria>AC6</acceptanceCriteria>
+      <subtasks>
+        <subtask>Run `uv sync` in backend directory</subtask>
+        <subtask>Verify all dependencies are installed without errors</subtask>
+        <subtask>Check `.venv` directory is created</subtask>
+      </subtasks>
+    </task>
+    <task id="6" status="pending">
+      <description>Test FastAPI server</description>
+      <acceptanceCriteria>AC7, AC8, AC9</acceptanceCriteria>
+      <subtasks>
+        <subtask>Start server with `uv run uvicorn src.main:app --reload`</subtask>
+        <subtask>Verify server starts on localhost:8000</subtask>
+        <subtask>Test root endpoint with curl/browser: `http://localhost:8000`</subtask>
+        <subtask>Verify response: `{"message": "Numerologist AI API"}`</subtask>
+        <subtask>Access API docs at `http://localhost:8000/docs`</subtask>
+        <subtask>Verify Swagger UI loads successfully</subtask>
+      </subtasks>
+    </task>
+    <task id="7" status="pending">
+      <description>Commit to Git</description>
+      <acceptanceCriteria>Supporting</acceptanceCriteria>
+      <subtasks>
+        <subtask>Stage backend/ directory and pyproject.toml</subtask>
+        <subtask>Create commit with message: "Story 1.2: Setup Backend with uv &amp; FastAPI"</subtask>
+        <subtask>Push to repository</subtask>
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <docs>
+      <document path="/home/hieutt50/projects/numerologist-ai/docs/epics.md">
+        <title>Epic Breakdown - Story 1.2</title>
+        <relevantSections>
+          <section>Epic 1: Foundation &amp; Project Setup</section>
+          <section>Story 1.2: Setup Backend with uv &amp; FastAPI</section>
+          <section>Technical Notes with pyproject.toml configuration</section>
+          <section>uv Commands Reference</section>
+          <section>Wiring Up instructions</section>
+        </relevantSections>
+        <keyInsights>
+          - Story is part of Epic 1 (Foundation)
+          - Uses uv for Python dependency management (modern, fast alternative to pip/poetry)
+          - Python version requirement: >=3.10
+          - Main dependencies: FastAPI, Uvicorn, SQLModel, Alembic, plus auth/caching libraries
+          - Dev dependencies: pytest, black, ruff
+          - Backend structure follows src/ pattern with api/, core/, models/, services/
+        </keyInsights>
+      </document>
+      <document path="/home/hieutt50/projects/numerologist-ai/docs/architecture.md">
+        <title>Architecture - Backend Architecture</title>
+        <relevantSections>
+          <section>Project Structure - Backend</section>
+          <section>Technology Stack Details - Backend</section>
+          <section>Implementation Patterns - API Response Patterns</section>
+          <section>Consistency Rules - Naming Conventions</section>
+          <section>Code Organization - Backend Endpoint Organization</section>
+        </relevantSections>
+        <keyInsights>
+          - Backend uses FastAPI 0.109+ with Python 3.10+
+          - Project structure defined: backend/app/ with api/, core/, models/, schemas/, services/, voice_pipeline/
+          - Async/await patterns throughout
+          - SQLModel for ORM (Pydantic + SQLAlchemy)
+          - CORS configuration needed for frontend integration
+          - Naming: snake_case for files, PascalCase for classes, snake_case for functions
+        </keyInsights>
+      </document>
+      <document path="/home/hieutt50/projects/numerologist-ai/docs/PRD.md">
+        <title>Product Requirements Document</title>
+        <relevantSections>
+          <section>Technology Stack - Backend Stack</section>
+          <section>NFR-P4: App Performance</section>
+          <section>NFR-S1: Data Encryption</section>
+        </relevantSections>
+        <keyInsights>
+          - Backend framework: FastAPI with Python 3.10+
+          - Performance target: API launch time &lt;3 seconds
+          - Security: All data in transit encrypted (TLS 1.3)
+          - This story establishes the foundation for all future backend development
+        </keyInsights>
+      </document>
+      <document path="/home/hieutt50/projects/numerologist-ai/docs/stories/1-2-setup-backend-with-uv-fastapi.md">
+        <title>Story 1.2 Full Details</title>
+        <relevantSections>
+          <section>Story statement and acceptance criteria</section>
+          <section>Dev Notes - Architecture Context</section>
+          <section>Dev Notes - Key Dependencies &amp; Versions</section>
+          <section>Dev Notes - uv Commands Reference</section>
+          <section>Dev Notes - Testing Strategy</section>
+          <section>Dev Notes - Code Example for src/main.py</section>
+          <section>Learnings from Previous Story</section>
+        </relevantSections>
+        <keyInsights>
+          - uv provides fast, deterministic dependency resolution
+          - Story prepares dependencies for future stories (auth, database, caching)
+          - Backend will use async patterns for high-performance I/O
+          - CORS configured for mobile app integration (will be expanded in Story 1.6)
+          - Testing: Manual verification for this story (server startup, endpoint access)
+          - Git commit pattern established: "Story X.Y: Description"
+        </keyInsights>
+      </document>
+    </docs>
+
+    <code>
+      <existingFiles>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/">
+          <status>Empty directory - to be populated by this story</status>
+          <purpose>Backend application root</purpose>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/Makefile">
+          <status>Exists (from Story 1.1)</status>
+          <purpose>Development workflow commands (will use in Story 1.7)</purpose>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/docker-compose.yml">
+          <status>Exists (from Story 1.1)</status>
+          <purpose>Local PostgreSQL and Redis services (will use in Story 1.4)</purpose>
+        </file>
+      </existingFiles>
+      <filesToCreate>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/pyproject.toml">
+          <purpose>uv project configuration with dependencies</purpose>
+          <dependencies>
+            <main>
+              - fastapi>=0.109.0
+              - uvicorn[standard]>=0.27.0
+              - sqlmodel>=0.0.14
+              - alembic>=1.13.0
+              - pydantic>=2.5.0
+              - python-jose[cryptography]>=3.3.0
+              - bcrypt>=4.1.0
+              - redis>=5.0.0
+            </main>
+            <dev>
+              - pytest>=7.4.0
+              - black>=24.1.0
+              - ruff>=0.1.0
+            </dev>
+          </dependencies>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/.python-version">
+          <purpose>Python version specification for uv</purpose>
+          <content>3.10 or higher</content>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/src/main.py">
+          <purpose>FastAPI application entry point</purpose>
+          <requirements>
+            - FastAPI app instance with title, description, version
+            - CORS middleware configuration
+            - Root endpoint returning {"message": "Numerologist AI API"}
+            - Startup/shutdown event handlers
+          </requirements>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/src/__init__.py">
+          <purpose>Python package marker for src/</purpose>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/src/api/">
+          <purpose>Directory for API routes (empty for now)</purpose>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/src/core/">
+          <purpose>Directory for core utilities (config, database, security)</purpose>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/src/models/">
+          <purpose>Directory for SQLModel ORM models</purpose>
+        </file>
+        <file path="/home/hieutt50/projects/numerologist-ai/backend/src/services/">
+          <purpose>Directory for business logic services</purpose>
+        </file>
+      </filesToCreate>
+    </code>
+
+    <dependencies>
+      <pythonVersion>>=3.10</pythonVersion>
+      <packageManager>uv (modern Python package manager)</packageManager>
+      <frameworks>
+        <framework name="FastAPI" version=">=0.109.0" purpose="Web framework with automatic OpenAPI docs"/>
+        <framework name="Uvicorn" version=">=0.27.0" purpose="ASGI server with hot reload support"/>
+        <framework name="SQLModel" version=">=0.0.14" purpose="SQLAlchemy ORM + Pydantic validation"/>
+        <framework name="Alembic" version=">=1.13.0" purpose="Database migration tool (initialized in Story 1.5)"/>
+        <framework name="Pydantic" version=">=2.5.0" purpose="Data validation library"/>
+      </frameworks>
+      <futureUse>
+        <dependency name="python-jose[cryptography]" version=">=3.3.0" purpose="JWT token creation/verification (Story 2.3-2.4)"/>
+        <dependency name="bcrypt" version=">=4.1.0" purpose="Password hashing library (Story 2.2)"/>
+        <dependency name="redis" version=">=5.0.0" purpose="Redis client for caching and sessions (Story 6+)"/>
+      </futureUse>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <technical>
+      <constraint>Must use uv for dependency management (project decision)</constraint>
+      <constraint>Python version minimum 3.10 (required for type hints features)</constraint>
+      <constraint>FastAPI requires Python 3.7+, but 3.10+ recommended for best experience</constraint>
+      <constraint>`.venv` should be in backend folder (uv default behavior)</constraint>
+      <constraint>Use async/await patterns for all I/O operations</constraint>
+      <constraint>CORS must be configured to allow frontend integration</constraint>
+    </technical>
+    <architectural>
+      <constraint>Follow src/ pattern: backend/src/ as source root</constraint>
+      <constraint>Separate concerns: api/ (routes), core/ (utilities), models/ (database), services/ (business logic)</constraint>
+      <constraint>All modules import relative to src/ (e.g., `from src.api import router`)</constraint>
+      <constraint>Backend structure must align with architecture.md specifications</constraint>
+    </architectural>
+    <conventions>
+      <constraint>Python code: snake_case for files, PascalCase for classes, snake_case for functions</constraint>
+      <constraint>Constants: UPPER_SNAKE_CASE</constraint>
+      <constraint>Private methods: _leading_underscore</constraint>
+      <constraint>Git commit message format: "Story 1.2: Setup Backend with uv &amp; FastAPI"</constraint>
+    </conventions>
+  </constraints>
+
+  <interfaces>
+    <api>
+      <endpoint method="GET" path="/" description="Root endpoint">
+        <response status="200">
+          <body>{"message": "Numerologist AI API"}</body>
+        </response>
+      </endpoint>
+      <endpoint method="GET" path="/docs" description="Swagger UI (auto-generated by FastAPI)">
+        <response status="200">
+          <body>Interactive API documentation</body>
+        </response>
+      </endpoint>
+    </api>
+    <codeStructure>
+      <module path="backend/src/main.py">
+        <exports>
+          <export name="app" type="FastAPI" description="FastAPI application instance"/>
+        </exports>
+        <functions>
+          <function name="read_root" returns="dict" description="Root endpoint handler"/>
+          <function name="startup_event" async="true" description="Application startup event"/>
+          <function name="shutdown_event" async="true" description="Application shutdown event"/>
+        </functions>
+      </module>
+    </codeStructure>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Manual verification for this foundational story</standard>
+      <standard>Automated tests will be added in later stories with pytest</standard>
+    </standards>
+    <locations>
+      <location>tests/ directory (to be created in future stories)</location>
+      <location>Manual testing: browser and curl commands</location>
+    </locations>
+    <testIdeas>
+      <idea>Server startup test: `uv run uvicorn src.main:app --reload` starts without errors</idea>
+      <idea>Root endpoint test: `curl http://localhost:8000` returns expected JSON</idea>
+      <idea>API docs test: Browser access to `http://localhost:8000/docs` shows Swagger UI</idea>
+      <idea>Dependency verification: `uv pip list | grep -E "fastapi|uvicorn|sqlmodel"` shows installed packages</idea>
+      <idea>Directory structure check: `ls -la backend/src/` shows api/, core/, models/, services/</idea>
+    </testIdeas>
+  </tests>
+
+  <relationships>
+    <previousStory id="1.1" title="Initialize Monorepo Structure" status="done">
+      <learnings>
+        - Monorepo structure established with backend/ and mobile/ folders
+        - Git repository initialized with clean commit history
+        - Makefile and docker-compose.yml placeholders created
+        - Git commit pattern: "Story X.Y: Description"
+      </learnings>
+    </previousStory>
+    <nextStory id="1.3" title="Setup Frontend with Expo TypeScript">
+      <dependencies>
+        - Backend API running at localhost:8000 for frontend to connect to
+        - Root endpoint available for health check from mobile app
+      </dependencies>
+    </nextStory>
+    <relatedStories>
+      <story id="1.4" relationship="parallel">Docker Compose for Local Services (PostgreSQL/Redis will be used in Story 1.5)</story>
+      <story id="1.5" relationship="dependent">Database Connection &amp; First Migration (requires this story's setup)</story>
+      <story id="1.7" relationship="integrates">Makefile &amp; Development Workflow (will add backend startup command)</story>
+    </relatedStories>
+  </relationships>
+
+  <devNotes>
+    <note priority="high">
+      uv is a modern Python package manager that provides fast, deterministic dependency resolution.
+      Key commands: `uv init`, `uv add`, `uv sync`, `uv run`.
+    </note>
+    <note priority="high">
+      This story prepares dependencies for future features:
+      - SQLModel/Alembic for database (Story 1.5)
+      - python-jose/bcrypt for authentication (Epic 2)
+      - redis for caching (Epic 6+)
+    </note>
+    <note priority="medium">
+      CORS configuration is intentionally permissive ("*") for development.
+      Will be restricted in production deployment (Story 1.6).
+    </note>
+    <note priority="medium">
+      Backend follows architecture.md specifications but uses simpler src/ structure
+      instead of app/ as shown in architecture diagram (more common Python convention).
+    </note>
+    <note priority="low">
+      Code example in story file shows both @app.on_event (older style) and lifespan handlers.
+      Use @app.on_event for simplicity in this foundational story.
+    </note>
+  </devNotes>
+</storyContext>
