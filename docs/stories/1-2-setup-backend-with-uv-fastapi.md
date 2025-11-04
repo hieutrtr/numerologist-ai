@@ -1,6 +1,6 @@
 # Story 1.2: Setup Backend with uv & FastAPI
 
-**Status:** review
+**Status:** done
 
 **Story ID:** 1.2
 
