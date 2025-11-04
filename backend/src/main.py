@@ -5,15 +5,33 @@ This is the main entry point for the Numerologist AI backend application.
 It initializes the FastAPI app with CORS middleware and basic endpoints.
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
-# Initialize FastAPI application
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """
+    Lifespan context manager for application startup and shutdown.
+
+    Replaces deprecated @app.on_event() decorators with modern lifespan pattern.
+    Runs startup code on entry, shutdown code on exit.
+    """
+    # Startup event
+    print("✓ Application startup - Numerologist AI API running")
+    yield
+    # Shutdown event
+    print("✓ Application shutdown")
+
+
+# Initialize FastAPI application with lifespan
 app = FastAPI(
     title="Numerologist AI API",
     description="Backend API for Numerologist AI application - voice-based numerology readings",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # Configure CORS middleware for mobile app integration
@@ -36,24 +54,6 @@ def read_root() -> dict:
         dict: API greeting message
     """
     return {"message": "Numerologist AI API"}
-
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    Application startup event handler.
-    Runs when the application starts up.
-    """
-    print("✓ Application startup - Numerologist AI API running")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Application shutdown event handler.
-    Runs when the application is shutting down.
-    """
-    print("✓ Application shutdown")
 
 
 # Health check endpoint (useful for monitoring)
