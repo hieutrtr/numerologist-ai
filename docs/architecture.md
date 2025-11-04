@@ -75,7 +75,7 @@ pip install deepgram-sdk
 | LLM Reasoning | Azure OpenAI GPT-5-mini | Aug 2025 | All epics | Real-time optimized, function calling for numerology, cost-effective |
 | Text-to-Speech | ElevenLabs | SDK v2.17.0 (Oct 2025) | Voice Pipeline | Natural conversational voice, low latency (<700ms) |
 | WebRTC Transport | Daily.co | Via Pipecat integration | Voice Pipeline | Managed WebRTC, reliable mobile support, Pipecat-native |
-| Voice Orchestration | Pipecat-ai | Latest (Python >=3.10) | Voice Pipeline | Framework handles LLM context, function calling, pipeline state |
+| Voice Orchestration | Pipecat-ai | Latest (Python >=3.11) | Voice Pipeline | Framework handles LLM context, function calling, pipeline state |
 | **Frontend Stack** |
 | Framework | React Native + Expo | Latest | All frontend | Cross-platform (Web PWA + Android), official recommended approach |
 | Language | TypeScript | Latest | All frontend | Type safety, better DX, catches errors early |
@@ -83,7 +83,7 @@ pip install deepgram-sdk
 | API Client | Axios + React Query | Latest | All frontend | Automatic caching, request deduplication, background refetch |
 | Styling | React Native StyleSheet | Built-in | All frontend | Native performance, TypeScript support |
 | **Backend Stack** |
-| Framework | FastAPI | Latest (Python 3.10+) | All backend | Async/await, auto docs, high performance |
+| Framework | FastAPI | Latest (Python 3.11+) | All backend | Async/await, auto docs, high performance |
 | Database | PostgreSQL | 14+ | All epics | Robust, ACID compliant, excellent for relational data |
 | ORM | SQLModel | Latest | All backend | FastAPI-native, Pydantic integration, type-safe queries |
 | Caching | Redis | 7-alpine | All epics | Sub-millisecond access, session storage, rate limiting |
