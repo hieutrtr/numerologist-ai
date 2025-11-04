@@ -258,9 +258,13 @@ Claude Haiku 4.5
 - Used uv 0.8.22 for fast, deterministic dependency management
 - Backend structure follows common Python convention (src/ pattern)
 - CORS configured permissively ("*") for development (will restrict in production)
-- Event handlers use @app.on_event() decorator (established pattern)
+- Event handlers use modern lifespan context manager (FastAPI 0.109+ best practice, replaces @app.on_event())
 - Added health check endpoint for monitoring
-- git commit: d95adf7 - Story 1.2: Setup Backend with uv & FastAPI
+- Code refactored to use asynccontextmanager for clean startup/shutdown handling
+- git commits:
+  * d95adf7 - Story 1.2: Setup Backend with uv & FastAPI (initial implementation)
+  * c18d340 - Story 1.2: Mark as review after successful implementation
+  * 07bdf3d - Refactor: Update FastAPI to use modern lifespan context manager
 
 ### File List
 
