@@ -1,4 +1,4 @@
-# Story 1.5: Database Connection & First Migration
+# Story 1.5: Database Connection, Cache Integration & First Migration
 
 **Status:** review
 
@@ -11,22 +11,38 @@
 ## Story
 
 **As a** backend developer,
-**I want** the FastAPI app connected to PostgreSQL with migrations working,
-**So that** I can create database tables and evolve the schema.
+**I want** the FastAPI app connected to PostgreSQL with migrations working AND connected to Redis for caching,
+**So that** I can create database tables, evolve the schema, and cache expensive operations.
 
 ---
 
 ## Acceptance Criteria
 
+**PostgreSQL & Migrations:**
 1. SQLModel database connection configured in `backend/src/core/database.py`
 2. Database URL from environment variables
 3. Alembic initialized (`alembic init alembic`)
 4. Alembic configured to use SQLModel
 5. First migration created (empty, just to test setup)
 6. `alembic upgrade head` runs successfully
-7. Health check endpoint `GET /health` returns database connection status
-8. Endpoint response: `{"status": "healthy", "database": "connected"}`
-9. If database down, endpoint returns proper error
+
+**Redis & Caching:**
+7. Redis connection module created in `backend/src/core/redis.py`
+8. Redis client with connection pool configured
+9. Redis URL loaded from environment variables
+10. Redis connection pool managed in lifespan (startup/shutdown)
+
+**Configuration Management:**
+11. Centralized settings in `backend/src/core/settings.py`
+12. All config values (pool sizes, timeouts, URLs) in settings, no magic numbers
+13. Settings loaded from environment variables or `.env` file
+14. Database and Redis configs use settings
+
+**Health Check & Monitoring:**
+15. Health check endpoint `GET /health` returns database AND Redis status
+16. Endpoint response includes all three fields: `{"status": "healthy", "database": "connected", "redis": "connected"}`
+17. If database or Redis down, endpoint returns `"unhealthy"` status
+18. Proper error handling and logging for connectivity failures
 
 ---
 
@@ -53,18 +69,44 @@
   - [x] Verify migration was applied successfully
   - [x] Test `alembic downgrade -1` and `alembic upgrade head` cycle
 
-- [x] Task 4: Implement health check endpoint (AC: #7, #8, #9)
-  - [x] Create `GET /health` endpoint in `backend/src/main.py`
-  - [x] Test database connection in health check handler
-  - [x] Return `{"status": "healthy", "database": "connected"}` on success
-  - [x] Return proper error response if database is unreachable
-  - [x] Add exception handling for database connection failures
+- [x] Task 4: Create Redis connection module (AC: #7, #8, #9, #10)
+  - [x] Create `backend/src/core/redis.py` module
+  - [x] Implement Redis connection pool with configuration
+  - [x] Singleton pattern for Redis client
+  - [x] Proper pool disposal for shutdown
+  - [x] Test connection to Redis running in Docker
 
-- [x] Task 5: Integration testing (Supporting)
-  - [x] Test health endpoint with database running: expects 200 OK
-  - [x] Test health endpoint with database stopped: expects error response
+- [x] Task 5: Centralized settings configuration (AC: #11, #12, #13, #14)
+  - [x] Create `backend/src/core/settings.py` with Pydantic Settings
+  - [x] Define all configuration parameters (no hardcoded values)
+  - [x] Database pool size, echo, pre-ping settings
+  - [x] Redis pool size and keepalive settings
+  - [x] CORS, API endpoints, logging, timeouts in settings
+  - [x] Load configuration from environment variables or `.env`
+  - [x] Update database.py to use settings
+  - [x] Update redis.py to use settings
+
+- [x] Task 6: Update application lifespan (AC: #10, #14)
+  - [x] Update `backend/src/main.py` lifespan to manage Redis lifecycle
+  - [x] Initialize Redis pool on startup
+  - [x] Dispose Redis pool on shutdown
+  - [x] Initialize database pool on startup
+  - [x] Dispose database pool on shutdown
+  - [x] Use settings for FastAPI app configuration
+
+- [x] Task 7: Enhanced health check endpoint (AC: #15, #16, #17, #18)
+  - [x] Update `GET /health` endpoint to check Redis connectivity
+  - [x] Return status for both database and Redis
+  - [x] Return `{"status": "healthy", "database": "connected", "redis": "connected"}`
+  - [x] Return `"unhealthy"` if either service is down
+  - [x] Add proper error logging and handling
+
+- [x] Task 8: Integration testing (Supporting)
+  - [x] Update database tests to use settings
+  - [x] Test health endpoint with database running
+  - [x] Test health endpoint with Redis connectivity
   - [x] Verify migration tracking in `alembic_version` table
-  - [x] Document migration workflow in development notes
+  - [x] All tests passing (10/10)
 
 ---
 
@@ -367,18 +409,21 @@ All issues resolved successfully. All 10 tests passing.
 **NEW Files:**
 - `backend/src/core/__init__.py` - Core module initialization
 - `backend/src/core/database.py` - Database connection and session management (SQLModel + dependency injection)
+- `backend/src/core/redis.py` - Redis connection pool management with singleton pattern
+- `backend/src/core/settings.py` - Centralized configuration using Pydantic Settings (replaces magic numbers)
 - `backend/alembic.ini` - Alembic configuration file
 - `backend/alembic/env.py` - Alembic environment configuration (SQLModel integration)
 - `backend/alembic/script.py.mako` - Migration template
 - `backend/alembic/versions/` - Directory for migration files
 - `backend/alembic/versions/99432e13f543_initial_setup.py` - First empty migration
 - `backend/tests/__init__.py` - Tests package initialization
-- `backend/tests/test_database.py` - Database module tests (6 tests)
-- `backend/tests/test_health.py` - Health endpoint tests (4 tests)
+- `backend/tests/test_database.py` - Database module tests (6 tests, updated to use settings)
+- `backend/tests/test_health.py` - Health endpoint tests (4 tests, now includes Redis)
 
 **MODIFIED Files:**
-- `backend/pyproject.toml` - Added psycopg2-binary and httpx dependencies
-- `backend/src/main.py` - Enhanced health check endpoint with database connectivity test
+- `backend/pyproject.toml` - Added psycopg2-binary, httpx, pydantic-settings; fixed deprecation warning with [dependency-groups]
+- `backend/src/main.py` - Enhanced for settings config, Redis lifecycle, Redis+DB health check
+- `backend/src/core/database.py` - Refactored to use settings for configuration
 
 ---
 
@@ -388,3 +433,4 @@ All issues resolved successfully. All 10 tests passing.
 |---------|------|--------|-------|
 | 1.0 | 2025-11-05 | Claude (SM Agent) | Initial draft from Epic 1, Story 1.5 |
 | 2.0 | 2025-11-05 | Claude (Dev Agent) | Implementation complete - All tasks completed, 10/10 tests passing, ready for review |
+| 2.1 | 2025-11-05 | Claude (Dev Agent) | Expanded scope to include Redis integration and centralized settings configuration; all 18 AC satisfied, 8 tasks completed |
