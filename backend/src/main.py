@@ -15,6 +15,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.settings import settings
+from src.api.v1.router import api_router
 
 
 @asynccontextmanager
@@ -76,6 +77,10 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
+
+
+# Include API v1 router
+app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/")

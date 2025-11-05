@@ -1,0 +1,212 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.3</storyId>
+    <title>User Registration API Endpoint</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-3-user-registration-api-endpoint.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to register with email, password, name, and birth date</iWant>
+    <soThat>I can create an account and access the app</soThat>
+    <tasks>
+      - Task 1: Create Pydantic Schemas (UserCreate, UserResponse)
+      - Task 2: Create Auth Router and Registration Endpoint (POST /api/v1/auth/register)
+      - Task 3: Wire Up Router to Main App
+      - Task 4: Create Unit Tests (11 test scenarios)
+      - Task 5: Integration Testing (curl/Postman)
+      - Task 6: Documentation and Cleanup
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Pydantic schemas created in backend/src/schemas/user.py (UserCreate, UserResponse)</criterion>
+    <criterion id="AC2">Registration endpoint: POST /api/v1/auth/register exists and is functional</criterion>
+    <criterion id="AC3">Request body: {"email": "...", "password": "...", "full_name": "...", "birth_date": "YYYY-MM-DD"}</criterion>
+    <criterion id="AC4">Validates email format, password strength (min 8 chars), birth date not in future</criterion>
+    <criterion id="AC5">Returns 400 if email already exists</criterion>
+    <criterion id="AC6">Returns 201 with user data (no password in response) and JWT token</criterion>
+    <criterion id="AC7">Password hashed before storing in database using hash_password() from Story 2.2</criterion>
+    <criterion id="AC8">Response format: {"user": {...}, "access_token": "...", "token_type": "bearer"}</criterion>
+    <criterion id="AC9">Can test with curl or Postman</criterion>
+    <criterion id="AC10">API docs show endpoint at /docs</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 2: User Authentication &amp; Profile</title>
+        <section>Story 2.3: User Registration API Endpoint</section>
+        <snippet>User wants to register with email, password, name, and birth date. Includes Pydantic schemas, POST /api/v1/auth/register endpoint, validation rules, and technical implementation notes with code examples.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-2-password-hashing-security-utilities.md</path>
+        <title>Story 2.2: Password Hashing &amp; Security Utilities</title>
+        <section>Dev Notes - Learnings</section>
+        <snippet>Security functions available: hash_password(password: str) -> str for bcrypt hashing with cost 12, create_access_token(data: dict) -> str for JWT token generation with 15min expiry. Import pattern: from src.core.security import hash_password, create_access_token</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-1-user-model-database-schema.md</path>
+        <title>Story 2.1: User Model &amp; Database Schema</title>
+        <section>Dev Notes</section>
+        <snippet>User model at backend/src/models/user.py with fields: id (UUID), email (str, unique, indexed), hashed_password (str | None), full_name (str), birth_date (date), created_at, updated_at, is_active. Database pattern: use get_session dependency.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/core/security.py</path>
+        <kind>module</kind>
+        <symbol>hash_password</symbol>
+        <lines>53-94</lines>
+        <reason>REUSE - Hash passwords with bcrypt cost 12 before storing. Returns UTF-8 encoded hash string.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/security.py</path>
+        <kind>module</kind>
+        <symbol>create_access_token</symbol>
+        <lines>138-186</lines>
+        <reason>REUSE - Create JWT access token with 15min default expiry. Include user ID in 'sub' claim.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/database.py</path>
+        <kind>module</kind>
+        <symbol>get_session</symbol>
+        <lines>30-52</lines>
+        <reason>REUSE - Dependency injection for database sessions. Use as Depends(get_session) in FastAPI routes.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/models/user.py</path>
+        <kind>model</kind>
+        <symbol>User</symbol>
+        <lines>14-71</lines>
+        <reason>REUSE - SQLModel User table with required fields for registration: id, email, hashed_password, full_name, birth_date, created_at, updated_at, is_active</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/main.py</path>
+        <kind>application</kind>
+        <symbol>app</symbol>
+        <lines>61-68</lines>
+        <reason>REFERENCE - Main FastAPI app instance. API routers should be included here with app.include_router()</reason>
+      </artifact>
+      <artifact>
+        <path>backend/tests/core/test_security.py</path>
+        <kind>test</kind>
+        <symbol>TestPasswordHashing, TestJWTTokens</symbol>
+        <lines>1-327</lines>
+        <reason>REFERENCE - Test patterns for security functions. Follow similar structure for auth endpoint tests.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="fastapi" version="&gt;=0.109.0" />
+        <package name="pydantic" version="&gt;=2.5.0" />
+        <package name="pydantic-settings" version="&gt;=2.1.0" />
+        <package name="sqlmodel" version="&gt;=0.0.14" />
+        <package name="python-jose[cryptography]" version="&gt;=3.3.0" />
+        <package name="bcrypt" version="&gt;=4.1.0" />
+        <package name="pytest" version="&gt;=7.4.0" scope="dev" />
+        <package name="httpx" version="&gt;=0.27.0" scope="dev" />
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>MUST use existing security functions from backend/src/core/security.py - DO NOT recreate hash_password or create_access_token</constraint>
+    <constraint>MUST use get_session dependency from backend/src/core/database.py for database access</constraint>
+    <constraint>MUST follow import pattern: from src.core.security import hash_password, create_access_token</constraint>
+    <constraint>MUST use Pydantic EmailStr type for email validation</constraint>
+    <constraint>MUST validate password minimum 8 characters using Pydantic Field(min_length=8)</constraint>
+    <constraint>MUST validate birth_date is not in future using Pydantic validator</constraint>
+    <constraint>MUST check for duplicate email before creating user (return 400 if exists)</constraint>
+    <constraint>MUST exclude hashed_password from API response using UserResponse schema</constraint>
+    <constraint>MUST return 201 status code for successful registration</constraint>
+    <constraint>MUST include JWT token in response: {"user": {...}, "access_token": "...", "token_type": "bearer"}</constraint>
+    <constraint>API endpoint structure: /api/v1/auth/register</constraint>
+    <constraint>All functions MUST have complete type hints</constraint>
+    <constraint>All functions MUST have comprehensive docstrings</constraint>
+    <constraint>Tests MUST mirror src/ structure: backend/tests/api/v1/endpoints/test_auth.py</constraint>
+    <constraint>Use pytest framework for all tests</constraint>
+    <constraint>Follow established coding patterns from existing core modules</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>hash_password</name>
+      <kind>function</kind>
+      <signature>def hash_password(password: str) -> str</signature>
+      <path>backend/src/core/security.py</path>
+      <description>Hash plain text password using bcrypt with cost factor 12. Returns UTF-8 encoded hash string.</description>
+    </interface>
+    <interface>
+      <name>create_access_token</name>
+      <kind>function</kind>
+      <signature>def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str</signature>
+      <path>backend/src/core/security.py</path>
+      <description>Create JWT access token with HS256 algorithm. Default expiry: 15 minutes. Include user ID in 'sub' claim.</description>
+    </interface>
+    <interface>
+      <name>get_session</name>
+      <kind>function</kind>
+      <signature>def get_session() -> Generator[Session, None, None]</signature>
+      <path>backend/src/core/database.py</path>
+      <description>FastAPI dependency for database sessions. Automatically commits on success, rolls back on exception.</description>
+    </interface>
+    <interface>
+      <name>User</name>
+      <kind>SQLModel</kind>
+      <signature>class User(SQLModel, table=True)</signature>
+      <path>backend/src/models/user.py</path>
+      <description>User database model with fields: id (UUID), email (str), hashed_password (str | None), full_name (str), birth_date (date), created_at, updated_at, is_active</description>
+    </interface>
+    <interface>
+      <name>POST /api/v1/auth/register</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/v1/auth/register</signature>
+      <path>backend/src/api/v1/endpoints/auth.py (to be created)</path>
+      <description>User registration endpoint. Request: {email, password, full_name, birth_date}. Response: {user, access_token, token_type}. Returns 201 on success, 400 if email exists, 422 for validation errors.</description>
+    </interface>
+    <interface>
+      <name>UserCreate</name>
+      <kind>Pydantic schema</kind>
+      <signature>class UserCreate(BaseModel)</signature>
+      <path>backend/src/schemas/user.py (to be created)</path>
+      <description>Input schema for user registration with fields: email (EmailStr), password (str, min 8), full_name (str), birth_date (date). Includes validators for password strength and birth_date range.</description>
+    </interface>
+    <interface>
+      <name>UserResponse</name>
+      <kind>Pydantic schema</kind>
+      <signature>class UserResponse(BaseModel)</signature>
+      <path>backend/src/schemas/user.py (to be created)</path>
+      <description>Response schema for user data. Includes: id, email, full_name, birth_date, created_at, updated_at. EXCLUDES hashed_password for security.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest framework with httpx TestClient for API testing. Tests should mirror src/ structure (backend/tests/api/v1/endpoints/test_auth.py). Follow patterns from existing test_security.py: clear test names (test_register_with_valid_data), AAA pattern (Arrange-Act-Assert), comprehensive edge case coverage. All tests must be independent and deterministic. Use pytest fixtures for database session and test client setup.
+    </standards>
+    <locations>
+      backend/tests/api/v1/endpoints/test_auth.py (to be created)
+      backend/tests/core/test_security.py (reference for patterns)
+      backend/tests/test_health.py (reference for API testing patterns)
+    </locations>
+    <ideas>
+      <test id="AC1-AC8">test_register_with_valid_data - Verify 201 response with user data and token</test>
+      <test id="AC5">test_register_duplicate_email - Verify 400 error when email already exists</test>
+      <test id="AC4">test_register_invalid_email - Verify 422 validation error for invalid email format</test>
+      <test id="AC4">test_register_weak_password - Verify 422 error for password less than 8 characters</test>
+      <test id="AC4">test_register_future_birth_date - Verify 422 error for birth_date in future</test>
+      <test id="AC3">test_register_missing_required_fields - Verify 422 error for missing email/password/name/birth_date</test>
+      <test id="AC7">test_register_password_is_hashed - Verify hashed_password in database is not plain text</test>
+      <test id="AC6,AC8">test_register_response_excludes_password - Verify response does not include hashed_password field</test>
+      <test id="AC6,AC8">test_register_token_is_valid - Verify JWT token can be decoded and contains user ID in 'sub' claim</test>
+      <test id="AC4">test_register_birth_date_today - Verify birth_date equal to today is valid</test>
+      <test id="AC4">test_register_special_characters_in_email - Verify valid email with special characters (e.g., user+test@example.com)</test>
+    </ideas>
+  </tests>
+</story-context>
