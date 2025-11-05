@@ -2,7 +2,7 @@
 
 **Epic:** Epic 1 - Foundation & Project Setup
 **Story ID:** 1-6-frontend-api-service-setup
-**Status:** review
+**Status:** done
 **Created:** 2025-11-05
 **Updated:** 2025-11-05
 **Context Reference:** docs/stories/1-6-frontend-api-service-setup.context.xml
@@ -473,7 +473,7 @@ Home screen now displays real-time backend connection status with retry capabili
 - [x] No TypeScript errors or warnings
 - [x] Tested on both web and mobile (Expo Go)
 - [x] Environment configuration documented
-- [ ] Git commit created with message: "Story 1.6: Frontend API Service Setup - Implementation Complete"
+- [x] Git commit created with message: "Story 1.6: Frontend API Service Setup - Implementation Complete"
 
 ---
 
