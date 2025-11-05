@@ -47,7 +47,7 @@ development_status:
   1-4-docker-compose-for-local-services: done
   1-5-database-connection-first-migration: done
   1-6-frontend-api-service-setup: done
-  1-7-makefile-development-workflow: backlog
+  1-7-makefile-development-workflow: done
   epic-1-retrospective: optional
 
   # ============================================================================

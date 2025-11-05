@@ -1,0 +1,274 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>7</storyId>
+    <title>Makefile Development Workflow</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-7-makefile-development-workflow.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>simple commands to start the entire development environment</iWant>
+    <soThat>I can get coding quickly without remembering complex commands</soThat>
+    <tasks>
+      <task id="1" mapped="AC1,AC2,AC3,AC4,AC5,AC6,AC7,AC8">Verify Existing Makefile Structure</task>
+      <task id="2" mapped="AC2,AC9">Test Docker Commands</task>
+      <task id="3" mapped="AC3,AC9">Test Backend Command</task>
+      <task id="4" mapped="AC4,AC9">Test Mobile Command</task>
+      <task id="5" mapped="AC5">Test Integrated Dev Command</task>
+      <task id="6" mapped="AC6,AC7">Test Testing and Cleanup Commands</task>
+      <task id="7" mapped="AC8,AC9">Test Database Migration Commands</task>
+      <task id="8" mapped="AC10">Update README Documentation</task>
+      <task id="9" mapped="All">End-to-End Validation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criteria id="AC1" title="Makefile Structure and Help System">
+      <item>Makefile exists in root directory with proper .PHONY declarations</item>
+      <item>make help (or just make) displays all available commands with descriptions</item>
+      <item>Help output is well-formatted and easy to read</item>
+      <item>Commands are grouped logically (dev, docker, database, utility)</item>
+    </criteria>
+    <criteria id="AC2" title="Docker Service Management">
+      <item>make docker-up starts PostgreSQL and Redis containers in detached mode</item>
+      <item>Command displays success message with service URLs (localhost:5432, localhost:6379)</item>
+      <item>make docker-down stops all Docker services gracefully</item>
+      <item>Commands provide clear feedback on what they're doing</item>
+    </criteria>
+    <criteria id="AC3" title="Backend Server Command">
+      <item>make backend starts FastAPI server with auto-reload enabled</item>
+      <item>Server starts on http://0.0.0.0:8000 (accessible from other devices)</item>
+      <item>Command runs from backend directory using uv run uvicorn</item>
+      <item>Clear output showing server is ready and where docs are available</item>
+    </criteria>
+    <criteria id="AC4" title="Mobile App Command">
+      <item>make mobile starts Expo development server</item>
+      <item>Command runs from mobile directory using npm start</item>
+      <item>Expo Metro bundler starts successfully</item>
+      <item>QR code displayed for mobile device connection</item>
+    </criteria>
+    <criteria id="AC5" title="Integrated Development Command">
+      <item>make dev orchestrates full environment startup</item>
+      <item>Executes docker-up first to ensure services are ready</item>
+      <item>Starts backend and mobile in parallel (using &amp; operator)</item>
+      <item>Provides clear instructions on what URLs to visit</item>
+    </criteria>
+    <criteria id="AC6" title="Testing Command">
+      <item>make test runs all backend tests via pytest</item>
+      <item>Also runs all mobile tests (if test suite exists)</item>
+      <item>Clear output showing test results for both environments</item>
+      <item>Returns appropriate exit code (0 for pass, non-zero for fail)</item>
+    </criteria>
+    <criteria id="AC7" title="Cleanup Command">
+      <item>make clean removes Python bytecode files (__pycache__, *.pyc)</item>
+      <item>Cleans mobile cache (node_modules/.cache)</item>
+      <item>Handles missing directories gracefully (no errors if already clean)</item>
+      <item>Provides confirmation message when complete</item>
+    </criteria>
+    <criteria id="AC8" title="Database Migration Commands (Bonus)">
+      <item>make db-migrate MSG='description' auto-generates migration from model changes</item>
+      <item>make db-upgrade applies all pending migrations to database</item>
+      <item>make db-downgrade rolls back the last applied migration</item>
+      <item>make db-current shows current migration version</item>
+      <item>make db-history displays full migration history</item>
+      <item>All DB commands require MSG parameter where needed</item>
+    </criteria>
+    <criteria id="AC9" title="Error Handling">
+      <item>Commands provide helpful error messages if prerequisites are missing</item>
+      <item>Database migration commands validate required MSG parameter</item>
+      <item>make clean doesn't fail if directories don't exist</item>
+      <item>Commands use @echo for user-friendly output</item>
+    </criteria>
+    <criteria id="AC10" title="Documentation Updated">
+      <item>README.md includes "Development Workflow" section</item>
+      <item>Documents make dev as the primary quick-start command</item>
+      <item>Lists all Makefile commands with brief descriptions</item>
+      <item>Explains what each command does and when to use it</item>
+    </criteria>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epics - Epic 1" section="Story 1.7">
+        Story 1.7 defines the Makefile workflow commands. Core requirements: help, dev (docker+backend+mobile), individual service commands, testing, cleanup, and database migrations. All commands must provide clear feedback and handle errors gracefully.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Development Workflow">
+        Development workflow describes starting backend (uv run uvicorn) and frontend (npm start) separately. Testing approach uses pytest for backend. Docker Compose recommended for local development services.
+      </doc>
+      <doc path="README.md" title="Project README" section="Quick Start & Development Commands">
+        README already documents make commands (help, dev, backend, mobile, docker-up/down, test, clean) with descriptions. Shows make dev as primary entry point. Includes troubleshooting section.
+      </doc>
+      <doc path="docs/stories/1-6-frontend-api-service-setup.md" title="Story 1.6 (Previous)" section="Dev Notes - Learnings">
+        Previous story established patterns: configuration documentation (.env.example), end-to-end testing (services running + connectivity), clear user feedback, and comprehensive error handling.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="Makefile" kind="makefile" symbol="all_targets" lines="1-123" reason="Primary artifact to validate - contains all make targets">
+        Complete Makefile with all required commands. Uses .PHONY declarations, dependency chaining (dev depends on docker-up), parallel execution (backend &amp; mobile), emoji feedback, error suppression in clean, and MSG parameter validation for database commands.
+      </artifact>
+      <artifact path="docker-compose.yml" kind="config" symbol="services" lines="1-59" reason="Defines PostgreSQL and Redis services used by make docker-up">
+        Docker Compose configuration for local development. Defines postgres:18-alpine and redis:7-alpine services with healthchecks, port mappings (5432, 6379), volume persistence, and custom network.
+      </artifact>
+      <artifact path="backend/pyproject.toml" kind="config" symbol="project.dependencies" lines="1-35" reason="Backend dependencies and dev tools configuration">
+        Python project dependencies using uv. Includes FastAPI, uvicorn, SQLModel, alembic, pydantic-settings for runtime. Dev dependencies: pytest, black, ruff, httpx for testing and linting.
+      </artifact>
+      <artifact path="mobile/package.json" kind="config" symbol="scripts" lines="1-31" reason="Mobile app dependencies and start scripts">
+        React Native/Expo mobile app configuration. Scripts section defines npm start (expo start), web/android/ios variants. Dependencies include expo, react-native, axios for API, zustand for state.
+      </artifact>
+      <artifact path="backend/src/main.py" kind="python" symbol="app" lines="N/A" reason="FastAPI application entry point started by make backend">
+        FastAPI application instance that make backend command starts via uvicorn with --reload flag on host 0.0.0.0:8000.
+      </artifact>
+      <artifact path="mobile/src/app/index.tsx" kind="typescript" symbol="HomeScreen" lines="N/A" reason="Main mobile app screen started by make mobile">
+        Expo app entry point that make mobile command launches. Displays API connection status from health check endpoint.
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <runtime>
+          <package name="fastapi" version=">=0.109.0" />
+          <package name="uvicorn[standard]" version=">=0.27.0" />
+          <package name="sqlmodel" version=">=0.0.14" />
+          <package name="alembic" version=">=1.13.0" />
+          <package name="pydantic" version=">=2.5.0" />
+          <package name="pydantic-settings" version=">=2.1.0" />
+          <package name="python-jose[cryptography]" version=">=3.3.0" />
+          <package name="bcrypt" version=">=4.1.0" />
+          <package name="redis" version=">=5.0.0" />
+          <package name="psycopg2-binary" version=">=2.9.0" />
+        </runtime>
+        <dev>
+          <package name="pytest" version=">=7.4.0" />
+          <package name="black" version=">=24.1.0" />
+          <package name="ruff" version=">=0.1.0" />
+          <package name="httpx" version=">=0.27.0" />
+        </dev>
+      </python>
+      <node>
+        <runtime>
+          <package name="expo" version="~54.0.22" />
+          <package name="react" version="19.1.0" />
+          <package name="react-native" version="0.81.5" />
+          <package name="axios" version="^1.13.1" />
+          <package name="zustand" version="^5.0.8" />
+          <package name="expo-router" version="^6.0.14" />
+        </runtime>
+        <dev>
+          <package name="typescript" version="~5.9.2" />
+          <package name="@types/react" version="~19.1.0" />
+        </dev>
+      </node>
+      <system>
+        <tool name="docker" purpose="Container runtime for PostgreSQL and Redis" />
+        <tool name="docker-compose" purpose="Multi-container orchestration for local dev" />
+        <tool name="uv" purpose="Python package manager (fast alternative to pip)" />
+        <tool name="npm" purpose="Node package manager for mobile app dependencies" />
+        <tool name="make" purpose="Task runner for development commands" />
+      </system>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint category="tooling">Makefile already exists - this is a VALIDATION story, not implementation. Focus on testing each command works, error handling, and documentation.</constraint>
+    <constraint category="dependencies">dev target must depend on docker-up to ensure services are ready before starting backend/mobile.</constraint>
+    <constraint category="parallel_execution">backend and mobile must start in parallel using &amp; operator to allow both services to run simultaneously.</constraint>
+    <constraint category="error_handling">clean command must use '2&gt;/dev/null || true' to suppress errors when directories don't exist.</constraint>
+    <constraint category="validation">Database migration commands (db-migrate, db-revision) must validate MSG parameter is provided before executing.</constraint>
+    <constraint category="user_feedback">All commands must use @echo with emojis for clear, friendly feedback about what's happening.</constraint>
+    <constraint category="documentation">README.md must be updated with Development Workflow section documenting all make commands and usage examples.</constraint>
+    <constraint category="testing">End-to-end validation must verify: make dev starts all services, backend accessible at :8000, mobile shows "API Status: Connected".</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="make help" kind="command">
+      <signature>make help</signature>
+      <description>Displays all available Makefile commands with descriptions, grouped by category (development, docker, database, utility)</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make dev" kind="command">
+      <signature>make dev</signature>
+      <description>Orchestrates full development environment: runs docker-up first, then starts backend and mobile in parallel</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make backend" kind="command">
+      <signature>make backend</signature>
+      <description>Starts FastAPI backend server with auto-reload: cd backend &amp;&amp; uv run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make mobile" kind="command">
+      <signature>make mobile</signature>
+      <description>Starts Expo mobile development server: cd mobile &amp;&amp; npm start</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make docker-up" kind="command">
+      <signature>make docker-up</signature>
+      <description>Starts PostgreSQL (port 5432) and Redis (port 6379) containers in detached mode via docker-compose</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make docker-down" kind="command">
+      <signature>make docker-down</signature>
+      <description>Stops all Docker containers gracefully via docker-compose down</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make test" kind="command">
+      <signature>make test</signature>
+      <description>Runs all tests: backend tests via pytest, then mobile tests via npm test</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make clean" kind="command">
+      <signature>make clean</signature>
+      <description>Removes Python bytecode (__pycache__, *.pyc) and mobile cache (node_modules/.cache) with error suppression</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make db-migrate" kind="command">
+      <signature>make db-migrate MSG='description'</signature>
+      <description>Auto-generates Alembic migration from SQLModel changes, requires MSG parameter with migration description</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make db-upgrade" kind="command">
+      <signature>make db-upgrade</signature>
+      <description>Applies all pending Alembic migrations to database via alembic upgrade head</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make db-downgrade" kind="command">
+      <signature>make db-downgrade</signature>
+      <description>Rolls back last applied migration via alembic downgrade -1</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make db-current" kind="command">
+      <signature>make db-current</signature>
+      <description>Shows current database migration version via alembic current</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="make db-history" kind="command">
+      <signature>make db-history</signature>
+      <description>Displays full Alembic migration history via alembic history</description>
+      <path>Makefile</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Backend testing uses pytest framework (version >=7.4.0) with httpx for async client testing. Tests should be located in backend/tests/ directory. Mobile testing uses default React Native/Expo test setup (npm test). Makefile test target runs both test suites sequentially and returns appropriate exit codes for CI/CD integration.
+    </standards>
+    <locations>
+      <location>backend/tests/</location>
+      <location>mobile/__tests__/</location>
+    </locations>
+    <ideas>
+      <test ac="AC1" description="Run 'make help' and verify output contains all command names and descriptions">Test help command displays complete command list</test>
+      <test ac="AC2" description="Run 'make docker-up', verify PostgreSQL on 5432 and Redis on 6379 are accessible">Test Docker services start successfully</test>
+      <test ac="AC3" description="Run 'make backend' and verify http://localhost:8000/docs loads">Test backend command starts FastAPI server</test>
+      <test ac="AC4" description="Run 'make mobile' and verify Expo dev server starts with QR code">Test mobile command starts Expo server</test>
+      <test ac="AC5" description="Run 'make dev' and verify all three services (Docker, backend, mobile) start">Test integrated dev command orchestration</test>
+      <test ac="AC6" description="Create sample test file, run 'make test', verify pytest executes">Test testing command runs all test suites</test>
+      <test ac="AC7" description="Create __pycache__, run 'make clean', verify removed; run clean again, verify no error">Test cleanup command removes files and is idempotent</test>
+      <test ac="AC8" description="Run 'make db-current', 'make db-history', 'make db-migrate MSG=test', verify all work">Test database migration commands</test>
+      <test ac="AC9" description="Run 'make backend' without Docker, verify error message; run 'make db-migrate' without MSG, verify validation">Test error handling and validation</test>
+      <test ac="AC10" description="Verify README.md contains Development Workflow section with all commands documented">Test documentation is complete</test>
+    </ideas>
+  </tests>
+</story-context>

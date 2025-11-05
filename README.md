@@ -111,20 +111,103 @@ numerologist-ai/                    # Root monorepo
 
 ---
 
-## Development Commands
+## Development Workflow
 
-Use the Makefile for common development tasks:
+The Numerologist AI project provides a comprehensive Makefile to streamline your development workflow. All commands are designed to be simple, memorable, and provide clear feedback.
+
+### Quick Start
+
+The fastest way to get the entire development environment running:
 
 ```bash
-make help          # Show all available commands
-make dev           # Start full development environment
-make backend       # Start backend only
-make mobile        # Start mobile app only
-make docker-up     # Start PostgreSQL + Redis
-make docker-down   # Stop Docker services
-make test          # Run all tests
-make clean         # Clean generated files
+make dev
 ```
+
+This single command will:
+1. Start Docker services (PostgreSQL and Redis)
+2. Launch the FastAPI backend server on http://localhost:8000
+3. Start the Expo mobile development server in parallel
+
+**Result:** Full stack running with one command!
+
+---
+
+### Core Development Commands
+
+| Command | Description | Use When |
+|---------|-------------|----------|
+| `make help` | Display all available commands with descriptions | First time setup or as a reference |
+| `make dev` | Start complete development environment | Beginning a development session |
+| `make backend` | Start FastAPI backend server only | Working on backend features independently |
+| `make mobile` | Start Expo mobile app only | Working on frontend features independently |
+| `make docker-up` | Start PostgreSQL and Redis containers | Need database services without app servers |
+| `make docker-down` | Stop all Docker containers | Ending development session or troubleshooting |
+| `make test` | Run all tests (backend + mobile) | Before committing code or after changes |
+| `make clean` | Remove Python cache and mobile build artifacts | Troubleshooting or cleaning up workspace |
+
+---
+
+### Database Migration Commands
+
+Manage database schema changes using Alembic migrations:
+
+```bash
+# Check current migration version
+make db-current
+
+# View full migration history
+make db-history
+
+# Create a new migration after changing models
+make db-migrate MSG="add user email field"
+
+# Apply all pending migrations to database
+make db-upgrade
+
+# Roll back the last applied migration
+make db-downgrade
+
+# Create an empty migration file for manual changes
+make db-revision MSG="custom data migration"
+```
+
+**Migration Workflow Example:**
+1. Modify your SQLModel models in `backend/src/models/`
+2. Run `make db-migrate MSG="describe your change"`
+3. Review the generated migration file in `backend/alembic/versions/`
+4. Apply the migration with `make db-upgrade`
+5. Verify with `make db-current`
+
+---
+
+### Troubleshooting
+
+**Backend fails to start:**
+- Verify Docker services are running: `docker ps`
+- Start services if needed: `make docker-up`
+- Check `.env` file exists and has required variables
+- Ensure port 8000 is not already in use
+
+**Mobile app fails to start:**
+- Install dependencies: `cd mobile && npm install`
+- Clear Expo cache: `cd mobile && npx expo start --clear`
+- Check node_modules exists and is not corrupted
+
+**Tests are failing:**
+- Ensure database is up to date: `make db-current`
+- Run migrations if needed: `make db-upgrade`
+- Check Docker services are healthy: `docker ps`
+
+**Clean build needed:**
+- Run `make clean` to remove all cache files
+- Run `make docker-down` to stop services
+- Run `make dev` to start fresh
+
+**Database migration errors:**
+- Verify database is accessible: `make docker-up`
+- Check migration files in `backend/alembic/versions/`
+- Review migration history: `make db-history`
+- Ensure MSG parameter is provided: `make db-migrate MSG="description"`
 
 ---
 
