@@ -1,0 +1,270 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>6</storyId>
+    <title>Frontend API Service Setup</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-6-frontend-api-service-setup.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>frontend developer</asA>
+    <iWant>an API client configured to call the backend</iWant>
+    <soThat>I can make HTTP requests from the mobile app and communicate with backend services</soThat>
+    <tasks>
+### Task 1: Install Dependencies and Create API Module Structure
+**Mapped to:** AC1, AC2
+- Install axios package in mobile project
+- Create `mobile/src/services/` directory
+- Create `api.ts` file with TypeScript scaffolding
+- Create `.env.example` with EXPO_PUBLIC_API_URL documentation
+- Configure TypeScript for environment variable typing
+
+### Task 2: Implement Axios Client with Base Configuration
+**Mapped to:** AC1, AC5
+- Create axios instance with `axios.create()`
+- Configure base URL from environment variable with fallback
+- Set timeout to 10000ms
+- Set default headers (Content-Type: application/json)
+- Export client as named export
+
+### Task 3: Implement Request and Response Interceptors
+**Mapped to:** AC3, AC4
+- Add request interceptor with auth token placeholder
+- Add development-mode request logging
+- Add response interceptor for error transformation
+- Handle network errors (ECONNREFUSED, timeout)
+- Transform HTTP errors into user-friendly format
+- Export error types for use in components
+
+### Task 4: Update Home Screen with Health Check
+**Mapped to:** AC6, AC7, AC8
+- Import API client in home screen
+- Add state management for: loading, connected, error
+- Implement useEffect hook to call `/health` on mount
+- Parse health check response (status, database, redis fields)
+- Display connection status with conditional styling
+- Add retry button for failed connections
+- Handle all error scenarios with appropriate messages
+
+### Task 5: Testing and Validation
+**Mapped to:** All ACs
+- Test health check with backend running (should show "Connected")
+- Test health check with backend stopped (should show error)
+- Test health check with slow network (timeout handling)
+- Verify environment variable loading works
+- Verify request/response interceptors execute
+- Test on both web and mobile (Expo Go)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+### AC1: Axios Installation and Basic Configuration
+- Axios package installed in mobile project via npm
+- API client module created at `mobile/src/services/api.ts`
+- Axios instance created with base configuration
+- Base URL configurable via environment variable
+
+### AC2: Environment Configuration
+- `.env.example` file in mobile folder documents `EXPO_PUBLIC_API_URL`
+- Base URL defaults to `http://localhost:8000` for development
+- Environment variable properly loaded using Expo's env system
+- Configuration is type-safe with TypeScript
+
+### AC3: Request Interceptors Setup
+- Request interceptor configured to prepare for future auth token injection
+- Request interceptor has placeholder comment for auth token logic
+- Error handling in request interceptor
+- Interceptor logs requests in development mode (optional debug)
+
+### AC4: Response Interceptors and Error Handling
+- Response interceptor configured for centralized error handling
+- HTTP error responses properly caught and transformed
+- Network errors handled gracefully
+- Error responses include user-friendly messages
+
+### AC5: API Client Export and Usage Pattern
+- API client exported as named export from `api.ts`
+- TypeScript types defined for common API responses
+- Client configured with appropriate timeout (10 seconds)
+- Content-Type header set to `application/json`
+
+### AC6: Health Check Integration
+- Home screen (`mobile/src/app/index.tsx`) updated to import API client
+- Health check endpoint `/health` called on component mount
+- Loading state managed while health check executes
+- Success response displays "API Status: Connected"
+
+### AC7: UI Status Display
+- Home screen displays API connection status prominently
+- Status shows "Connected" with success styling when healthy
+- Status shows error message with error styling when failed
+- Loading spinner shown during initial health check
+
+### AC8: Error Handling and Offline Support
+- Network errors display user-friendly message (e.g., "Cannot reach server")
+- Timeout errors handled with appropriate message
+- HTTP error codes (4xx, 5xx) display appropriate messages
+- User can retry health check if initial connection fails
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Technology Stack</title>
+        <section>Frontend Stack & API Client</section>
+        <snippet>Architecture specifies Axios + React Query for API client. axios instance with interceptors should be created in mobile/src/services/api.ts. Pattern: Axios for HTTP client with automatic caching, request deduplication, and background refetch via React Query (future enhancement).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Frontend State Patterns</title>
+        <section>Frontend State Management</section>
+        <snippet>Zustand for state management (lightweight, 1kb), useState + useEffect for API calls. Future stories will introduce React Query for server state management with caching.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - API Response Patterns</title>
+        <section>Consistent Response Wrapper</section>
+        <snippet>Backend API endpoints return structured responses: {success: bool, data: Optional[Any], error: Optional[ErrorDetail], message: Optional[str]}. Frontend should parse and handle these consistently.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 1 - Foundation & Project Setup</title>
+        <section>Story 1.6: Frontend API Service Setup</section>
+        <snippet>Epic goal: Establish development environment with backend and frontend talking to each other. Story 1.6 creates Axios API client, configures env vars, sets up request/response interceptors, and integrates health check on home screen. Prerequisites: Story 1.3 (Expo app) and Story 1.5 (backend /health endpoint).</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/1-5-database-connection-first-migration.md</path>
+        <title>Story 1.5 - Backend Health Endpoint</title>
+        <section>Dev Notes - Health Check Pattern</section>
+        <snippet>Backend /health endpoint returns {status: 'healthy'|'unhealthy', database: 'connected'|'disconnected', redis: 'connected'|'disconnected'}. Frontend should parse and display all three fields.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>mobile/src/app/index.tsx</path>
+        <kind>component</kind>
+        <symbol>HomeScreen</symbol>
+        <lines>1-30</lines>
+        <reason>Existing home screen component that needs to be enhanced with health check integration. Currently displays static title and subtitle. Story will add API client import, health check on mount, loading/error/success states, and retry functionality.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient</symbol>
+        <lines>1-34</lines>
+        <reason>Basic axios API client already exists with minimal interceptors. Story will enhance with: comprehensive error handling, network error transforms, timeout handling, TypeScript types for HealthCheckResponse, and development-mode logging.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/main.py</path>
+        <kind>endpoint</kind>
+        <symbol>health_check</symbol>
+        <lines>93-142</lines>
+        <reason>Backend health check endpoint that returns {status, database, redis}. Frontend needs to call this endpoint, parse the response, and display all three fields to user.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package name="axios" version="^1.13.1" installed="true">HTTP client with interceptors for API calls</package>
+        <package name="react" version="19.1.0" installed="true">UI framework</package>
+        <package name="react-native" version="0.81.5" installed="true">Mobile framework</package>
+        <package name="expo" version="~54.0.22" installed="true">Development platform for React Native</package>
+        <package name="expo-router" version="^6.0.14" installed="true">File-based routing</package>
+        <package name="zustand" version="^5.0.8" installed="true">State management (for future use)</package>
+        <package name="typescript" version="~5.9.2" installed="true">Type safety</package>
+      </node>
+      <python>
+        <package name="fastapi" version="latest">Backend framework providing /health endpoint</package>
+        <package name="uvicorn" version="latest">ASGI server running the backend</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use existing axios client in mobile/src/services/api.ts - enhance, don't replace</constraint>
+    <constraint>Use existing home screen in mobile/src/app/index.tsx - add health check, don't rewrite from scratch</constraint>
+    <constraint>Follow React Native StyleSheet.create() pattern for styles, not inline styles</constraint>
+    <constraint>Use TypeScript with strict typing - define interfaces for API responses</constraint>
+    <constraint>Use Expo's environment variable system: process.env.EXPO_PUBLIC_API_URL</constraint>
+    <constraint>Error messages must be user-friendly, not technical (e.g., "Cannot reach server" not "ECONNREFUSED")</constraint>
+    <constraint>All components must use functional components with hooks (useState, useEffect)</constraint>
+    <constraint>Interceptors must be non-blocking - don't await async operations in request interceptor</constraint>
+    <constraint>Base URL must default to http://localhost:8000 for development</constraint>
+    <constraint>Timeout must be set to 10000ms (10 seconds) as specified in architecture</constraint>
+    <constraint>Request interceptor must have placeholder comment for future JWT token injection (Epic 2)</constraint>
+    <constraint>Must display all three health check fields: status, database, redis</constraint>
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>GET /health</name>
+      <kind>REST endpoint</kind>
+      <signature>GET http://localhost:8000/health → {status: 'healthy'|'unhealthy', database: 'connected'|'disconnected', redis: 'connected'|'disconnected'}</signature>
+      <path>backend/src/main.py:94</path>
+    </interface>
+    <interface>
+      <name>HealthCheckResponse</name>
+      <kind>TypeScript interface</kind>
+      <signature>interface HealthCheckResponse { status: 'healthy' | 'unhealthy'; database: 'connected' | 'disconnected'; redis: 'connected' | 'disconnected'; }</signature>
+      <path>mobile/src/services/api.ts (to be added)</path>
+    </interface>
+    <interface>
+      <name>apiClient</name>
+      <kind>Axios instance</kind>
+      <signature>export const apiClient: AxiosInstance (with baseURL, timeout, headers, request/response interceptors)</signature>
+      <path>mobile/src/services/api.ts:5</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+Mobile testing is manual for this story (no Jest setup yet in Epic 1). Testing standards from Story 1.5: Backend uses pytest with 10 tests passing. Frontend testing will be added in later epics. For now, manual testing with backend running/stopped, timeout scenarios, and env variable configurations. Use Expo Go app on physical device and web browser for cross-platform validation.
+    </standards>
+    <locations>
+Backend tests: backend/tests/ (pytest)
+Frontend tests: Not yet established (manual testing for Epic 1)
+    </locations>
+    <ideas>
+      <test id="AC1-AC2">
+        <description>Verify axios client configuration and environment variables</description>
+        <steps>
+- Check apiClient baseURL uses EXPO_PUBLIC_API_URL or defaults to http://localhost:8000
+- Verify timeout is 10000ms
+- Verify Content-Type header is application/json
+- Test with custom .env file to confirm env var loading works
+        </steps>
+      </test>
+      <test id="AC3-AC4-AC5">
+        <description>Verify interceptors and error handling</description>
+        <steps>
+- Check request interceptor has auth token placeholder comment
+- Verify development mode logging works (__DEV__)
+- Test network error (backend stopped) → should show "Cannot reach server"
+- Test timeout error (slow backend) → should show "Request timeout"
+- Test HTTP 500 error → should show appropriate server error message
+        </steps>
+      </test>
+      <test id="AC6-AC7-AC8">
+        <description>Verify home screen health check integration</description>
+        <steps>
+- Start backend → Mobile app should show "✓ API Status: Connected"
+- Verify database and redis status fields are displayed
+- Stop backend → should show error message with retry button
+- Click retry button → should attempt reconnection
+- Start backend → click retry → should show connected
+- Check loading spinner appears during initial health check
+        </steps>
+      </test>
+      <test id="Cross-platform">
+        <description>Test on multiple platforms</description>
+        <steps>
+- Test on web browser (Expo web)
+- Test on physical Android device via Expo Go
+- Test on iOS simulator (if available)
+- Verify consistent behavior across all platforms
+        </steps>
+      </test>
+    </ideas>
+  </tests>
+</story-context>
