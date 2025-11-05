@@ -24,14 +24,14 @@ help:
 dev: docker-up
 	@echo "Starting Numerologist AI Development Environment..."
 	@echo ""
-	@echo "📱 Backend will start on http://localhost:8000"
-	@echo "📱 API Docs available at http://localhost:8000/docs"
+	@echo "🔧 Backend will start on http://localhost:8000"
+	@echo "📚 API Docs available at http://localhost:8000/docs"
 	@echo "📱 Mobile app will start via Expo"
 	@echo ""
 	@echo "Press 'w' in Expo terminal for web preview, or scan QR code"
 	@echo ""
 	@echo "Starting services in parallel..."
-	@make backend & @make mobile
+	@$(MAKE) backend & $(MAKE) mobile
 
 # Start backend only
 backend:

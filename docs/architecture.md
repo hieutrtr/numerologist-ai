@@ -84,7 +84,7 @@ pip install deepgram-sdk
 | Styling | React Native StyleSheet | Built-in | All frontend | Native performance, TypeScript support |
 | **Backend Stack** |
 | Framework | FastAPI | Latest (Python 3.11+) | All backend | Async/await, auto docs, high performance |
-| Database | PostgreSQL | 14+ | All epics | Robust, ACID compliant, excellent for relational data |
+| Database | PostgreSQL | 18+ | All epics | Robust, ACID compliant, excellent for relational data |
 | ORM | SQLModel | Latest | All backend | FastAPI-native, Pydantic integration, type-safe queries |
 | Caching | Redis | 7-alpine | All epics | Sub-millisecond access, session storage, rate limiting |
 | Migrations | Alembic | Latest | All backend | Database version control, team collaboration |
@@ -255,7 +255,7 @@ Epic breakdown will be created in the next workflow phase, but here's the archit
 - **FastAPI 0.109+**: Modern Python web framework
 - **Python 3.10+**: Async/await, type hints, modern features
 - **SQLModel**: Database ORM (Pydantic + SQLAlchemy)
-- **PostgreSQL 14+**: Relational database
+- **PostgreSQL 18+**: Relational database
 - **Redis 7+**: In-memory cache and session store
 - **Alembic**: Database migrations
 - **Pydantic**: Data validation

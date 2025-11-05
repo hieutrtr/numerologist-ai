@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="1-4-docker-compose-for-local-services" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.4</storyId>
+    <title>Docker Compose for Local Services</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-4-docker-compose-for-local-services.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>PostgreSQL and Redis running locally via Docker</iWant>
+    <soThat>I can develop without installing databases on my machine</soThat>
+    <tasks>
+      <task id="1">Create docker-compose.yml with PostgreSQL and Redis services (AC: #1, #2, #3)
+        - Create `docker-compose.yml` in root directory
+        - Configure PostgreSQL service (postgres:18-alpine image, port 5432)
+        - Set PostgreSQL environment variables (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
+        - Configure data volume for PostgreSQL persistence
+        - Configure Redis service (redis:7-alpine image, port 6379)
+        - Configure data volume for Redis persistence
+        - Define named volumes (postgres_data, redis_data)
+      </task>
+      <task id="2">Create environment configuration files (AC: #4, #5)
+        - Create `.env.example` with database connection string templates
+        - Create `.env` (add to .gitignore if not present)
+        - Set values: POSTGRES_URL, REDIS_URL with localhost connection strings
+        - Document required environment variables for local development
+      </task>
+      <task id="3">Verify Docker Compose setup (AC: #6)
+        - Run `docker-compose up -d` to start services
+        - Verify both services started without errors
+        - Check `docker-compose ps` shows two running containers
+      </task>
+      <task id="4">Test PostgreSQL connectivity (AC: #7)
+        - Install `psql` CLI tool (psql client)
+        - Connect using: `psql postgresql://postgres:password@localhost:5432/numerologist`
+        - Run `\dt` to verify connection and list tables
+        - Verify database `numerologist` exists and is accessible
+      </task>
+      <task id="5">Test Redis connectivity (AC: #8)
+        - Install `redis-cli` tool
+        - Run `redis-cli -h localhost -p 6379 ping`
+        - Verify response is `PONG`
+        - Test basic commands: `SET test_key test_value` and `GET test_key`
+      </task>
+      <task id="6">Verify data persistence (AC: #9)
+        - Stop services: `docker-compose down`
+        - Restart services: `docker-compose up -d`
+        - Verify PostgreSQL and Redis containers restart successfully
+        - Verify previous data still exists in both databases
+      </task>
+      <task id="7">Document setup in README (Supporting)
+        - Add Docker Compose setup section to root README.md
+        - Include commands: `docker-compose up -d`, `docker-compose down`
+        - Document database connection strings for local development
+        - Note: PostgreSQL available at `localhost:5432`, Redis at `localhost:6379`
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">`docker-compose.yml` created in root directory</criterion>
+    <criterion id="2">PostgreSQL service configured (port 5432, volume for data persistence)</criterion>
+    <criterion id="3">Redis service configured (port 6379)</criterion>
+    <criterion id="4">`.env.example` file with database connection strings</criterion>
+    <criterion id="5">`.env` file created (gitignored) with actual values</criterion>
+    <criterion id="6">`docker-compose up -d` starts both services successfully</criterion>
+    <criterion id="7">Can connect to PostgreSQL: `psql postgresql://postgres:password@localhost:5432/numerologist`</criterion>
+    <criterion id="8">Can connect to Redis: `redis-cli -h localhost -p 6379 ping` returns PONG</criterion>
+    <criterion id="9">Services persist data between restarts</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.4: Docker Compose for Local Services</section>
+        <snippet>Docker-based local development environment with PostgreSQL 18 and Redis 7. Services accessible via docker-compose commands. Data persistence via named volumes.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Documentation</title>
+        <section>Infrastructure Architecture</section>
+        <snippet>Docker Compose for local development with PostgreSQL 18+ and Redis 7+. Production uses managed services (Azure Database for PostgreSQL, Azure Cache for Redis).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Technical Requirements</section>
+        <snippet>Backend requires PostgreSQL database and Redis cache. All development environments must use Docker for reproducibility.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>backend/pyproject.toml</path>
+        <kind>config</kind>
+        <symbol>database_dependencies</symbol>
+        <reason>Story 1.5 will use SQLModel and Alembic (already in pyproject.toml) to connect to PostgreSQL created by this story</reason>
+      </artifact>
+      <artifact>
+        <path>.gitignore</path>
+        <kind>config</kind>
+        <symbol>.env_pattern</symbol>
+        <reason>Must verify .env is gitignored before creating .env file with sensitive credentials</reason>
+      </artifact>
+      <artifact>
+        <path>README.md</path>
+        <kind>documentation</kind>
+        <symbol>setup_section</symbol>
+        <reason>Will document docker-compose setup instructions and commands</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="docker">
+        <package name="docker-compose" version="1.29+" description="Container orchestration for PostgreSQL and Redis services" />
+      </ecosystem>
+      <ecosystem name="python">
+        <package name="sqlmodel" version="0.0.14+" description="ORM for database connections (used in Story 1.5)" />
+        <package name="alembic" version="1.13+" description="Database migrations (used in Story 1.5)" />
+      </ecosystem>
+      <ecosystem name="database">
+        <package name="postgres" version="18-alpine" description="PostgreSQL database service" />
+        <package name="redis" version="7-alpine" description="Redis cache service" />
+      </ecosystem>
+      <ecosystem name="tools">
+        <package name="psql" description="PostgreSQL client CLI (for testing)" />
+        <package name="redis-cli" description="Redis CLI tool (for testing)" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint priority="critical">Docker and Docker Compose must be installed on developer machine</constraint>
+    <constraint priority="critical">Ports 5432 (PostgreSQL) and 6379 (Redis) must be available on localhost</constraint>
+    <constraint priority="high">.env file must not be committed to git - add to .gitignore before creating</constraint>
+    <constraint priority="high">Environment variables must be sourced from .env file, not hardcoded in code</constraint>
+    <constraint priority="high">PostgreSQL connection string format: postgresql://user:password@host:port/database</constraint>
+    <constraint priority="high">Redis connection string format: redis://host:port</constraint>
+    <constraint priority="medium">Named volumes must be used for data persistence (postgres_data, redis_data)</constraint>
+    <constraint priority="medium">Alpine-based images preferred for minimal size and fast startup</constraint>
+    <constraint priority="medium">Services must communicate via service names within Docker network (postgres:5432, redis:6379)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>PostgreSQL Connection</name>
+      <kind>database_connection</kind>
+      <signature>postgresql://postgres:password@localhost:5432/numerologist</signature>
+      <path>Environment variable: DATABASE_URL</path>
+      <reason>Backend (Story 1.5) will use this connection to initialize database and run migrations</reason>
+    </interface>
+    <interface>
+      <name>Redis Connection</name>
+      <kind>cache_connection</kind>
+      <signature>redis://localhost:6379</signature>
+      <path>Environment variable: REDIS_URL</path>
+      <reason>Backend (Stories 7, 8) will use this for caching and session management</reason>
+    </interface>
+    <interface>
+      <name>docker-compose CLI</name>
+      <kind>command_interface</kind>
+      <signature>docker-compose up -d | docker-compose down | docker-compose ps</signature>
+      <path>Root directory</path>
+      <reason>Primary interface for starting, stopping, and monitoring services</reason>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Manual verification tests per testing strategy in Dev Notes. Tests verify: Docker installation, service startup via docker-compose, PostgreSQL connectivity via psql client, Redis connectivity via redis-cli, and data persistence across restart cycles. No automated tests required for this infrastructure story (testing happens in Story 1.5 when backend connects).</standards>
+    <locations>
+      <location>Root directory: docker-compose.yml (verify syntax with `docker-compose config`)</location>
+      <location>Root directory: .env.example and .env (verify environment variable format)</location>
+      <location>Manual CLI verification: psql, redis-cli, docker-compose commands</location>
+    </locations>
+    <ideas>
+      <idea acId="1">Verify docker-compose.yml syntax: `docker-compose config` without errors</idea>
+      <idea acId="6">Verify docker-compose up -d starts both containers: `docker-compose ps` shows 2 running services</idea>
+      <idea acId="7">Verify PostgreSQL accessibility: `psql postgresql://postgres:password@localhost:5432/numerologist -c "SELECT 1"`</idea>
+      <idea acId="8">Verify Redis accessibility: `redis-cli -h localhost -p 6379 PING` returns PONG</idea>
+      <idea acId="9">Data persistence test: insert data, docker-compose down, docker-compose up -d, verify data exists</idea>
+    </ideas>
+  </tests>
+</story-context>

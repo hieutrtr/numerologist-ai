@@ -249,7 +249,7 @@ Note: Expo Router automatically detects `src/app` directory.
 # docker-compose.yml structure
 services:
   postgres:
-    image: postgres:14-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
