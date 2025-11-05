@@ -2,13 +2,19 @@
 Numerologist AI Backend - FastAPI Application
 
 This is the main entry point for the Numerologist AI backend application.
-It initializes the FastAPI app with CORS middleware and basic endpoints.
+It initializes the FastAPI app with CORS middleware, health checks,
+and manages lifecycle for database and cache connections.
+
+Configuration is centralized in src.core.settings to avoid magic numbers
+and scattered environment variable references.
 """
 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.core.settings import settings
 
 
 @asynccontextmanager
@@ -20,39 +26,56 @@ async def lifespan(_app: FastAPI):
     Runs startup code on entry, shutdown code on exit.
 
     Manages:
-    - Database connection pool lifecycle
-    - Future: Redis connection lifecycle
+    - Database (PostgreSQL) connection pool lifecycle
+    - Redis connection pool and client lifecycle
     """
     # Startup event
     from src.core.database import engine
+    from src.core.redis import get_redis_client, get_redis_pool
 
     print("✓ Application startup - Numerologist AI API running")
     print("✓ Database connection pool initialized")
+
+    # Initialize Redis connection (validates connectivity)
+    try:
+        redis_pool = get_redis_pool()
+        redis_client = get_redis_client()
+        redis_client.ping()
+        print("✓ Redis connection pool initialized")
+    except Exception as e:
+        print(f"⚠ Redis initialization warning: {str(e)}")
 
     yield
 
     # Shutdown event - cleanup resources
     print("✓ Disposing database connection pool...")
     engine.dispose()
+
+    print("✓ Disposing Redis connection pool...")
+    from src.core.redis import dispose_redis_pool
+    dispose_redis_pool()
+
     print("✓ Application shutdown complete")
 
 
-# Initialize FastAPI application with lifespan
+# Initialize FastAPI application with lifespan and settings from configuration
 app = FastAPI(
-    title="Numerologist AI API",
+    title=settings.app_name,
     description="Backend API for Numerologist AI application - voice-based numerology readings",
-    version="0.1.0",
+    version=settings.app_version,
     lifespan=lifespan,
+    docs_url="/docs" if settings.enable_docs else None,
+    redoc_url="/redoc" if settings.enable_redoc else None,
 )
 
 # Configure CORS middleware for mobile app integration
-# In development, allow all origins. Will be restricted in production.
+# Configuration loaded from settings for flexibility across environments
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_origins=settings.cors_origins,
+    allow_credentials=settings.cors_allow_credentials,
+    allow_methods=settings.cors_allow_methods,
+    allow_headers=settings.cors_allow_headers,
 )
 
 
@@ -68,38 +91,53 @@ def read_root() -> dict:
 
 
 # Health check endpoint (useful for monitoring)
-@app.get("/health")
+@app.get(settings.health_check_endpoint)
 def health_check() -> dict:
     """
     Health check endpoint for monitoring and load balancers.
 
-    Tests the database connection and returns comprehensive health status.
+    Tests connectivity for all critical services:
+    - PostgreSQL database
+    - Redis cache/session store
 
     Returns:
-        dict: Health status with database connectivity information
+        dict: Comprehensive health status with each service status
 
     Example Response:
-        {"status": "healthy", "database": "connected"}
-    """
-    from sqlmodel import Session, select, text
-    from src.core.database import engine
-
-    try:
-        # Test database connection with a simple query
-        with Session(engine) as session:
-            # Execute a simple SELECT to verify connection
-            session.exec(text("SELECT 1"))
-
-        return {"status": "healthy", "database": "connected"}
-
-    except Exception as e:
-        # Log the error for debugging (in production, use proper logging)
-        import logging
-        logging.error(f"Database health check failed: {str(e)}")
-
-        # Return error status
-        return {
-            "status": "unhealthy",
-            "database": "disconnected",
-            "error": "Database connection failed"
+        {
+            "status": "healthy",
+            "database": "connected",
+            "redis": "connected"
         }
+    """
+    import logging
+    from sqlmodel import Session, text
+
+    from src.core.database import engine
+    from src.core.redis import get_redis_client
+
+    health_status = {
+        "status": "healthy",
+        "database": "disconnected",
+        "redis": "disconnected",
+    }
+
+    # Check database connection
+    try:
+        with Session(engine) as session:
+            session.exec(text("SELECT 1"))
+        health_status["database"] = "connected"
+    except Exception as e:
+        logging.error(f"Database health check failed: {str(e)}")
+        health_status["status"] = "unhealthy"
+
+    # Check Redis connection
+    try:
+        redis_client = get_redis_client()
+        redis_client.ping()
+        health_status["redis"] = "connected"
+    except Exception as e:
+        logging.error(f"Redis health check failed: {str(e)}")
+        health_status["status"] = "unhealthy"
+
+    return health_status

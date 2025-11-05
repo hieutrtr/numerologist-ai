@@ -8,21 +8,19 @@ Tests cover:
 - Connection error handling
 """
 
-import os
-from unittest.mock import patch
-
 import pytest
 from sqlmodel import Session, text
 
-from src.core.database import DATABASE_URL, engine, get_session
+from src.core.database import engine, get_session
+from src.core.settings import settings
 
 
-def test_database_url_from_environment():
-    """Test that DATABASE_URL is loaded from environment or uses fallback."""
-    # The DATABASE_URL should be a PostgreSQL connection string
-    assert DATABASE_URL.startswith("postgresql://")
-    assert "postgres" in DATABASE_URL
-    assert "numerologist" in DATABASE_URL
+def test_database_url_from_settings():
+    """Test that database URL is loaded from settings with proper defaults."""
+    # The database URL should be a PostgreSQL connection string
+    assert settings.database_url.startswith("postgresql://")
+    assert "postgres" in settings.database_url
+    assert "numerologist" in settings.database_url
 
 
 def test_engine_creation():

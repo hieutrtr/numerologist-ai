@@ -3,28 +3,27 @@ Database connection and session management for Numerologist AI.
 
 This module provides SQLModel database connectivity with connection pooling
 and dependency injection for FastAPI routes.
+
+Configuration is centralized in src.core.settings to avoid magic numbers
+and scattered environment variable references.
 """
 
-import os
 from typing import Generator
 
 from sqlmodel import Session, create_engine
 
+from .settings import settings
 
-# Get database URL from environment with fallback to development database
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:password@localhost:5432/numerologist"
-)
 
 # Create SQLModel engine with connection pooling
-# echo=True enables SQL query logging (useful for development)
+# Configuration loaded from settings (environment variables or .env file)
 engine = create_engine(
-    DATABASE_URL,
-    echo=False,  # Set to True for SQL debugging
-    pool_pre_ping=True,  # Verify connections before using them
-    pool_size=5,  # Number of connections to maintain
-    max_overflow=10,  # Additional connections when pool is full
+    settings.database_url,
+    echo=settings.db_echo,
+    pool_pre_ping=settings.db_pool_pre_ping,
+    pool_size=settings.db_pool_size,
+    max_overflow=settings.db_max_overflow,
+    echo_pool=settings.db_echo_pool,
 )
 
 
