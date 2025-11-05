@@ -2,7 +2,7 @@
 
 **Epic:** Epic 2 - User Authentication & Profile
 **Story ID:** 2-1-user-model-database-schema
-**Status:** review
+**Status:** done
 **Created:** 2025-11-05
 **Updated:** 2025-11-05
 

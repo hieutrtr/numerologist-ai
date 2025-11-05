@@ -54,7 +54,7 @@ development_status:
   # EPIC 2: User Authentication & Profile
   # ============================================================================
   epic-2: backlog
-  2-1-user-model-database-schema: review
+  2-1-user-model-database-schema: done
   2-2-password-hashing-security-utilities: backlog
   2-3-user-registration-api-endpoint: backlog
   2-4-user-login-api-endpoint: backlog
