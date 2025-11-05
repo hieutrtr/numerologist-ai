@@ -7,8 +7,8 @@ from sqlmodel import SQLModel
 
 from alembic import context
 
-# Import database URL from our database module
-from src.core.database import DATABASE_URL
+# Import database URL from settings
+from src.core.settings import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -16,7 +16,7 @@ config = context.config
 
 # Set the sqlalchemy.url from environment variable
 # This overrides any value in alembic.ini
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -26,7 +26,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # Import all SQLModel models here when they are created
-# from src.models.user import User
+from src.models.user import User
 # from src.models.conversation import Conversation
 target_metadata = SQLModel.metadata
 
