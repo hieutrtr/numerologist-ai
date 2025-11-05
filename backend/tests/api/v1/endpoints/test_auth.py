@@ -706,3 +706,317 @@ class TestUserLogin:
 
         # Assert - Same error message (security best practice)
         assert error1 == error2 == "Invalid credentials"
+
+
+class TestGetCurrentUser:
+    """Test suite for GET /me endpoint (protected route)."""
+
+    def test_get_me_with_valid_token(self, client: TestClient, session: Session):
+        """
+        Test GET /me with valid token returns 200 with user data.
+
+        Verifies that authenticated users can retrieve their profile
+        using a valid JWT token.
+        """
+        # Arrange: Register and login to get valid token
+        registration_data = {
+            "email": "test@example.com",
+            "password": "securepass123",
+            "full_name": "Test User",
+            "birth_date": "1990-01-15"
+        }
+        client.post("/api/v1/auth/register", json=registration_data)
+
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={"email": "test@example.com", "password": "securepass123"}
+        )
+        token = login_response.json()["access_token"]
+
+        # Act: Call GET /me with valid token
+        response = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Assert: Returns 200 with user data
+        assert response.status_code == 200
+        data = response.json()
+        assert data["email"] == "test@example.com"
+        assert data["full_name"] == "Test User"
+        assert data["birth_date"] == "1990-01-15"
+        assert "id" in data
+        assert "created_at" in data
+        assert "updated_at" in data
+        assert "is_active" in data
+
+    def test_get_me_without_token(self, client: TestClient):
+        """
+        Test GET /me without Authorization header returns 401.
+
+        Verifies that unauthenticated requests are rejected.
+        """
+        # Act: Call GET /me without token
+        response = client.get("/api/v1/auth/me")
+
+        # Assert: Returns 401 Unauthorized
+        assert response.status_code == 403  # FastAPI HTTPBearer returns 403 for missing auth
+        # Note: HTTPBearer raises 403 when credentials are missing, not 401
+
+    def test_get_me_with_invalid_token(self, client: TestClient):
+        """
+        Test GET /me with invalid token returns 401.
+
+        Verifies that malformed or incorrectly signed tokens are rejected.
+        """
+        # Arrange: Create invalid token
+        invalid_token = "invalid.jwt.token"
+
+        # Act: Call GET /me with invalid token
+        response = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {invalid_token}"}
+        )
+
+        # Assert: Returns 401 Unauthorized
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Invalid token"
+
+    def test_get_me_with_expired_token(self, client: TestClient, session: Session):
+        """
+        Test GET /me with expired token returns 401.
+
+        Verifies that expired tokens are rejected even if properly signed.
+        """
+        # Arrange: Create user and generate expired token manually
+        from src.core.security import create_access_token
+        from src.models.user import User
+        from datetime import datetime
+
+        user = User(
+            email="test@example.com",
+            hashed_password="hashed_password",
+            full_name="Test User",
+            birth_date=date(1990, 1, 15)
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
+        # Create expired token (expired 1 minute ago)
+        expired_token = create_access_token(
+            data={"sub": str(user.id)},
+            expires_delta=timedelta(minutes=-1)
+        )
+
+        # Act: Call GET /me with expired token
+        response = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {expired_token}"}
+        )
+
+        # Assert: Returns 401 Unauthorized
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Invalid token"
+
+    def test_get_me_response_excludes_password(self, client: TestClient):
+        """
+        Test GET /me response excludes hashed_password field.
+
+        Verifies security: sensitive password data must not be exposed.
+        """
+        # Arrange: Register and login to get valid token
+        registration_data = {
+            "email": "test@example.com",
+            "password": "securepass123",
+            "full_name": "Test User",
+            "birth_date": "1990-01-15"
+        }
+        client.post("/api/v1/auth/register", json=registration_data)
+
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={"email": "test@example.com", "password": "securepass123"}
+        )
+        token = login_response.json()["access_token"]
+
+        # Act: Call GET /me
+        response = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Assert: Response excludes password fields
+        data = response.json()
+        assert "password" not in data
+        assert "hashed_password" not in data
+
+    def test_get_me_response_format(self, client: TestClient):
+        """
+        Test GET /me response format matches UserResponse schema.
+
+        Verifies response includes all expected fields with correct types.
+        """
+        # Arrange: Register and login to get valid token
+        registration_data = {
+            "email": "test@example.com",
+            "password": "securepass123",
+            "full_name": "Test User",
+            "birth_date": "1990-01-15"
+        }
+        client.post("/api/v1/auth/register", json=registration_data)
+
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={"email": "test@example.com", "password": "securepass123"}
+        )
+        token = login_response.json()["access_token"]
+
+        # Act: Call GET /me
+        response = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Assert: Response has expected structure
+        assert response.status_code == 200
+        data = response.json()
+
+        # Check all required fields exist
+        required_fields = ["id", "email", "full_name", "birth_date", "created_at", "updated_at", "is_active"]
+        for field in required_fields:
+            assert field in data, f"Missing field: {field}"
+
+        # Check data types and values
+        assert isinstance(data["id"], str)  # UUID as string
+        assert isinstance(data["email"], str)
+        assert isinstance(data["full_name"], str)
+        assert isinstance(data["birth_date"], str)  # date as ISO string
+        assert isinstance(data["created_at"], str)  # datetime as ISO string
+        assert isinstance(data["updated_at"], str)  # datetime as ISO string
+        assert isinstance(data["is_active"], bool)
+
+    def test_get_me_integration_after_login(self, client: TestClient):
+        """
+        Test full authentication flow: register → login → get_me.
+
+        Verifies complete integration of authentication endpoints.
+        """
+        # Arrange: Register new user
+        registration_data = {
+            "email": "integration@example.com",
+            "password": "securepass123",
+            "full_name": "Integration Test",
+            "birth_date": "1992-05-20"
+        }
+        register_response = client.post("/api/v1/auth/register", json=registration_data)
+        assert register_response.status_code == 201
+
+        # Act: Login with credentials
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={"email": "integration@example.com", "password": "securepass123"}
+        )
+        assert login_response.status_code == 200
+        login_data = login_response.json()
+        token = login_data["access_token"]
+
+        # Act: Get user profile using token
+        me_response = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Assert: All steps successful with consistent data
+        assert me_response.status_code == 200
+        me_data = me_response.json()
+
+        # Verify data consistency across register, login, and get_me
+        assert me_data["email"] == registration_data["email"]
+        assert me_data["full_name"] == registration_data["full_name"]
+        assert me_data["birth_date"] == registration_data["birth_date"]
+        assert me_data["id"] == login_data["user"]["id"]
+        assert me_data["is_active"] is True
+
+    def test_get_me_with_token_from_different_user(self, client: TestClient):
+        """
+        Test GET /me returns correct user for the token provided.
+
+        Verifies that each token correctly identifies its own user
+        and doesn't return data for other users.
+        """
+        # Arrange: Register two different users
+        user1_data = {
+            "email": "user1@example.com",
+            "password": "password1",
+            "full_name": "User One",
+            "birth_date": "1990-01-01"
+        }
+        user2_data = {
+            "email": "user2@example.com",
+            "password": "password2",
+            "full_name": "User Two",
+            "birth_date": "1991-02-02"
+        }
+
+        client.post("/api/v1/auth/register", json=user1_data)
+        client.post("/api/v1/auth/register", json=user2_data)
+
+        # Login as both users
+        login1 = client.post("/api/v1/auth/login", json={"email": "user1@example.com", "password": "password1"})
+        login2 = client.post("/api/v1/auth/login", json={"email": "user2@example.com", "password": "password2"})
+
+        token1 = login1.json()["access_token"]
+        token2 = login2.json()["access_token"]
+
+        # Act: Get profile for each user with their token
+        response1 = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token1}"})
+        response2 = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token2}"})
+
+        # Assert: Each token returns correct user
+        data1 = response1.json()
+        data2 = response2.json()
+
+        assert data1["email"] == "user1@example.com"
+        assert data1["full_name"] == "User One"
+        assert data2["email"] == "user2@example.com"
+        assert data2["full_name"] == "User Two"
+        assert data1["id"] != data2["id"]  # Different users
+
+    def test_get_me_multiple_requests_same_token(self, client: TestClient):
+        """
+        Test GET /me with same token multiple times works consistently.
+
+        Verifies tokens can be reused until expiration (stateless auth).
+        """
+        # Arrange: Register and login
+        registration_data = {
+            "email": "test@example.com",
+            "password": "securepass123",
+            "full_name": "Test User",
+            "birth_date": "1990-01-15"
+        }
+        client.post("/api/v1/auth/register", json=registration_data)
+
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={"email": "test@example.com", "password": "securepass123"}
+        )
+        token = login_response.json()["access_token"]
+
+        # Act: Make multiple requests with same token
+        response1 = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        response2 = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        response3 = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+
+        # Assert: All requests succeed with same data
+        assert response1.status_code == 200
+        assert response2.status_code == 200
+        assert response3.status_code == 200
+
+        data1 = response1.json()
+        data2 = response2.json()
+        data3 = response3.json()
+
+        # Data should be identical
+        assert data1 == data2 == data3

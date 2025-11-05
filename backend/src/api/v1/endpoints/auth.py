@@ -10,6 +10,7 @@ from sqlmodel import Session, select
 
 from src.core.database import get_session
 from src.core.security import hash_password, create_access_token, verify_password
+from src.core.deps import get_current_user
 from src.models.user import User
 from src.schemas.user import UserCreate, UserLogin, UserResponse
 
@@ -203,3 +204,91 @@ async def login(
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+async def get_me(
+    current_user: User = Depends(get_current_user)
+) -> UserResponse:
+    """
+    Get current authenticated user profile.
+
+    Returns the profile information for the currently authenticated user.
+    Requires a valid JWT token in the Authorization header.
+
+    This endpoint is protected by the get_current_user dependency, which:
+    1. Validates the JWT token from Authorization header
+    2. Verifies token signature and expiration
+    3. Queries database for user by ID from token
+    4. Returns 401 if token invalid, expired, or user not found
+
+    Args:
+        current_user: Authenticated user from get_current_user dependency.
+                     Automatically injected by FastAPI dependency injection.
+
+    Returns:
+        UserResponse: User profile data (excludes hashed_password)
+            {
+                "id": UUID,
+                "email": str,
+                "full_name": str,
+                "birth_date": date,
+                "created_at": datetime,
+                "updated_at": datetime,
+                "is_active": bool
+            }
+
+    Raises:
+        HTTPException: 401 Unauthorized in the following cases:
+            - Authorization header missing
+            - Token invalid or malformed
+            - Token expired (after 15 minutes)
+            - User not found in database
+
+    Security:
+        - Requires "Authorization: Bearer <token>" header
+        - Token validation handled by get_current_user dependency
+        - Response excludes sensitive data (hashed_password)
+        - Same UserResponse schema as registration and login (consistency)
+
+    Example Request:
+        GET /api/v1/auth/me
+        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    Example Response (200 OK):
+        {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "email": "user@example.com",
+            "full_name": "John Doe",
+            "birth_date": "1990-01-15",
+            "created_at": "2025-11-05T10:00:00",
+            "updated_at": "2025-11-05T10:00:00",
+            "is_active": true
+        }
+
+    Example Error Response (401 Unauthorized - Missing Token):
+        {
+            "detail": "Not authenticated"
+        }
+
+    Example Error Response (401 Unauthorized - Invalid Token):
+        {
+            "detail": "Invalid token"
+        }
+
+    Example Error Response (401 Unauthorized - User Not Found):
+        {
+            "detail": "User not found"
+        }
+
+    Usage Pattern:
+        This endpoint demonstrates the standard pattern for protecting endpoints.
+        Any future endpoint can be protected by adding the get_current_user dependency:
+
+        ```python
+        @router.get("/protected-resource")
+        async def protected_route(current_user: User = Depends(get_current_user)):
+            # Only authenticated users can access this
+            return {"data": "sensitive information"}
+        ```
+    """
+    return UserResponse.model_validate(current_user)

@@ -58,7 +58,7 @@ development_status:
   2-2-password-hashing-security-utilities: done
   2-3-user-registration-api-endpoint: done
   2-4-user-login-api-endpoint: done
-  2-5-get-current-user-endpoint-protected: backlog
+  2-5-get-current-user-endpoint-protected: done
   2-6-frontend-auth-state-management-zustand: backlog
   2-7-login-screen-ui: backlog
   2-8-register-screen-ui: backlog
