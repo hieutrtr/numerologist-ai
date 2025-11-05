@@ -31,14 +31,13 @@ async def lifespan(_app: FastAPI):
     """
     # Startup event
     from src.core.database import engine
-    from src.core.redis import get_redis_client, get_redis_pool
+    from src.core.redis import get_redis_client
 
     print("✓ Application startup - Numerologist AI API running")
     print("✓ Database connection pool initialized")
 
     # Initialize Redis connection (validates connectivity)
     try:
-        redis_pool = get_redis_pool()
         redis_client = get_redis_client()
         redis_client.ping()
         print("✓ Redis connection pool initialized")
