@@ -1,0 +1,205 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>5</storyId>
+    <title>Database Connection & First Migration</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-5-database-connection-first-migration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>the FastAPI app connected to PostgreSQL with migrations working</iWant>
+    <soThat>I can create database tables and evolve the schema</soThat>
+    <tasks>
+- Task 1: Create database connection module (AC: #1, #2)
+  - Create `backend/src/core/database.py` module
+  - Configure SQLModel engine with DATABASE_URL from environment
+  - Implement `get_session()` dependency for FastAPI routes
+  - Add database connection error handling
+  - Test connection to PostgreSQL running in Docker
+
+- Task 2: Initialize and configure Alembic (AC: #3, #4)
+  - Run `alembic init alembic` in backend directory
+  - Configure `alembic.ini` with SQLModel-compatible settings
+  - Update `alembic/env.py` to import SQLModel metadata
+  - Set `sqlalchemy.url` to read from environment variable
+  - Verify Alembic can connect to database
+
+- Task 3: Create first migration (AC: #5, #6)
+  - Generate empty migration: `alembic revision -m "initial setup"`
+  - Review generated migration file
+  - Run `alembic upgrade head` to apply migration
+  - Verify migration was applied successfully
+  - Test `alembic downgrade -1` and `alembic upgrade head` cycle
+
+- Task 4: Implement health check endpoint (AC: #7, #8, #9)
+  - Create `GET /health` endpoint in `backend/src/main.py`
+  - Test database connection in health check handler
+  - Return `{"status": "healthy", "database": "connected"}` on success
+  - Return proper error response if database is unreachable
+  - Add exception handling for database connection failures
+
+- Task 5: Integration testing (Supporting)
+  - Test health endpoint with database running: expects 200 OK
+  - Test health endpoint with database stopped: expects error response
+  - Verify migration tracking in `alembic_version` table
+  - Document migration workflow in development notes
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. SQLModel database connection configured in `backend/src/core/database.py`
+2. Database URL from environment variables
+3. Alembic initialized (`alembic init alembic`)
+4. Alembic configured to use SQLModel
+5. First migration created (empty, just to test setup)
+6. `alembic upgrade head` runs successfully
+7. Health check endpoint `GET /health` returns database connection status
+8. Endpoint response: `{"status": "healthy", "database": "connected"}`
+9. If database down, endpoint returns proper error
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Backend Stack</section>
+        <snippet>FastAPI (Python 3.11+) with async/await, PostgreSQL 18+ for database, SQLModel as ORM for FastAPI-native type-safe queries, Alembic for database migrations</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Database Models</section>
+        <snippet>SQLModel models with UUIDs as primary keys, relationships defined via Relationship(), models include User, NumerologyProfile, Conversation, ConversationMessage</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 1 - Foundation & Project Setup</title>
+        <section>Story 1.5 - Database Connection & First Migration</section>
+        <snippet>Configure SQLModel database connection in backend/src/core/database.py, initialize Alembic migrations, create health check endpoint at GET /health</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/1-4-docker-compose-for-local-services.md</path>
+        <title>Story 1.4: Docker Compose for Local Services</title>
+        <section>Dev Notes</section>
+        <snippet>PostgreSQL 18-alpine running on port 5432, connection string: postgresql://postgres:password@localhost:5432/numerologist, data persisted via postgres_data volume</snippet>
+      </doc>
+      <doc>
+        <path>.env.example</path>
+        <title>Environment Variables Template</title>
+        <section>Database Configuration</section>
+        <snippet>DATABASE_URL template for PostgreSQL connection, REDIS_URL for caching</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/main.py</path>
+        <kind>api_entrypoint</kind>
+        <symbol>app</symbol>
+        <lines>1-69</lines>
+        <reason>Main FastAPI application with existing health check endpoint (line 60-68) that needs enhancement to include database status</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/__init__.py</path>
+        <kind>module_init</kind>
+        <symbol>__init__</symbol>
+        <lines>1</lines>
+        <reason>Backend src module initialization file, establishes module structure</reason>
+      </artifact>
+      <artifact>
+        <path>backend/pyproject.toml</path>
+        <kind>dependencies</kind>
+        <symbol>project</symbol>
+        <lines>1-31</lines>
+        <reason>Defines project dependencies including fastapi, sqlmodel, alembic, uvicorn - all required packages already listed</reason>
+      </artifact>
+      <artifact>
+        <path>.env</path>
+        <kind>config</kind>
+        <symbol>environment</symbol>
+        <lines>all</lines>
+        <reason>Contains DATABASE_URL and other environment variables from Story 1.4, will be used for database connection</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="fastapi" version=">=0.109.0" />
+        <package name="uvicorn" version=">=0.27.0" extras="standard" />
+        <package name="sqlmodel" version=">=0.0.14" />
+        <package name="alembic" version=">=1.13.0" />
+        <package name="pydantic" version=">=2.5.0" />
+        <package name="python-jose" version=">=3.3.0" extras="cryptography" />
+        <package name="bcrypt" version=">=4.1.0" />
+        <package name="redis" version=">=5.0.0" />
+        <package name="pytest" version=">=7.4.0" scope="dev" />
+        <package name="black" version=">=24.1.0" scope="dev" />
+        <package name="ruff" version=">=0.1.0" scope="dev" />
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Database connection must be placed in backend/src/core/database.py following architecture structure
+    - Use SQLModel for ORM (FastAPI-native, Pydantic integration)
+    - Database URL must be read from environment variable DATABASE_URL with fallback
+    - Use async database sessions via get_session() dependency injection pattern
+    - Alembic configuration must support SQLModel metadata auto-generation
+    - Health check endpoint already exists at GET /health - enhance it to include database connection status
+    - Never hardcode database credentials in source code
+    - Follow Python 3.11+ async/await patterns for database operations
+    - PostgreSQL 18 running on localhost:5432 via Docker (prerequisite from Story 1.4)
+    - Migration files must be stored in backend/alembic/versions/ directory
+    - Alembic env.py must import SQLModel Base metadata for auto-generation support
+    - Connection string format: postgresql://user:password@host:port/database
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>get_session</name>
+      <kind>dependency_injection</kind>
+      <signature>def get_session() -> Generator[Session, None, None]</signature>
+      <path>backend/src/core/database.py</path>
+      <description>FastAPI dependency that provides SQLModel database sessions to route handlers</description>
+    </interface>
+    <interface>
+      <name>GET /health</name>
+      <kind>rest_endpoint</kind>
+      <signature>GET /health -> {"status": "healthy", "database": "connected"}</signature>
+      <path>backend/src/main.py</path>
+      <description>Health check endpoint that verifies API and database connectivity, returns JSON with status and database connection state</description>
+    </interface>
+    <interface>
+      <name>alembic upgrade head</name>
+      <kind>cli_command</kind>
+      <signature>alembic upgrade head</signature>
+      <path>backend/alembic/</path>
+      <description>Alembic CLI command to apply all pending migrations to database</description>
+    </interface>
+    <interface>
+      <name>alembic revision</name>
+      <kind>cli_command</kind>
+      <signature>alembic revision -m "message" or alembic revision --autogenerate -m "message"</signature>
+      <path>backend/alembic/</path>
+      <description>Alembic CLI command to create new migration, --autogenerate detects model changes automatically</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>The project uses pytest for testing (version >=7.4.0). Tests should be created in backend/tests/ directory. Follow FastAPI testing patterns using TestClient for endpoint tests and pytest fixtures for database setup. Test database connections should use separate test database or mock connections to avoid affecting development data.</standards>
+    <locations>
+      - backend/tests/ (to be created)
+      - backend/tests/test_database.py (integration tests for database connection)
+      - backend/tests/test_health.py (tests for health endpoint)
+    </locations>
+    <ideas>
+      <test ac="1,2">Test database connection module: verify engine creation, session generation, environment variable loading, connection error handling</test>
+      <test ac="3,4,5,6">Test Alembic setup: verify alembic.ini exists, env.py imports SQLModel metadata, first migration applies successfully, downgrade/upgrade cycle works</test>
+      <test ac="7,8,9">Test health endpoint: GET /health returns 200 with database connected, returns error response when database unavailable, response format matches {"status": "healthy", "database": "connected"}</test>
+      <test ac="all">Integration test: start with Docker postgres running, create connection, apply migration, query alembic_version table, verify migration recorded</test>
+    </ideas>
+  </tests>
+</story-context>

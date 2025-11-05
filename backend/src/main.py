@@ -18,12 +18,23 @@ async def lifespan(_app: FastAPI):
 
     Replaces deprecated @app.on_event() decorators with modern lifespan pattern.
     Runs startup code on entry, shutdown code on exit.
+
+    Manages:
+    - Database connection pool lifecycle
+    - Future: Redis connection lifecycle
     """
     # Startup event
+    from src.core.database import engine
+
     print("✓ Application startup - Numerologist AI API running")
+    print("✓ Database connection pool initialized")
+
     yield
-    # Shutdown event
-    print("✓ Application shutdown")
+
+    # Shutdown event - cleanup resources
+    print("✓ Disposing database connection pool...")
+    engine.dispose()
+    print("✓ Application shutdown complete")
 
 
 # Initialize FastAPI application with lifespan
@@ -62,7 +73,33 @@ def health_check() -> dict:
     """
     Health check endpoint for monitoring and load balancers.
 
+    Tests the database connection and returns comprehensive health status.
+
     Returns:
-        dict: Health status
+        dict: Health status with database connectivity information
+
+    Example Response:
+        {"status": "healthy", "database": "connected"}
     """
-    return {"status": "healthy"}
+    from sqlmodel import Session, select, text
+    from src.core.database import engine
+
+    try:
+        # Test database connection with a simple query
+        with Session(engine) as session:
+            # Execute a simple SELECT to verify connection
+            session.exec(text("SELECT 1"))
+
+        return {"status": "healthy", "database": "connected"}
+
+    except Exception as e:
+        # Log the error for debugging (in production, use proper logging)
+        import logging
+        logging.error(f"Database health check failed: {str(e)}")
+
+        # Return error status
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": "Database connection failed"
+        }

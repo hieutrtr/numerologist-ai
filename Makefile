@@ -1,7 +1,7 @@
 # Numerologist AI - Development Makefile
 # This Makefile provides convenient commands for development workflow
 
-.PHONY: help dev backend mobile docker-up docker-down test clean
+.PHONY: help dev backend mobile docker-up docker-down test clean db-migrate db-upgrade db-downgrade db-current db-history db-revision
 
 # Default target
 help:
@@ -15,6 +15,14 @@ help:
 	@echo "  make docker-down   - Stop Docker containers"
 	@echo "  make test          - Run all tests (backend + mobile)"
 	@echo "  make clean         - Clean up generated files and caches"
+	@echo ""
+	@echo "Database Migration Commands:"
+	@echo "  make db-migrate       - Auto-generate migration from model changes"
+	@echo "  make db-upgrade       - Apply all pending migrations"
+	@echo "  make db-downgrade     - Rollback last migration"
+	@echo "  make db-current       - Show current migration version"
+	@echo "  make db-history       - Show migration history"
+	@echo "  make db-revision MSG='description' - Create empty migration"
 	@echo ""
 	@echo "Quick Start:"
 	@echo "  make dev           # Starts everything needed for development"
@@ -73,5 +81,42 @@ clean:
 	find . -type f -name ".pytest_cache" -delete
 	cd mobile && rm -rf node_modules/.cache 2>/dev/null || true
 	@echo "✅ Cleaned up successfully"
+
+# Database Migration Commands
+db-migrate:
+	@echo "🔄 Auto-generating migration from model changes..."
+	@if [ -z "$(MSG)" ]; then \
+		echo "❌ Error: MSG is required. Usage: make db-migrate MSG='description'"; \
+		exit 1; \
+	fi
+	cd backend && uv run alembic revision --autogenerate -m "$(MSG)"
+	@echo "✅ Migration created. Review the file before applying!"
+
+db-upgrade:
+	@echo "⬆️  Applying all pending migrations..."
+	cd backend && uv run alembic upgrade head
+	@echo "✅ Database is up to date"
+
+db-downgrade:
+	@echo "⬇️  Rolling back last migration..."
+	cd backend && uv run alembic downgrade -1
+	@echo "✅ Rolled back one migration"
+
+db-current:
+	@echo "📍 Current migration version:"
+	cd backend && uv run alembic current
+
+db-history:
+	@echo "📜 Migration history:"
+	cd backend && uv run alembic history
+
+db-revision:
+	@echo "📝 Creating empty migration..."
+	@if [ -z "$(MSG)" ]; then \
+		echo "❌ Error: MSG is required. Usage: make db-revision MSG='description'"; \
+		exit 1; \
+	fi
+	cd backend && uv run alembic revision -m "$(MSG)"
+	@echo "✅ Empty migration created"
 
 .DEFAULT_GOAL := help

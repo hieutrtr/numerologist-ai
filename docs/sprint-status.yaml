@@ -45,7 +45,7 @@ development_status:
   1-2-setup-backend-with-uv-fastapi: done
   1-3-setup-frontend-with-expo-typescript: done
   1-4-docker-compose-for-local-services: done
-  1-5-database-connection-first-migration: backlog
+  1-5-database-connection-first-migration: review
   1-6-frontend-api-service-setup: backlog
   1-7-makefile-development-workflow: backlog
   epic-1-retrospective: optional
