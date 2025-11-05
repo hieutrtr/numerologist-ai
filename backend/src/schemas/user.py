@@ -79,6 +79,36 @@ class UserCreate(BaseModel):
         return v
 
 
+class UserLogin(BaseModel):
+    """
+    Schema for user login request.
+
+    Accepts email and password for authentication.
+    Validation of credentials against the database is performed in the endpoint,
+    not at the schema level.
+
+    Attributes:
+        email: User's email address (validated format)
+        password: User's plain text password
+
+    Example:
+        {
+            "email": "user@example.com",
+            "password": "securepass123"
+        }
+    """
+
+    email: EmailStr = Field(
+        ...,
+        description="User's email address (must be valid format)"
+    )
+    password: str = Field(
+        ...,
+        min_length=1,
+        description="Password (authenticated against hashed password in database)"
+    )
+
+
 class UserResponse(BaseModel):
     """
     Schema for user data in API responses.

@@ -383,3 +383,326 @@ class TestUserRegistration:
         assert response.status_code == 201
         data = response.json()
         assert data["user"]["email"] == special_email_data["email"]
+
+
+class TestUserLogin:
+    """Test suite for user login endpoint."""
+
+    def test_login_with_valid_credentials(self, client: TestClient, session: Session):
+        """
+        Test successful login with valid credentials.
+
+        Verifies:
+        - 200 status code
+        - User data in response
+        - JWT token present
+        - Token type is 'bearer'
+        - User ID matches registered user
+        """
+        # Arrange - Create user first
+        registration_data = {
+            "email": "testuser@example.com",
+            "password": "securepass123",
+            "full_name": "Test User",
+            "birth_date": "1990-01-15"
+        }
+        register_response = client.post("/api/v1/auth/register", json=registration_data)
+        user_id = register_response.json()["user"]["id"]
+
+        # Act
+        login_data = {
+            "email": "testuser@example.com",
+            "password": "securepass123"
+        }
+        response = client.post("/api/v1/auth/login", json=login_data)
+
+        # Assert
+        assert response.status_code == 200
+        data = response.json()
+
+        # Check response structure
+        assert "user" in data
+        assert "access_token" in data
+        assert "token_type" in data
+        assert data["token_type"] == "bearer"
+
+        # Check user data matches
+        user_data = data["user"]
+        assert user_data["email"] == registration_data["email"]
+        assert user_data["full_name"] == registration_data["full_name"]
+        assert user_data["id"] == user_id
+
+    def test_login_with_non_existent_email(self, client: TestClient):
+        """
+        Test login with non-existent email returns 401 error.
+
+        Verifies:
+        - 401 status code
+        - Generic error message (doesn't reveal if email exists)
+        """
+        # Arrange
+        login_data = {
+            "email": "nonexistent@example.com",
+            "password": "somepassword123"
+        }
+
+        # Act
+        response = client.post("/api/v1/auth/login", json=login_data)
+
+        # Assert
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Invalid credentials"
+
+    def test_login_with_incorrect_password(self, client: TestClient):
+        """
+        Test login with incorrect password returns 401 error.
+
+        Verifies:
+        - 401 status code
+        - Same error message as non-existent email (security best practice)
+        """
+        # Arrange - Create user first
+        registration_data = {
+            "email": "testuser@example.com",
+            "password": "securepass123",
+            "full_name": "Test User",
+            "birth_date": "1990-01-15"
+        }
+        client.post("/api/v1/auth/register", json=registration_data)
+
+        # Act - Try to login with wrong password
+        login_data = {
+            "email": "testuser@example.com",
+            "password": "wrongpassword123"
+        }
+        response = client.post("/api/v1/auth/login", json=login_data)
+
+        # Assert
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Invalid credentials"
+
+    def test_login_with_invalid_email_format(self, client: TestClient):
+        """
+        Test login with invalid email format returns 422 validation error.
+
+        Verifies:
+        - 422 status code
+        - Validation error for email field
+        """
+        # Arrange
+        login_data = {
+            "email": "not-an-email",
+            "password": "password123"
+        }
+
+        # Act
+        response = client.post("/api/v1/auth/login", json=login_data)
+
+        # Assert
+        assert response.status_code == 422
+        errors = response.json()["detail"]
+        assert any(error["loc"] == ["body", "email"] for error in errors)
+
+    def test_login_with_missing_fields(self, client: TestClient):
+        """
+        Test login with missing required fields returns 422 error.
+
+        Verifies:
+        - 422 status code when email is missing
+        - 422 status code when password is missing
+        """
+        # Test missing email
+        response = client.post("/api/v1/auth/login", json={
+            "password": "password123"
+        })
+        assert response.status_code == 422
+
+        # Test missing password
+        response = client.post("/api/v1/auth/login", json={
+            "email": "user@example.com"
+        })
+        assert response.status_code == 422
+
+    def test_login_token_is_valid(self, client: TestClient):
+        """
+        Test that JWT token in login response is valid and contains user ID.
+
+        Verifies:
+        - Token can be successfully decoded
+        - Token contains 'sub' claim with user ID
+        - Token expiration is set
+        - Token structure matches registration token
+        """
+        # Arrange - Create user
+        registration_data = {
+            "email": "tokentest@example.com",
+            "password": "password123",
+            "full_name": "Token Test",
+            "birth_date": "1990-01-15"
+        }
+        register_response = client.post("/api/v1/auth/register", json=registration_data)
+        user_id = register_response.json()["user"]["id"]
+
+        # Act
+        login_data = {
+            "email": "tokentest@example.com",
+            "password": "password123"
+        }
+        response = client.post("/api/v1/auth/login", json=login_data)
+
+        # Assert
+        assert response.status_code == 200
+        data = response.json()
+        token = data["access_token"]
+
+        # Verify token can be decoded
+        payload = verify_access_token(token)
+        assert payload is not None
+        assert "sub" in payload  # User ID in 'sub' claim
+        assert "exp" in payload  # Expiration time set
+        assert payload["sub"] == user_id
+
+    def test_login_response_excludes_password(self, client: TestClient):
+        """
+        Test that API response does not include password fields.
+
+        Verifies:
+        - Response JSON does not contain 'hashed_password' key
+        - Response JSON does not contain 'password' key
+        - Security: prevents accidental password exposure
+        """
+        # Arrange - Create user
+        registration_data = {
+            "email": "security@example.com",
+            "password": "securepass123",
+            "full_name": "Security Test",
+            "birth_date": "1990-01-15"
+        }
+        client.post("/api/v1/auth/register", json=registration_data)
+
+        # Act
+        login_data = {
+            "email": "security@example.com",
+            "password": "securepass123"
+        }
+        response = client.post("/api/v1/auth/login", json=login_data)
+
+        # Assert
+        assert response.status_code == 200
+        data = response.json()
+        user_data = data["user"]
+
+        # Ensure no password fields in response
+        assert "password" not in user_data
+        assert "hashed_password" not in user_data
+
+    def test_login_case_insensitive_email(self, client: TestClient):
+        """
+        Test login with different email casing (case-insensitive lookup).
+
+        Verifies:
+        - Login works with uppercase email
+        - Login works with mixed case email
+        - Case-insensitive comparison finds registered user
+        """
+        # Arrange - Register with lowercase email
+        registration_data = {
+            "email": "testuser@example.com",
+            "password": "securepass123",
+            "full_name": "Test User",
+            "birth_date": "1990-01-15"
+        }
+        register_response = client.post("/api/v1/auth/register", json=registration_data)
+        user_id = register_response.json()["user"]["id"]
+
+        # Act - Login with uppercase email
+        login_data_uppercase = {
+            "email": "TESTUSER@EXAMPLE.COM",
+            "password": "securepass123"
+        }
+        response = client.post("/api/v1/auth/login", json=login_data_uppercase)
+
+        # Assert
+        assert response.status_code == 200
+        assert response.json()["user"]["id"] == user_id
+
+        # Act - Login with mixed case email
+        login_data_mixed = {
+            "email": "TestUser@Example.Com",
+            "password": "securepass123"
+        }
+        response = client.post("/api/v1/auth/login", json=login_data_mixed)
+
+        # Assert
+        assert response.status_code == 200
+        assert response.json()["user"]["id"] == user_id
+
+    def test_login_response_format_matches_registration(self, client: TestClient):
+        """
+        Test that login response format matches registration response format.
+
+        Verifies response consistency for user data structure across endpoints.
+        """
+        # Arrange - Register user
+        registration_data = {
+            "email": "formattest@example.com",
+            "password": "password123",
+            "full_name": "Format Test",
+            "birth_date": "1990-01-15"
+        }
+        register_response = client.post("/api/v1/auth/register", json=registration_data)
+        register_data = register_response.json()
+
+        # Act - Login with same user
+        login_data = {
+            "email": "formattest@example.com",
+            "password": "password123"
+        }
+        login_response = client.post("/api/v1/auth/login", json=login_data)
+        login_data = login_response.json()
+
+        # Assert - Response structure identical
+        assert "user" in register_data and "user" in login_data
+        assert "access_token" in register_data and "access_token" in login_data
+        assert "token_type" in register_data and "token_type" in login_data
+
+        # User fields should match
+        reg_user = register_data["user"]
+        login_user = login_data["user"]
+        assert set(reg_user.keys()) == set(login_user.keys())
+
+    def test_login_error_message_consistency(self, client: TestClient):
+        """
+        Test that login error messages don't reveal if email exists.
+
+        Verifies security best practice:
+        - Same error message for "user not found" and "wrong password"
+        - Prevents email enumeration attacks
+        """
+        # Arrange - Create one user
+        registration_data = {
+            "email": "existing@example.com",
+            "password": "password123",
+            "full_name": "Existing User",
+            "birth_date": "1990-01-15"
+        }
+        client.post("/api/v1/auth/register", json=registration_data)
+
+        # Act & Assert - Non-existent email error
+        response1 = client.post("/api/v1/auth/login", json={
+            "email": "nonexistent@example.com",
+            "password": "anypassword"
+        })
+        assert response1.status_code == 401
+        error1 = response1.json()["detail"]
+
+        # Act & Assert - Existing email, wrong password error
+        response2 = client.post("/api/v1/auth/login", json={
+            "email": "existing@example.com",
+            "password": "wrongpassword"
+        })
+        assert response2.status_code == 401
+        error2 = response2.json()["detail"]
+
+        # Assert - Same error message (security best practice)
+        assert error1 == error2 == "Invalid credentials"
