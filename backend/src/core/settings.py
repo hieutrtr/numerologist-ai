@@ -121,6 +121,27 @@ class Settings(BaseSettings):
     """TCP keepalive socket options for Redis connections."""
 
     # =====================================================================
+    # JWT AUTHENTICATION
+    # =====================================================================
+    jwt_secret: str = "dev-secret-change-in-production-MUST-BE-SECURE"
+    """
+    Secret key for JWT token signing and verification.
+
+    ⚠️  CRITICAL: MUST be changed in production via environment variable!
+
+    Requirements:
+    - Minimum 32 characters
+    - Use cryptographically random string
+    - Never commit production secret to version control
+    - Rotate periodically for security
+
+    Environment variable: JWT_SECRET
+
+    Generate secure secret:
+        python -c "import secrets; print(secrets.token_urlsafe(32))"
+    """
+
+    # =====================================================================
     # CORS & SECURITY
     # =====================================================================
     cors_origins: list[str] = ["*"]
