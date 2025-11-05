@@ -1,0 +1,229 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>1</storyId>
+    <title>User Model & Database Schema</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-1-user-model-database-schema.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>a User database model with all required fields</iWant>
+    <soThat>I can store user information securely</soThat>
+    <tasks>
+      <task id="1" mapped="AC1,AC2,AC4">Create User Model File</task>
+      <task id="2" mapped="AC5">Register Model with Alembic</task>
+      <task id="3" mapped="AC6">Generate Alembic Migration</task>
+      <task id="4" mapped="AC7">Apply Migration to Database</task>
+      <task id="5" mapped="AC8">Verify Database Table Creation</task>
+      <task id="6" mapped="AC10">Test Model CRUD Operations</task>
+      <task id="7" mapped="AC9">Validation Testing</task>
+      <task id="8" mapped="All">Documentation and Code Comments</task>
+      <task id="9" mapped="AC6,AC7">Rollback Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criteria id="AC1" title="User Model Created with SQLModel">
+      <item>File `backend/src/models/user.py` exists</item>
+      <item>`User` class defined inheriting from `SQLModel` with `table=True`</item>
+      <item>Model uses proper SQLModel field declarations</item>
+      <item>All type hints are correct and use Python 3.11+ syntax</item>
+    </criteria>
+    <criteria id="AC2" title="Required Fields Defined">
+      <item>`id: UUID` with `default_factory=uuid4` and `primary_key=True`</item>
+      <item>`email: str` with `unique=True` and `index=True`</item>
+      <item>`hashed_password: str | None = None` (nullable for OAuth users, no unique constraint)</item>
+      <item>`full_name: str` (user's display name)</item>
+      <item>`birth_date: date` (required for numerology calculations)</item>
+      <item>`created_at: datetime` with `default_factory=datetime.utcnow`</item>
+      <item>`updated_at: datetime` with `default_factory=datetime.utcnow`</item>
+      <item>`is_active: bool` with `default=True`</item>
+    </criteria>
+    <criteria id="AC3" title="Database Constraints and Indexes">
+      <item>Email field has `UNIQUE` constraint</item>
+      <item>Email field has database index for fast lookups</item>
+      <item>Primary key on `id` field</item>
+      <item>No password field accepts plain text (only hashed_password)</item>
+      <item>hashed_password is nullable (NULL for OAuth users without passwords)</item>
+    </criteria>
+    <criteria id="AC4" title="Model Imports and Dependencies">
+      <item>SQLModel imported from sqlmodel</item>
+      <item>UUID and uuid4 imported from uuid</item>
+      <item>date and datetime imported from datetime</item>
+      <item>Field imported from sqlmodel for field configuration</item>
+      <item>All imports follow project conventions</item>
+    </criteria>
+    <criteria id="AC5" title="Model Registered with Alembic">
+      <item>User model imported in `backend/src/models/__init__.py`</item>
+      <item>Model discoverable by Alembic auto-generation</item>
+      <item>No circular import issues</item>
+    </criteria>
+    <criteria id="AC6" title="Alembic Migration Generated">
+      <item>Alembic migration created using `alembic revision --autogenerate -m "create users table"`</item>
+      <item>Migration file exists in `backend/alembic/versions/`</item>
+      <item>Migration file contains `create_table('user')` operation</item>
+      <item>All fields present in migration</item>
+      <item>Unique constraint on email in migration</item>
+      <item>Index on email in migration</item>
+    </criteria>
+    <criteria id="AC7" title="Migration Applied Successfully">
+      <item>`alembic upgrade head` executes without errors</item>
+      <item>Database connection successful during migration</item>
+      <item>Migration shows as current version in `alembic_version` table</item>
+      <item>`alembic current` shows the new migration</item>
+    </criteria>
+    <criteria id="AC8" title="Database Table Verification">
+      <item>Can connect to PostgreSQL: `psql $DATABASE_URL`</item>
+      <item>`\dt` command shows `user` table</item>
+      <item>`\d user` shows correct columns and types</item>
+      <item>Email column has unique index</item>
+      <item>Primary key constraint on id column</item>
+    </criteria>
+    <criteria id="AC9" title="Model Validation and Constraints">
+      <item>Pydantic validation works (SQLModel uses Pydantic)</item>
+      <item>Email validation ensures proper email format</item>
+      <item>Birth date validation prevents future dates</item>
+      <item>Created_at and updated_at automatically set on creation</item>
+      <item>is_active defaults to True</item>
+    </criteria>
+    <criteria id="AC10" title="Integration with Core Database Module">
+      <item>User model can be queried using get_session() dependency</item>
+      <item>Can create user: `session.add(user); session.commit()`</item>
+      <item>Can query user: `session.exec(select(User).where(User.email == email)).first()`</item>
+      <item>Database session management works correctly</item>
+    </criteria>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/epics.md" title="Epics - Epic 2" section="Story 2.1">
+        Story 2.1 defines the User model requirements: id (UUID primary key), email (unique, indexed), hashed_password, full_name, birth_date, created_at, updated_at, is_active. Model must use SQLModel with table=True, be registered in models/__init__.py for Alembic discovery, generate migration, and create users table in PostgreSQL.
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Database Models - User">
+        Architecture specifies exact User model structure with 8 fields. UUID primary key prevents enumeration attacks. Email unique and indexed for fast login. Only hashed_password stored (never plain text). birth_date required for numerology. Soft delete via is_active flag. Timestamps in UTC. Future relationships: numerology_profile (1:1), conversations (1:many).
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Naming Conventions">
+        Tables: snake_case singular. Columns: snake_case. Booleans: is_* prefix. Timestamps: *_at suffix. Foreign keys: {table}_id. Python: Classes PascalCase, functions snake_case, constants UPPER_SNAKE_CASE.
+      </doc>
+      <doc path="docs/stories/1-5-database-connection-first-migration.md" title="Story 1.5 (Prerequisites)" section="Database Setup">
+        Story 1.5 established database connection using settings.DATABASE_URL, created SQLModel engine with connection pooling, implemented get_session() dependency for FastAPI, configured Alembic for migrations, created initial_setup migration. This story builds on that foundation.
+      </doc>
+      <doc path="docs/stories/1-7-makefile-development-workflow.md" title="Story 1.7 (Prerequisites)" section="Database Commands">
+        Story 1.7 created make db-* commands: db-migrate MSG="desc" (generate migration), db-upgrade (apply), db-downgrade (rollback), db-current (show version), db-history (list migrations). Use these commands instead of raw alembic commands for consistency.
+      </doc>
+    </docs>
+    <code>
+      <artifact path="backend/src/core/database.py" kind="python" symbol="get_session" lines="30-52" reason="Existing database session dependency that User model will use for CRUD operations">
+        Provides SQLModel Session via dependency injection for FastAPI routes. Creates engine with connection pooling from settings.database_url. Implements automatic commit on success and rollback on exceptions. Will be used in Task 6 to test User model CRUD operations.
+      </artifact>
+      <artifact path="backend/src/core/settings.py" kind="python" symbol="Settings" lines="22-192" reason="Centralized configuration including DATABASE_URL and connection pool settings">
+        Pydantic Settings class providing all app configuration. DATABASE_URL defaults to postgresql://postgres:password@localhost:5432/numerologist. Connection pool config: pool_size=5, max_overflow=10, pool_pre_ping=True. User model depends on this for database connection.
+      </artifact>
+      <artifact path="backend/alembic/env.py" kind="python" symbol="target_metadata" lines="26-31" reason="Alembic configuration showing how to register models for auto-discovery">
+        Sets target_metadata = SQLModel.metadata for autogenerate support. Currently has commented-out import statements for models (lines 29-30). User model must be imported here for Alembic to detect it: "from src.models.user import User".
+      </artifact>
+      <artifact path="backend/src/models/__init__.py" kind="python" symbol="N/A" lines="N/A" reason="Models package init file - DOES NOT EXIST YET, will be created in Task 2">
+        This file will be created to import and export User model for Alembic auto-discovery. Must contain: "from src.models.user import User" and "__all__ = ['User']". Critical for migration generation.
+      </artifact>
+      <artifact path="backend/src/models/user.py" kind="python" symbol="User" lines="N/A" reason="User model file - TO BE CREATED in Task 1">
+        Will define User(SQLModel, table=True) class with 8 fields: id (UUID), email (str, unique, indexed), hashed_password (str | None, nullable for OAuth), full_name (str), birth_date (date), created_at (datetime), updated_at (datetime), is_active (bool). OAuth users will have NULL password and authenticate via separate OAuthAccount table (Story 2.11).
+      </artifact>
+      <artifact path="backend/alembic/versions/99432e13f543_initial_setup.py" kind="python" symbol="upgrade/downgrade" lines="N/A" reason="Existing initial migration - new user table migration will come after this">
+        First migration (initial_setup) from Story 1.5. New migration generated in Task 3 will have down_revision pointing to this migration (99432e13f543). Provides migration chain context.
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <runtime>
+          <package name="sqlmodel" version=">=0.0.14" />
+          <package name="alembic" version=">=1.13.0" />
+          <package name="pydantic" version=">=2.5.0" />
+          <package name="pydantic-settings" version=">=2.1.0" />
+          <package name="psycopg2-binary" version=">=2.9.0" />
+          <package name="uuid" version="builtin" />
+        </runtime>
+        <dev>
+          <package name="pytest" version=">=7.4.0" />
+        </dev>
+      </python>
+      <system>
+        <tool name="postgresql" version="18+" purpose="Database server for user table storage" />
+        <tool name="docker" purpose="Run PostgreSQL container locally" />
+        <tool name="alembic" purpose="Database migration tool" />
+        <tool name="make" purpose="Run db-* commands (db-migrate, db-upgrade, etc.)" />
+      </system>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint category="model_structure">User model MUST inherit from SQLModel with table=True parameter for ORM table mapping</constraint>
+    <constraint category="naming">Table name MUST be 'user' (singular, snake_case). Column names MUST be snake_case. Boolean fields MUST use is_* prefix</constraint>
+    <constraint category="security">NEVER store plain text passwords. Only hashed_password field allowed. Use bcrypt hashing (Story 2.2 will implement). hashed_password is NULLABLE for OAuth users who authenticate via Google/Apple (Story 2.11)</constraint>
+    <constraint category="data_types">id MUST be UUID (not integer) for security. birth_date MUST be date (not datetime) for numerology calculations. Timestamps MUST use datetime.utcnow() for UTC consistency</constraint>
+    <constraint category="constraints">Email MUST have unique constraint AND database index. Primary key on id field. No null values on required fields</constraint>
+    <constraint category="alembic_registration">User model MUST be imported in src/models/__init__.py for Alembic auto-discovery. Without this, migration generation will fail</constraint>
+    <constraint category="migration_reversibility">All migrations MUST be reversible. downgrade() function must drop what upgrade() creates</constraint>
+    <constraint category="testing">Test migration forward (upgrade) AND backward (downgrade). Test unique email constraint actually works (duplicate insert fails)</constraint>
+    <constraint category="imports">Use Python 3.11+ syntax. Import from correct modules: UUID/uuid4 from uuid, date/datetime from datetime, SQLModel/Field from sqlmodel</constraint>
+    <constraint category="soft_delete">Use is_active=False for soft delete (preserves data). Hard delete will be implemented later (Story 7.3 GDPR)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="get_session" kind="function">
+      <signature>def get_session() -> Generator[Session, None, None]</signature>
+      <description>FastAPI dependency for database session injection. Yields SQLModel Session with auto-commit/rollback. Use as: def endpoint(session: Session = Depends(get_session))</description>
+      <path>backend/src/core/database.py</path>
+    </interface>
+    <interface name="User.__tablename__" kind="attribute">
+      <signature>__tablename__ = "user"</signature>
+      <description>SQLModel automatically sets table name based on class name lowercased. User class creates 'user' table</description>
+      <path>backend/src/models/user.py</path>
+    </interface>
+    <interface name="alembic revision" kind="command">
+      <signature>alembic revision --autogenerate -m "create users table"</signature>
+      <description>Generates migration by comparing SQLModel metadata to current database schema. Prefers: make db-migrate MSG="create users table"</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="alembic upgrade" kind="command">
+      <signature>alembic upgrade head</signature>
+      <description>Applies all pending migrations to database. Prefers: make db-upgrade</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="alembic downgrade" kind="command">
+      <signature>alembic downgrade -1</signature>
+      <description>Rolls back last applied migration. Prefers: make db-downgrade</description>
+      <path>Makefile</path>
+    </interface>
+    <interface name="alembic current" kind="command">
+      <signature>alembic current</signature>
+      <description>Shows currently applied migration version. Prefers: make db-current</description>
+      <path>Makefile</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Backend testing uses pytest framework (version >=7.4.0). Tests located in backend/tests/ directory. Database tests should use test database (not production). Migration tests verify both upgrade and downgrade work. Model tests verify field defaults, constraints, and validation. Use fixtures for database session and test data setup.
+    </standards>
+    <locations>
+      <location>backend/tests/</location>
+      <location>backend/tests/models/</location>
+    </locations>
+    <ideas>
+      <test ac="AC1,AC2,AC4" description="Create User model instance, verify all fields have correct types and defaults. Check id auto-generated, created_at/updated_at set, is_active=True">Test User model instantiation and defaults</test>
+      <test ac="AC5" description="Import User from src.models, verify __tablename__ attribute exists and equals 'user'">Test User model registration and table name</test>
+      <test ac="AC6" description="Run alembic autogenerate, verify migration file created with create_table('user') and all 8 columns">Test migration generation</test>
+      <test ac="AC7" description="Run alembic upgrade head, check alembic_version table, verify migration applied successfully">Test migration application</test>
+      <test ac="AC8" description="Query database schema, verify user table exists with correct columns, types, constraints, and indexes">Test database table structure</test>
+      <test ac="AC3,AC10" description="Insert user, try inserting duplicate email (should fail), query by email, verify unique constraint works">Test email uniqueness constraint</test>
+      <test ac="AC9" description="Create User with invalid email format, verify Pydantic validation fails. Test missing required fields">Test model validation</test>
+      <test ac="AC6,AC7" description="Run downgrade -1, verify table dropped. Run upgrade head, verify table recreated">Test migration reversibility</test>
+      <test ac="AC10" description="Use get_session() to create, query, update user. Verify session commit/rollback works">Test CRUD operations with database session</test>
+      <test ac="All" description="Full integration: Generate migration, apply, insert user, query, verify, rollback migration, verify table gone">End-to-end migration and model integration test</test>
+    </ideas>
+  </tests>
+</story-context>

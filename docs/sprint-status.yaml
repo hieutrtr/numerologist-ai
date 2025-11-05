@@ -54,7 +54,7 @@ development_status:
   # EPIC 2: User Authentication & Profile
   # ============================================================================
   epic-2: backlog
-  2-1-user-model-database-schema: backlog
+  2-1-user-model-database-schema: ready-for-dev
   2-2-password-hashing-security-utilities: backlog
   2-3-user-registration-api-endpoint: backlog
   2-4-user-login-api-endpoint: backlog
@@ -64,6 +64,7 @@ development_status:
   2-8-register-screen-ui: backlog
   2-9-profile-screen-ui: backlog
   2-10-auth-navigation-flow: backlog
+  2-11-oauth-account-model-google-signin: drafted
   epic-2-retrospective: optional
 
   # ============================================================================
@@ -153,7 +154,7 @@ development_status:
 #
 # Epic Breakdown:
 #   - Epic 1: 7 stories (Foundation)
-#   - Epic 2: 10 stories (Authentication)
+#   - Epic 2: 11 stories (Authentication + OAuth)
 #   - Epic 3: 10 stories (Voice)
 #   - Epic 4: 7 stories (Numerology)
 #   - Epic 5: 6 stories (History)
