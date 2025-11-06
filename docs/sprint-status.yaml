@@ -62,7 +62,7 @@ development_status:
   2-6-frontend-auth-state-management-zustand: done
   2-7-login-screen-ui: review
   2-8-register-screen-ui: done
-  2-9-profile-screen-ui: review
+  2-9-profile-screen-ui: done
   2-10-auth-navigation-flow: backlog
   2-11-oauth-account-model-google-signin: drafted
   epic-2-retrospective: optional
