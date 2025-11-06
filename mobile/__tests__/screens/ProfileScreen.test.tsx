@@ -35,6 +35,9 @@ jest.mock('@expo/vector-icons', () => ({
   MaterialIcons: () => <div testID="material-icon" />,
 }));
 
+// Note: We use Intl.DateTimeFormat for date formatting (native API, no external dependency)
+// This produces the same format as date-fns: "Month Day, Year" (e.g., "May 15, 1990")
+
 describe('ProfileScreen', () => {
   let mockLogout: jest.Mock;
   let mockRouter: any;

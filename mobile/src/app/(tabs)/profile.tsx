@@ -10,7 +10,6 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { format } from 'date-fns';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { User } from '@/types/user.types';
 
@@ -44,6 +43,7 @@ export default function ProfileScreen() {
   /**
    * Format birth date from ISO string to readable format
    * Example: "1990-05-15" → "May 15, 1990"
+   * Uses native JavaScript Intl.DateTimeFormat for cross-platform compatibility
    */
   const getFormattedBirthDate = (birthDateStr: string): string => {
     try {
@@ -58,8 +58,14 @@ export default function ProfileScreen() {
         return 'Invalid date';
       }
 
-      // Format using date-fns
-      return format(date, 'MMMM d, yyyy');
+      // Format using native Intl.DateTimeFormat (no external dependency)
+      // Works cross-platform: Web, iOS, Android
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      return formatter.format(date);
     } catch (err) {
       return 'Error formatting date';
     }
