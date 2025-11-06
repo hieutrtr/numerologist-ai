@@ -1,9 +1,77 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { apiClient } from '../services/api';
 import { User, RegisterData, AuthResponse, AuthState } from '../types/user.types';
 
 const AUTH_TOKEN_KEY = 'auth_token';
+
+/**
+ * Platform-aware token storage
+ * - On native (iOS/Android): Uses SecureStore for encrypted storage
+ * - On web: Uses localStorage (web secure context should use HTTPS)
+ */
+const tokenStorage = {
+  async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      // On web, use localStorage (in production, use HTTPS)
+      try {
+        localStorage.setItem(key, value);
+      } catch (error) {
+        console.error('Error storing token in localStorage:', error);
+        throw error;
+      }
+    } else {
+      // On native platforms, use SecureStore
+      try {
+        await SecureStore.setItemAsync(key, value);
+      } catch (error) {
+        console.error('Error storing token in SecureStore:', error);
+        throw error;
+      }
+    }
+  },
+
+  async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') {
+      // On web, use localStorage
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        console.error('Error retrieving token from localStorage:', error);
+        return null;
+      }
+    } else {
+      // On native platforms, use SecureStore
+      try {
+        return await SecureStore.getItemAsync(key);
+      } catch (error) {
+        console.error('Error retrieving token from SecureStore:', error);
+        return null;
+      }
+    }
+  },
+
+  async removeItem(key: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      // On web, use localStorage
+      try {
+        localStorage.removeItem(key);
+      } catch (error) {
+        console.error('Error removing token from localStorage:', error);
+        throw error;
+      }
+    } else {
+      // On native platforms, use SecureStore
+      try {
+        await SecureStore.deleteItemAsync(key);
+      } catch (error) {
+        console.error('Error removing token from SecureStore:', error);
+        throw error;
+      }
+    }
+  },
+};
 
 /**
  * Zustand auth store for managing user authentication state and token persistence
@@ -40,8 +108,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const { user, access_token } = response.data;
 
-      // Store token in SecureStore (encrypted)
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, access_token);
+      // Store token (platform-aware: SecureStore on native, localStorage on web)
+      await tokenStorage.setItem(AUTH_TOKEN_KEY, access_token);
 
       // Update store state
       set({
@@ -66,8 +134,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const { user, access_token } = response.data;
 
-      // Store token in SecureStore (encrypted)
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, access_token);
+      // Store token (platform-aware: SecureStore on native, localStorage on web)
+      await tokenStorage.setItem(AUTH_TOKEN_KEY, access_token);
 
       // Update store state
       set({
@@ -85,12 +153,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Logout action: clear authentication state and delete token
   logout: async () => {
     try {
-      // Delete token from SecureStore
-      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+      // Delete token (platform-aware: SecureStore on native, localStorage on web)
+      await tokenStorage.removeItem(AUTH_TOKEN_KEY);
     } catch (error) {
       // Log error but don't throw - logout should always succeed
       if (__DEV__) {
-        console.error('Error deleting token from SecureStore:', error);
+        console.error('Error deleting token from storage:', error);
       }
 
       // In production, consider sending to error tracking service (e.g., Sentry)
@@ -98,7 +166,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // This ensures storage cleanup failures don't go unnoticed in production
     }
 
-    // Reset store state (always happens regardless of SecureStore errors)
+    // Reset store state (always happens regardless of storage errors)
     set({
       user: null,
       token: null,
@@ -110,8 +178,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // CheckAuth action: validate token on app load or after app resume
   checkAuth: async () => {
     try {
-      // Retrieve token from SecureStore
-      const storedToken = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      // Retrieve token (platform-aware: SecureStore on native, localStorage on web)
+      const storedToken = await tokenStorage.getItem(AUTH_TOKEN_KEY);
 
       // If no token exists, mark loading as false and return early
       if (!storedToken) {
@@ -141,9 +209,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       } catch (error) {
         // Token validation failed (likely 401)
-        // Delete invalid token from SecureStore
+        // Delete invalid token from storage
         try {
-          await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+          await tokenStorage.removeItem(AUTH_TOKEN_KEY);
         } catch (deleteError) {
           if (__DEV__) {
             console.error('Error deleting invalid token:', deleteError);
