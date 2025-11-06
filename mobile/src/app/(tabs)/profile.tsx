@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -34,9 +34,32 @@ export default function ProfileScreen() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auth store and router
-  const { user, logout } = useAuthStore();
+  // Auth store and router - get ALL store properties for debugging
+  const authStore = useAuthStore();
+  const { user, logout, isAuthenticated, token } = authStore;
   const router = useRouter();
+
+  // Debug logging to understand why user might be null
+  useEffect(() => {
+    if (__DEV__) {
+      console.log('🔍 ProfileScreen mounted/updated:', {
+        userExists: !!user,
+        isAuthenticated,
+        hasToken: !!token,
+        userId: user?.id,
+        userEmail: user?.email,
+        fullName: user?.full_name,
+        birthDate: user?.birth_date,
+        // Log the entire store state
+        fullAuthState: {
+          user: authStore.user,
+          isAuthenticated: authStore.isAuthenticated,
+          isLoading: authStore.isLoading,
+          tokenLength: authStore.token?.length,
+        },
+      });
+    }
+  }, [user, isAuthenticated, token, authStore]);
 
   /**
    * Format birth date from ISO string to readable format
@@ -137,6 +160,15 @@ export default function ProfileScreen() {
 
   // Handle case where user data is missing
   if (!user) {
+    // Additional debug info when user is missing
+    if (__DEV__) {
+      console.warn('⚠️ User is null in ProfileScreen, but:', {
+        isAuthenticated,
+        hasToken: !!token,
+        tokenLength: token?.length,
+      });
+    }
+
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView
@@ -147,6 +179,12 @@ export default function ProfileScreen() {
             <Text style={styles.errorText}>
               Unable to load profile data. Please try logging out and back in.
             </Text>
+            {/* Debug info in dev mode */}
+            {__DEV__ && (
+              <Text style={styles.debugText}>
+                Debug: Auth={String(isAuthenticated)}, Token={!!token ? 'Yes' : 'No'}
+              </Text>
+            )}
             <TouchableOpacity
               style={styles.retryButton}
               onPress={handleLogout}
@@ -353,5 +391,13 @@ const styles = StyleSheet.create({
   // Footer Spacing
   footerSpacer: {
     height: 20,
+  },
+
+  // Debug styles
+  debugText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });

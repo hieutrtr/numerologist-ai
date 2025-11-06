@@ -106,11 +106,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password,
       });
 
+      // Debug: Log raw response to understand structure
+      if (__DEV__) {
+        console.log('📦 Raw login response:', {
+          hasData: !!response.data,
+          dataKeys: response.data ? Object.keys(response.data) : [],
+          fullResponse: response.data,
+        });
+      }
+
       const { user, access_token } = response.data;
 
       // Debug logging for development
       if (__DEV__) {
         console.log('🔐 Login successful:', {
+          userObject: user,  // Log full user object
           userId: user?.id,
           email: user?.email,
           tokenLength: access_token?.length,
