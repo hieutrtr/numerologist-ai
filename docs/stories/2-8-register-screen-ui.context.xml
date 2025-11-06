@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="2-8-register-screen-ui" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>8</storyId>
+    <title>Register Screen UI</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-06</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-8-register-screen-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>new user</asA>
+    <iWant>a registration screen with all required fields</iWant>
+    <soThat>I can create an account</soThat>
+    <tasks>
+      <task n="1" goal="Update Register Screen Component Structure (AC: #1)">
+        - Open existing mobile/src/app/(auth)/register.tsx (placeholder created in Story 2.7)
+        - Import required React Native components: View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator
+        - Import useAuthStore from stores
+        - Import Link and useRouter from expo-router
+        - Set up component state: email, password, confirmPassword, fullName, birthDate, error, showPassword, showConfirmPassword
+      </task>
+      <task n="2" goal="Implement Form Input Fields (AC: #2)">
+        - Create form layout with title "Create Account"
+        - Add Full Name TextInput with autoCapitalize="words", autoComplete="name"
+        - Add Email TextInput with keyboardType="email-address", autoCapitalize="none", autoComplete="email"
+        - Add Password TextInput with secureTextEntry={!showPassword}
+        - Add Confirm Password TextInput with secureTextEntry={!showConfirmPassword}
+        - Add Birth Date input (Task 3 handles the picker implementation)
+      </task>
+      <task n="3" goal="Implement Birth Date Picker (AC: #3)">
+        - Install @react-native-community/datetimepicker if not present
+        - Import DateTimePicker from @react-native-community/datetimepicker
+        - Add state for showDatePicker (boolean, default false)
+        - Create TouchableOpacity button to show date picker
+        - Display selected date in readable format (e.g., "May 15, 1990")
+        - On mobile: Show native DateTimePicker modal when button pressed
+        - On web: Use HTML date input type (Platform.OS === 'web' conditional)
+        - Set maximum date to today (prevent future dates)
+        - Handle date selection and update birthDate state
+        - Format date for display using date-fns or toLocaleDateString()
+      </task>
+      <task n="4" goal="Implement Show/Hide Password Toggles (AC: #2)">
+        - Add state for showPassword (boolean, default false)
+        - Add state for showConfirmPassword (boolean, default false)
+        - Add touchable icon/button next to password field
+        - Add touchable icon/button next to confirm password field
+        - Toggle showPassword state on password icon press
+        - Toggle showConfirmPassword state on confirm password icon press
+        - Update TextInput secureTextEntry based on respective states
+        - Use MaterialIcons visibility/visibility-off from @expo/vector-icons
+      </task>
+      <task n="5" goal="Implement Form Validation (AC: #10)">
+        - Create validateEmail function with regex pattern
+        - Create validatePassword function (min 8 characters)
+        - Create validatePasswordMatch function (password === confirmPassword)
+        - Create validateFullName function (not empty, trim whitespace)
+        - Create validateBirthDate function (valid date, not in future, reasonable age range)
+        - Create overall validateForm function that runs all validations
+        - Show inline validation errors for each field
+        - Disable register button if any validation fails
+        - Clear field-specific error when user modifies that field
+      </task>
+      <task n="6" goal="Implement Registration Action (AC: #5, #6, #7, #8)">
+        - Get register and isLoading from useAuthStore
+        - Create handleRegister async function
+        - Clear any previous error messages
+        - Run validateForm() before calling API
+        - If validation fails, show appropriate error and return early
+        - Format birth date to ISO string (YYYY-MM-DD) for API
+        - Call await register(email, password, fullName, birthDate) in try-catch block
+        - On success, use router.replace('/') to navigate to home (user auto-logged in)
+        - On error, catch exception and display user-friendly error message
+        - Handle specific errors: email already exists, network errors, validation errors
+        - Show loading state while isLoading is true
+      </task>
+      <task n="7" goal="Implement Loading State UI (AC: #6)">
+        - Disable register button while isLoading is true
+        - Show ActivityIndicator in button during loading
+        - Disable all text inputs while loading (editable={!isLoading})
+        - Change button text or show spinner to indicate progress
+      </task>
+      <task n="8" goal="Implement Error Display (AC: #7)">
+        - Add error state variable (string or null)
+        - Display error message in red container above form
+        - Clear error when user starts typing in any field
+        - Style error message for visibility and accessibility
+        - Handle specific error types: "Email already exists", network errors, validation errors
+      </task>
+      <task n="9" goal="Add Navigation to Login Screen (AC: #9)">
+        - Add "Already have an account? Login" text below register button
+        - Make "Login" text a Link to /(auth)/login route
+        - Style link to be clearly tappable (blue color, centered)
+        - Test navigation between register and login screens
+      </task>
+      <task n="10" goal="Keyboard Handling and Scrolling (AC: #2, #10)">
+        - Wrap form in ScrollView for long forms that exceed screen height
+        - Wrap ScrollView in KeyboardAvoidingView with behavior="padding" (iOS) or "height" (Android)
+        - Set returnKeyType for each field: "next" for all except last
+        - Set returnKeyType="done" for last field (birth date or confirm password)
+        - Add onSubmitEditing to each field to focus next field
+        - Add onSubmitEditing to last field to trigger registration
+        - Ensure keyboard dismisses on register button press (Keyboard.dismiss())
+        - Test scrolling behavior when keyboard is visible
+      </task>
+      <task n="11" goal="Styling and Polish (AC: all)">
+        - Create StyleSheet with consistent spacing and layout
+        - Use React Native StyleSheet for performance
+        - Ensure design works on various screen sizes (responsive spacing)
+        - Add appropriate padding and margins between fields
+        - Style input fields with borders and focus states
+        - Style button with primary color and disabled state
+        - Style date picker button to look like other inputs
+        - Ensure text is readable (sufficient contrast)
+        - Add SafeAreaView for mobile to avoid notch/status bar
+        - Match visual style with login screen for consistency
+      </task>
+      <task n="12" goal="Integration Testing (AC: all)">
+        - Test successful registration: fill all fields → register → navigate to home
+        - Test failed registration: email exists → error message displayed
+        - Test email validation: invalid email → error shown
+        - Test password validation: too short → error shown
+        - Test password confirmation: passwords don't match → error shown
+        - Test full name validation: empty field → error shown
+        - Test birth date validation: future date → error shown
+        - Test loading state: button disabled, spinner shown
+        - Test keyboard interactions: tab between fields, submit on done
+        - Test navigation: Login link works
+        - Test show/hide password toggles for both password fields
+        - Test date picker: native picker on mobile, HTML input on web
+        - Test on web platform
+        - Test on mobile platform (iOS/Android simulator)
+        - Verify integration with useAuthStore.register() from Story 2.6
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Register screen component created in mobile/src/app/(auth)/register.tsx</criterion>
+    <criterion id="2">Form fields: Email, Password, Confirm Password, Full Name, Birth Date</criterion>
+    <criterion id="3">Birth date picker uses native date picker on mobile, HTML input on web</criterion>
+    <criterion id="4">Password confirmation validation - must match password field</criterion>
+    <criterion id="5">"Register" button calls useAuthStore.register()</criterion>
+    <criterion id="6">Shows loading state while registering</criterion>
+    <criterion id="7">Displays error message if registration fails (e.g., email already exists)</criterion>
+    <criterion id="8">On success, navigates to home screen (user auto-logged in)</criterion>
+    <criterion id="9">"Already have an account? Login" link to login screen</criterion>
+    <criterion id="10">Form validation before submission: email format, password min 8 chars, full name not empty, birth date valid and not in future</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>API Contracts (lines 991-1053)</section>
+        <snippet>POST /api/v1/auth/register endpoint with request/response schema. Request: { email, password, full_name, birth_date }. Response: { user, access_token, token_type, expires_in }.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Frontend Component Organization (lines 686-732)</section>
+        <snippet>Standard component structure: Imports → Types → Component → Hooks → Effects → Handlers → Render → Styles. Follow this pattern for register component.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Frontend Styling Patterns (lines 783-856)</section>
+        <snippet>Use React Native StyleSheet.create() for performance. Color palette: primary #007AFF, errors #FF3B30, borders #E0E0E0, backgrounds #fff/#f9f9f9. Minimum touch targets 50px.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Naming Conventions (lines 625-647)</section>
+        <snippet>Components: PascalCase.tsx, Utilities: camelCase.ts, Hooks: useCamelCase, Types: PascalCase, TestIDs: pascalCase</snippet>
+      </entry>
+      <entry>
+        <path>docs/epics.md</path>
+        <title>Epic 2: User Authentication &amp; Profile</title>
+        <section>Story 2.8: Register Screen UI (lines 973-1012)</section>
+        <snippet>Complete requirements and acceptance criteria for registration screen. Form fields: email, password, full_name, birth_date, confirm_password. Validation: email format, password 8+ chars, birthdate not future.</snippet>
+      </entry>
+      <entry>
+        <path>docs/stories/2-7-login-screen-ui.md</path>
+        <title>Story 2.7: Login Screen UI - Dev Notes</title>
+        <section>Technical Summary and Implementation Details</section>
+        <snippet>Comprehensive reference implementation. Email validation regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, keyboard handling patterns, error display, show/hide password toggle using MaterialIcons, navigation with router.replace().</snippet>
+      </entry>
+    </docs>
+
+    <code>
+      <entry>
+        <path>mobile/src/app/(auth)/register.tsx</path>
+        <kind>component</kind>
+        <symbol>RegisterScreen</symbol>
+        <lines>1-48</lines>
+        <reason>TARGET FILE: Currently a placeholder. Needs full implementation with form fields, validation, and registration logic. Reference Story 2.7 login.tsx for patterns.</reason>
+      </entry>
+      <entry>
+        <path>mobile/src/app/(auth)/login.tsx</path>
+        <kind>component</kind>
+        <symbol>LoginScreen</symbol>
+        <lines>1-370</lines>
+        <reason>REFERENCE IMPLEMENTATION: Complete login screen with all UI patterns needed for register: email/password inputs, validation, error handling, loading states, keyboard navigation, show/hide password toggle, styling, and navigation.</reason>
+      </entry>
+      <entry>
+        <path>mobile/src/app/(auth)/_layout.tsx</path>
+        <kind>component</kind>
+        <symbol>AuthLayout</symbol>
+        <lines>1-19</lines>
+        <reason>AUTH NAVIGATION: Stack layout for auth screens. Already configured. Register route auto-discovered by Expo Router at /(auth)/register.</reason>
+      </entry>
+      <entry>
+        <path>mobile/src/stores/useAuthStore.ts</path>
+        <kind>service</kind>
+        <symbol>useAuthStore, register(), login(), logout(), checkAuth()</symbol>
+        <lines>1-250</lines>
+        <reason>AUTH STATE MANAGEMENT: Zustand store with register() method. Signature: register(data: RegisterData) => Promise&lt;void&gt;. Handles token storage (platform-aware: SecureStore on native, localStorage on web). Auto-login on success.</reason>
+      </entry>
+      <entry>
+        <path>mobile/src/types/user.types.ts</path>
+        <kind>types</kind>
+        <symbol>RegisterData, User, AuthResponse, AuthState</symbol>
+        <lines>1-63</lines>
+        <reason>TYPE CONTRACTS: RegisterData interface with email, password, full_name, birth_date fields. User interface with all user properties. AuthState with store contract.</reason>
+      </entry>
+      <entry>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient, request interceptor, response interceptor</symbol>
+        <lines>1-93</lines>
+        <reason>API CLIENT: Axios instance with auto Bearer token injection. Base URL from env: EXPO_PUBLIC_API_URL. Used by auth store for register endpoint call.</reason>
+      </entry>
+      <entry>
+        <path>mobile/src/app/_layout.tsx</path>
+        <kind>component</kind>
+        <symbol>RootLayout</symbol>
+        <lines>1-12</lines>
+        <reason>ROOT NAVIGATION: Stack layout that includes auth navigation. Auto-discovers (auth) group via Expo Router.</reason>
+      </entry>
+      <entry>
+        <path>mobile/tsconfig.json</path>
+        <kind>config</kind>
+        <symbol>baseUrl, paths</symbol>
+        <lines>1-20</lines>
+        <reason>IMPORT ALIASES: Configured path alias @/* → src/* for clean imports (e.g., @/stores/useAuthStore, @/types/user.types).</reason>
+      </entry>
+      <entry>
+        <path>mobile/package.json</path>
+        <kind>config</kind>
+        <symbol>dependencies, devDependencies</symbol>
+        <lines>1-50</lines>
+        <reason>PROJECT DEPENDENCIES: React Native, Expo, expo-router, zustand, axios, TypeScript. Note: No validation libraries installed - implement validation inline as shown in login.tsx.</reason>
+      </entry>
+    </code>
+
+    <dependencies>
+      <ecosystem name="node">
+        <package name="react-native" version="0.81.5">Core UI framework for cross-platform components (TextInput, ScrollView, KeyboardAvoidingView, etc.)</package>
+        <package name="expo" version="~54.0.22">Development framework and build system</package>
+        <package name="expo-router" version="^6.0.14">File-based navigation. Auto-discovers (auth)/register.tsx as /(auth)/register route</package>
+        <package name="react-native-safe-area-context" version="^5.6.2">SafeAreaView component for handling notches</package>
+        <package name="zustand" version="^5.0.8">State management for auth store</package>
+        <package name="axios" version="^1.13.1">HTTP client used by auth store to call /api/v1/auth/register</package>
+        <package name="expo-secure-store" version="^15.0.7">Encrypted token storage on native platforms</package>
+        <package name="@expo/vector-icons" version="latest">MaterialIcons for show/hide password toggle</package>
+        <package name="typescript" version="~5.9.2">Language and type checking</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface>
+      <name>RegisterData API Contract</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/v1/auth/register
+Request: {
+  "email": "string (email format)",
+  "password": "string (min 8 chars)",
+  "full_name": "string",
+  "birth_date": "string (ISO 8601: YYYY-MM-DD)"
+}
+Response (201): {
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "email": "string",
+      "full_name": "string",
+      "birth_date": "string (YYYY-MM-DD)",
+      "created_at": "ISO datetime",
+      "updated_at": "ISO datetime"
+    },
+    "access_token": "string (JWT)",
+    "token_type": "bearer",
+    "expires_in": 900
+  }
+}
+Error (422/409): {
+  "detail": "string (e.g., 'Email already exists')"
+}</signature>
+      <path>docs/architecture.md#API-Contracts</path>
+    </interface>
+    <interface>
+      <name>useAuthStore.register()</name>
+      <kind>function signature</kind>
+      <signature>async register(data: RegisterData): Promise&lt;void&gt;
+// RegisterData: { email, password, full_name, birth_date }
+// On success: sets user, token, isAuthenticated=true, token stored in SecureStore
+// On error: throws Error with message property</signature>
+      <path>mobile/src/stores/useAuthStore.ts</path>
+    </interface>
+    <interface>
+      <name>Validation Functions to Implement</name>
+      <kind>utility functions</kind>
+      <signature>validateEmail(email: string): boolean // Regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+validatePassword(password: string): boolean // password.length >= 8
+validatePasswordMatch(pwd: string, confirm: string): boolean // pwd === confirm
+validateFullName(name: string): boolean // name.trim().length > 0
+validateBirthDate(date: Date | null): boolean // date <= today and reasonable age</signature>
+      <path>mobile/src/app/(auth)/register.tsx (to implement)</path>
+    </interface>
+    <interface>
+      <name>Expo Router Navigation</name>
+      <kind>navigation api</kind>
+      <signature>useRouter() from 'expo-router'
+// After registration: router.replace('/') - navigates to home, prevents back
+// Link component: &lt;Link href="/(auth)/login"&gt; for login navigation</signature>
+      <path>mobile/src/app/(auth)/(implementation)</path>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint>Use React Native components only (no web-specific HTML). StyleSheet must work cross-platform.</constraint>
+    <constraint>Birth date must be stored as ISO string (YYYY-MM-DD) for API compatibility and database consistency.</constraint>
+    <constraint>Password must be minimum 8 characters, validated both client-side and server-side.</constraint>
+    <constraint>Email field must be unique in database. Handle "Email already exists" error gracefully.</constraint>
+    <constraint>After successful registration, user is auto-logged in (useAuthStore handles token storage). Navigate with router.replace('/') to prevent back navigation.</constraint>
+    <constraint>Use Project path aliases (@/stores, @/types) for imports. Update tsconfig.json baseUrl if needed.</constraint>
+    <constraint>All async operations (registration) must show loading state. Disable inputs and show ActivityIndicator during submission.</constraint>
+    <constraint>Follow naming conventions: component PascalCase.tsx, functions camelCase, hooks useCamelCase, types PascalCase, testIDs pascalCase.</constraint>
+    <constraint>Error messages must be user-friendly. Extract backend error details from err.response?.data?.detail or err.message. Provide fallback messages for network errors.</constraint>
+    <constraint>Date picker: native DateTimePicker on mobile (iOS/Android), HTML date input on web. Handle Platform.OS === 'web' conditional.</constraint>
+    <constraint>Keyboard handling: returnKeyType="next" to navigate between fields, returnKeyType="done" on last field. KeyboardAvoidingView with platform-specific behavior (padding on iOS, height on Android).</constraint>
+    <constraint>Use expo-secure-store for token storage on native platforms (iOS/Android). Web uses localStorage automatically in useAuthStore.</constraint>
+  </constraints>
+
+  <tests>
+    <standards>Tests for Story 2.8 should follow Expo/React Native testing patterns used elsewhere in the codebase. Use Jest for unit testing validation functions. Use React Native Testing Library for component testing (render, fireEvent, waitFor). Component tests should verify: form field rendering, validation errors, loading states, error handling, successful submission, navigation on success, keyboard interactions, date picker behavior. Mock useAuthStore.register() for component tests to isolate UI logic from API calls.</standards>
+    <locations>Test files should be created at: mobile/__tests__/screens/RegisterScreen.test.tsx (component tests), mobile/__tests__/utils/validation.test.ts (validation function tests). Follow naming pattern: [FileName].test.tsx for component tests, [utilityName].test.ts for utility tests.</locations>
+    <ideas>
+      <idea acId="1,2">Test register component renders all required form fields (email, password, confirm password, full name, birth date picker)</idea>
+      <idea acId="2,3">Test birth date picker: native modal opens on mobile, HTML input displays on web, prevents future dates</idea>
+      <idea acId="4,5">Test password confirmation: validation error if confirm password != password, error clears when user types</idea>
+      <idea acId="5,6">Test successful registration: valid form submission calls useAuthStore.register() with correct data (including ISO formatted birth date)</idea>
+      <idea acId="6,7">Test loading state: register button disabled while submitting, ActivityIndicator displays, form inputs disabled</idea>
+      <idea acId="7">Test error handling: display backend error message if email already exists, network error, or validation error</idea>
+      <idea acId="8">Test navigation: on successful registration, router.replace('/') called to navigate to home screen</idea>
+      <idea acId="9">Test navigation link: "Already have an account? Login" link navigates to /(auth)/login</idea>
+      <idea acId="10">Test validation: email regex rejects invalid formats, password validates min 8 chars, full name rejects empty, birth date validates format and not future</idea>
+      <idea acId="10">Test keyboard interactions: tab between fields, returnKeyType works (next/done), Keyboard.dismiss() called on submit</idea>
+      <idea acId="2">Test show/hide password toggles: work independently for password and confirm password fields</idea>
+      <idea acId="all">Integration test: complete happy path from form entry to successful registration to home navigation</idea>
+    </ideas>
+  </tests>
+</story-context>
