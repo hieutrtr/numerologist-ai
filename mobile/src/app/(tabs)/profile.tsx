@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,9 @@ import {
   ActivityIndicator,
   StyleSheet,
   ScrollView,
-  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { User } from '@/types/user.types';
 
 /**
  * Profile Screen Component
@@ -32,7 +30,7 @@ import { User } from '@/types/user.types';
  */
 export default function ProfileScreen() {
   // State management
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false); // Currently not used, reserved for future data fetching
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
