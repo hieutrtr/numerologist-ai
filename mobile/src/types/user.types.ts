@@ -59,4 +59,5 @@ export interface AuthState {
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  googleSignIn: (idToken: string) => Promise<void>;
 }

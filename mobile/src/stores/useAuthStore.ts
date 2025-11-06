@@ -247,4 +247,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     }
   },
+
+  // Google Sign-In action: authenticate with Google OAuth ID token
+  googleSignIn: async (idToken: string) => {
+    try {
+      set({ isLoading: true });
+
+      // Send Google ID token to backend for verification and user creation/linking
+      // Backend handles three cases:
+      // 1. New user: Creates User + OAuthAccount
+      // 2. Existing OAuth user: Returns existing user
+      // 3. Email match: Links OAuthAccount to existing password user
+      const response = await apiClient.post<AuthResponse>('/api/v1/auth/google', {
+        id_token: idToken,
+      });
+
+      const { user, access_token } = response.data;
+
+      // Store token (platform-aware: SecureStore on native, localStorage on web)
+      await tokenStorage.setItem(AUTH_TOKEN_KEY, access_token);
+
+      // Update store state
+      set({
+        user,
+        token: access_token,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
 }));
