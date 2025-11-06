@@ -1,0 +1,193 @@
+<story-context id="2-7-login-screen-ui" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>7</storyId>
+    <title>Login Screen UI</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-06</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-7-login-screen-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>a login screen where I can enter my credentials</iWant>
+    <soThat>I can access my account and use the app</soThat>
+    <tasks>
+      <task id="1" acs="1">Create Auth Layout and Route Structure</task>
+      <task id="2" acs="1,2">Create Login Screen Component</task>
+      <task id="3" acs="2">Implement Show/Hide Password Toggle</task>
+      <task id="4" acs="9">Implement Email Validation</task>
+      <task id="5" acs="3,4,5,6">Implement Login Action</task>
+      <task id="6" acs="8,10">Keyboard Handling and UX</task>
+      <task id="7" acs="4">Add Loading State UI</task>
+      <task id="8" acs="5">Add Error Display</task>
+      <task id="9" acs="7">Add Navigation to Register Screen</task>
+      <task id="10" acs="10">Styling and Polish</task>
+      <task id="11" acs="all">Integration Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Login screen component created in mobile/src/app/(auth)/login.tsx</criterion>
+    <criterion id="2">Form fields: Email (email input), Password (secure text input)</criterion>
+    <criterion id="3">"Login" button calls useAuthStore.login()</criterion>
+    <criterion id="4">Shows loading state while logging in</criterion>
+    <criterion id="5">Displays error message if login fails</criterion>
+    <criterion id="6">On success, navigates to home screen</criterion>
+    <criterion id="7">"Don't have an account? Register" link to register screen</criterion>
+    <criterion id="8">Proper keyboard handling (next/done buttons)</criterion>
+    <criterion id="9">Email validation (format check)</criterion>
+    <criterion id="10">Works on both web and mobile</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 2 - User Authentication & Profile</title>
+        <section>Story 2.7: Login Screen UI</section>
+        <snippet>Login screen component with email/password fields, loading states, error handling, and navigation to register screen. Uses Expo Router file-based routing at mobile/src/app/(auth)/login.tsx</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture</title>
+        <section>Frontend - React Native with Expo</section>
+        <snippet>Cross-platform mobile framework using React Native + Expo SDK for Web PWA and Android delivery. Uses React Native StyleSheet for styling and TypeScript for type safety.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture</title>
+        <section>Project Structure</section>
+        <snippet>Mobile app structure: mobile/src/app/ contains routing with (auth) group for login/register screens and (tabs) group for protected screens. Stores in mobile/src/stores/ including useAuthStore for authentication.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR-3: User Management</section>
+        <snippet>FR-3.1: User Registration & Authentication - Secure authentication with email/password and OAuth 2.0 for social logins. JWT tokens with 15-minute expiration.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-6-frontend-auth-state-management-zustand.md</path>
+        <title>Story 2.6: Frontend Auth State Management</title>
+        <section>Dev Notes</section>
+        <snippet>Auth store created at mobile/src/stores/useAuthStore.ts with login(), register(), logout(), checkAuth() actions. Login accepts email and password, stores token in SecureStore, and updates isAuthenticated state. API client automatically includes auth token in requests.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>mobile/src/stores/useAuthStore.ts</path>
+        <kind>store</kind>
+        <symbol>useAuthStore</symbol>
+        <lines>23-173</lines>
+        <reason>Auth store with login() action to be called from login screen. Provides isLoading state for UI feedback and isAuthenticated for navigation logic.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/types/user.types.ts</path>
+        <kind>types</kind>
+        <symbol>User, LoginCredentials, AuthResponse, AuthState</symbol>
+        <lines>10-62</lines>
+        <reason>TypeScript interfaces for user data and login credentials. LoginCredentials interface defines email and password fields needed for login form.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient</symbol>
+        <lines>1-75</lines>
+        <reason>Axios client with auth token interceptor. Auth store uses this for login API calls. Already configured with base URL and error handling.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/_layout.tsx</path>
+        <kind>layout</kind>
+        <symbol>RootLayout</symbol>
+        <lines>1-50</lines>
+        <reason>Root layout for Expo Router. Will need to be updated to include auth stack navigation for login/register screens.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <npm>
+        <package name="expo-router" version="^6.0.14" reason="File-based routing and navigation" />
+        <package name="react-native" version="0.81.5" reason="Core mobile framework" />
+        <package name="zustand" version="^5.0.8" reason="State management (useAuthStore)" />
+        <package name="expo-secure-store" version="^15.0.7" reason="Encrypted token storage" />
+        <package name="react-native-safe-area-context" version="^5.6.2" reason="SafeAreaView for mobile devices" />
+        <package name="@expo/vector-icons" version="built-in" reason="Icons for show/hide password toggle (optional, may need installation)" />
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use Expo Router file-based routing: create file at mobile/src/app/(auth)/login.tsx for /login route</constraint>
+    <constraint>Use React Native components only (TextInput, TouchableOpacity, View, Text, KeyboardAvoidingView, ActivityIndicator)</constraint>
+    <constraint>Use React Native StyleSheet for styling (not CSS or external styling libraries)</constraint>
+    <constraint>Must work on both web and mobile platforms (iOS, Android)</constraint>
+    <constraint>Use useAuthStore from mobile/src/stores/useAuthStore.ts for authentication logic</constraint>
+    <constraint>Call login(email, password) method from auth store, handle errors in try-catch</constraint>
+    <constraint>Use router.replace() for navigation after login (not router.push()) to prevent back navigation</constraint>
+    <constraint>Implement email validation with regex before submitting</constraint>
+    <constraint>Show loading state using isLoading from auth store</constraint>
+    <constraint>Display user-friendly error messages (never expose backend errors directly)</constraint>
+    <constraint>Use KeyboardAvoidingView with platform-specific behavior (padding for iOS, height for Android)</constraint>
+    <constraint>Use SafeAreaView to avoid notch/status bar on mobile devices</constraint>
+    <constraint>Follow TypeScript strict mode requirements</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>useAuthStore.login</name>
+      <kind>function</kind>
+      <signature>async login(email: string, password: string): Promise&lt;void&gt;</signature>
+      <path>mobile/src/stores/useAuthStore.ts</path>
+      <description>Authenticates user with email and password. Throws error on failure. Updates isAuthenticated state and stores token in SecureStore on success.</description>
+    </interface>
+    <interface>
+      <name>useAuthStore</name>
+      <kind>zustand-store</kind>
+      <signature>{ user: User | null, token: string | null, isAuthenticated: boolean, isLoading: boolean, login: Function, register: Function, logout: Function, checkAuth: Function }</signature>
+      <path>mobile/src/stores/useAuthStore.ts</path>
+      <description>Auth state management store. Use destructuring to access login method and isLoading/isAuthenticated states.</description>
+    </interface>
+    <interface>
+      <name>LoginCredentials</name>
+      <kind>typescript-interface</kind>
+      <signature>interface LoginCredentials { email: string; password: string; }</signature>
+      <path>mobile/src/types/user.types.ts</path>
+      <description>Type definition for login form data</description>
+    </interface>
+    <interface>
+      <name>POST /api/v1/auth/login</name>
+      <kind>rest-endpoint</kind>
+      <signature>POST /api/v1/auth/login { email: string, password: string } -&gt; { user: UserResponse, access_token: string }</signature>
+      <path>backend/src/api/v1/endpoints/auth.py</path>
+      <description>Backend login endpoint. Called by auth store, not directly by UI components.</description>
+    </interface>
+    <interface>
+      <name>Expo Router Navigation</name>
+      <kind>library-api</kind>
+      <signature>import { Link, useRouter } from 'expo-router'; router.replace(path); router.push(path)</signature>
+      <path>expo-router</path>
+      <description>File-based routing. Use Link for navigation links, useRouter() for programmatic navigation. Use replace() after login to prevent back navigation to login screen.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Manual testing for UI components in React Native. Focus on user interaction flows, cross-platform compatibility (web, iOS, Android), form validation, error states, loading states, and navigation. Test with actual API integration using auth store from Story 2.6. Automated tests can be added in future stories using Jest/React Native Testing Library.</standards>
+    <locations>
+      <location>mobile/src/app/(auth)/__tests__/ (future automated tests location)</location>
+      <location>Manual testing: Expo Go app on physical device or simulator</location>
+      <location>Web testing: http://localhost:8081 in browser</location>
+    </locations>
+    <ideas>
+      <idea ac="1,2">Test login screen renders with email and password fields, verify correct keyboard types and secure text entry</idea>
+      <idea ac="3">Test login button calls useAuthStore.login() with form values</idea>
+      <idea ac="4">Test loading state: button disabled, spinner shown during API call</idea>
+      <idea ac="5">Test error display: invalid credentials show error message, network errors handled gracefully</idea>
+      <idea ac="6">Test navigation: successful login navigates to home screen using router.replace()</idea>
+      <idea ac="7">Test register link: tapping navigates to /register route</idea>
+      <idea ac="8">Test keyboard handling: tab from email to password, done button submits form, keyboard doesn't cover inputs</idea>
+      <idea ac="9">Test email validation: invalid email format shows error, valid email passes</idea>
+      <idea ac="10">Test cross-platform: login works on web browser, iOS simulator, Android emulator</idea>
+      <idea ac="2">Test show/hide password toggle: eye icon toggles password visibility</idea>
+    </ideas>
+  </tests>
+</story-context>

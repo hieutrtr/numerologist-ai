@@ -60,7 +60,7 @@ development_status:
   2-4-user-login-api-endpoint: done
   2-5-get-current-user-endpoint-protected: done
   2-6-frontend-auth-state-management-zustand: done
-  2-7-login-screen-ui: backlog
+  2-7-login-screen-ui: review
   2-8-register-screen-ui: backlog
   2-9-profile-screen-ui: backlog
   2-10-auth-navigation-flow: backlog
