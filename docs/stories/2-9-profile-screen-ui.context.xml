@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/2-9-profile-screen-ui" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>9</storyId>
+    <title>Profile Screen UI</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-06</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-9-profile-screen-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>logged-in user</asA>
+    <iWant>to view my profile information</iWant>
+    <soThat>I can see my account details</soThat>
+    <tasks>
+      - Task 1: Set Up Profile Screen Component Structure (AC: #1)
+      - Task 2: Implement User Data Display (AC: #2, #3)
+      - Task 3: Implement Logout Functionality (AC: #4, #5)
+      - Task 4: Implement Loading State (AC: #6)
+      - Task 5: Implement Error Handling (AC: #7)
+      - Task 6: Design and Style Profile Screen (AC: #8)
+      - Task 7: Implement Tabs Navigation Integration (AC: #1)
+      - Task 8: Integration Testing (AC: all)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    - AC1: Profile screen component created in `mobile/src/app/(tabs)/profile.tsx`
+    - AC2: Displays user information: Name, Email, Birth Date
+    - AC3: Shows formatted birth date (e.g., "May 15, 1990")
+    - AC4: "Logout" button that calls `useAuthStore.logout()`
+    - AC5: On logout, clears token and navigates to login screen
+    - AC6: Loading state while fetching user data
+    - AC7: Error handling if user data fails to load
+    - AC8: Clean, readable layout
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown - Numerologist AI</title>
+        <section>Story 2.9: Profile Screen UI (lines 1015-1057)</section>
+        <snippet>Profile screen for logged-in users to view account details. Displays name, email, birth date with logout functionality. Uses Zustand auth store integration and Expo Router tabs navigation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Frontend Stack - State Management & Authentication (lines 79-95)</section>
+        <snippet>Zustand for lightweight state management, JWT tokens for stateless scalable authentication, platform-aware token storage (SecureStore on native, localStorage on web).</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-8-register-screen-ui.md</path>
+        <title>Previous Story: Register Screen UI</title>
+        <section>Dev Agent Record - Component Patterns (lines 150-300)</section>
+        <snippet>Established component structure patterns, error handling UI, loading states, StyleSheet performance optimization, date formatting approaches, Expo Router navigation patterns.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-7-login-screen-ui.md</path>
+        <title>Reference Story: Login Screen UI</title>
+        <section>Auth Components & Styling</section>
+        <snippet>Email/password validation patterns, show/hide password toggle implementation, error container styling, ActivityIndicator loading states, keyboard handling.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-6-frontend-auth-state-management-zustand.md</path>
+        <title>Auth Store Implementation</title>
+        <section>Zustand Store with Logout Action</section>
+        <snippet>useAuthStore Zustand hook with logout() method, platform-aware token storage, user state management, isAuthenticated flag, isLoading state.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>mobile/src/stores/useAuthStore.ts</path>
+        <kind>service</kind>
+        <symbol>useAuthStore</symbol>
+        <lines>91-250</lines>
+        <reason>Primary auth store with logout() method (line 154-176), user state access, platform-aware token management. Essential for profile screen to access logged-in user data and implement logout.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(auth)/login.tsx</path>
+        <kind>component</kind>
+        <symbol>LoginScreen</symbol>
+        <lines>1-50</lines>
+        <reason>Reference implementation for form layout, error handling UI, loading states, StyleSheet patterns. Profile screen should match visual consistency for cohesive app experience.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(auth)/register.tsx</path>
+        <kind>component</kind>
+        <symbol>RegisterScreen</symbol>
+        <lines>1-70</lines>
+        <reason>Reference for component structure, imports, state management patterns, error container styling (lines 292-296), ActivityIndicator usage (lines 524-525).</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/types/user.types.ts</path>
+        <kind>types</kind>
+        <symbol>User, AuthState</symbol>
+        <reason>TypeScript interfaces defining User structure (full_name, email, birth_date fields), AuthState with logout() signature, typing for auth store integration.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient</symbol>
+        <reason>Axios API client used by useAuthStore for authenticated requests. Profile screen may need to fetch updated user data or handle API errors.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(tabs)/_layout.tsx</path>
+        <kind>component</kind>
+        <symbol>TabsLayout</symbol>
+        <reason>Tabs navigation layout where profile.tsx tab is registered. Profile component automatically discovered as route via file-based routing.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <node>
+        <package name="react" version="19.1.0">Core React library for component development</package>
+        <package name="react-native" version="0.81.5">Native components: View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator, ScrollView</package>
+        <package name="react-native-safe-area-context" version="^5.6.2">SafeAreaView for mobile notch avoidance</package>
+        <package name="expo" version="~54.0.22">Expo framework for cross-platform development</package>
+        <package name="expo-router" version="^6.0.14">File-based routing, useRouter hook, Link navigation</package>
+        <package name="zustand" version="^5.0.8">Lightweight state management for auth store integration</package>
+        <package name="date-fns" version="N/A">Date formatting library (recommend: install for formatting birth date)</package>
+        <package name="@expo/vector-icons" version="^14.0.2">MaterialIcons for UI elements</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface>
+      <name>useAuthStore.logout()</name>
+      <kind>Zustand store method</kind>
+      <signature>logout(): Promise&lt;void&gt;</signature>
+      <path>mobile/src/stores/useAuthStore.ts:154-176</path>
+      <description>Async logout action that removes auth token from storage and resets auth state. Should be called on logout button press. Returns promise resolving when complete.</description>
+    </interface>
+    <interface>
+      <name>useAuthStore.user</name>
+      <kind>Zustand store state</kind>
+      <signature>user: User | null</signature>
+      <path>mobile/src/stores/useAuthStore.ts:93</path>
+      <description>Current authenticated user object with fields: id, email, full_name, birth_date (ISO YYYY-MM-DD format). Null if not authenticated.</description>
+    </interface>
+    <interface>
+      <name>useAuthStore.isAuthenticated</name>
+      <kind>Zustand store state</kind>
+      <signature>isAuthenticated: boolean</signature>
+      <path>mobile/src/stores/useAuthStore.ts:95</path>
+      <description>Boolean flag indicating if user is currently authenticated. Used by root layout for auth flow navigation.</description>
+    </interface>
+    <interface>
+      <name>useRouter()</name>
+      <kind>Expo Router hook</kind>
+      <signature>useRouter(): Router</signature>
+      <description>Provides router.replace() method for navigation. Use router.replace('/(auth)/login') to navigate to login after logout without allowing back navigation.</description>
+    </interface>
+    <interface>
+      <name>User type interface</name>
+      <kind>TypeScript interface</kind>
+      <signature>interface User { id: string; email: string; full_name: string; birth_date: string; }</signature>
+      <path>mobile/src/types/user.types.ts</path>
+      <description>Defines structure of logged-in user object. birth_date is ISO 8601 format (YYYY-MM-DD). Profile screen displays these fields.</description>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint>
+      <name>Platform-Aware Development</name>
+      <description>Component must work on Web (PWA), iOS, and Android. Use Platform.OS conditionals for platform-specific code. SafeAreaView handles mobile notch/status bar avoidance.</description>
+      <source>docs/architecture.md line 80</source>
+    </constraint>
+    <constraint>
+      <name>Cross-Platform Token Storage</name>
+      <description>Token storage is platform-aware (SecureStore on native, localStorage on web). Logout method automatically handles platform differences via tokenStorage helper.</description>
+      <source>mobile/src/stores/useAuthStore.ts lines 14-74</source>
+    </constraint>
+    <constraint>
+      <name>Zustand State Management</name>
+      <description>Use useAuthStore hook to access auth state. Do NOT create local duplicate of user data. Prefer store.user directly for single source of truth.</description>
+      <source>docs/architecture.md line 82</source>
+    </constraint>
+    <constraint>
+      <name>Navigation Pattern: router.replace()</name>
+      <description>After logout, use router.replace('/(auth)/login') not router.push(). This prevents back button returning to profile after logout.</description>
+      <source>docs/stories/2-8-register-screen-ui.md line 256-257</source>
+    </constraint>
+    <constraint>
+      <name>Styling: React Native StyleSheet</name>
+      <description>Use React Native StyleSheet for performance optimization. Inline styles discouraged. Match visual style with login/register screens for consistency.</description>
+      <source>docs/stories/2-8-register-screen-ui.md line 441-492</source>
+    </constraint>
+    <constraint>
+      <name>Date Formatting: ISO to Display</name>
+      <description>Birth date from API is ISO 8601 (YYYY-MM-DD). Format for display using date-fns format() or toLocaleDateString(). Example: "1990-05-15" → "May 15, 1990"</description>
+      <source>docs/stories/2-9-profile-screen-ui.md line 225-230</source>
+    </constraint>
+    <constraint>
+      <name>Tabs File-Based Routing</name>
+      <description>Profile component at mobile/src/app/(tabs)/profile.tsx is auto-discovered by Expo Router. No manual route registration needed. Should appear as tab in TabsLayout.</description>
+      <source>docs/epics.md line 1041-1052</source>
+    </constraint>
+    <constraint>
+      <name>TypeScript Type Safety</name>
+      <description>Use TypeScript types for all data structures. Import User type from user.types.ts. Ensure type safety for router navigation and auth store integration.</description>
+      <source>docs/architecture.md line 81</source>
+    </constraint>
+  </constraints>
+
+  <tests>
+    <standards>
+      Jest with @testing-library/react-native for unit and integration testing. Tests should follow patterns established in Stories 2.7-2.8 (login/register screens). Mock useAuthStore and useRouter. Use fireEvent for user interactions (button presses, form submissions). Use waitFor() for async operations. Tests located in mobile/__tests__/screens/ directory with naming convention: ComponentName.test.tsx.
+    </standards>
+    <locations>
+      mobile/__tests__/screens/ProfileScreen.test.tsx (primary test file)
+      mobile/__tests__/stores/useAuthStore.test.ts (auth store integration tests)
+      mobile/__tests__/services/api.test.ts (API error handling)
+    </locations>
+    <ideas>
+      - Test 1 (AC1, AC8): Component renders with proper structure, imports, state initialization
+      - Test 2 (AC2, AC3): User data displays correctly (name, email, formatted birth date) from useAuthStore.user
+      - Test 3 (AC4, AC5): Logout button triggers useAuthStore.logout() and navigates to login screen via router.replace()
+      - Test 4 (AC6): Loading state displays ActivityIndicator while data is loading, logout button disabled
+      - Test 5 (AC7): Error state displays error message when user data fails to load, retry button available
+      - Test 6 (AC8): Layout passes accessibility checks, text readable, buttons tappable, responsive on multiple screen sizes
+      - Test 7 (AC3): Birth date formatting edge cases (leap years, new year boundaries, various date formats)
+      - Test 8 (AC5): After logout, user cannot navigate back to profile screen (route state updated)
+      - Test 9 (AC4): Logout button disabled during submission, not clickable multiple times
+      - Test 10 (AC2): Handles missing user data gracefully (null email, empty name)
+      - Test 11 (AC6): Logout completes and state resets even with storage errors
+      - Test 12 (Platform): Tests on web, iOS simulator, Android simulator with proper Platform.OS handling
+    </ideas>
+  </tests>
+</story-context>

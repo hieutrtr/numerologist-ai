@@ -1,6 +1,6 @@
 # Story 2.9: Profile Screen UI
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
 
 ### Context Reference
 
-<!-- Path(s) to story context XML will be added here by context workflow -->
+- [Story Context](./2-9-profile-screen-ui.context.xml)
 
 ### Agent Model Used
 
