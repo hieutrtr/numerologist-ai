@@ -26,17 +26,6 @@ export default function RootLayout() {
     if (isLoading) return; // Don't redirect while loading
 
     const inAuthGroup = segments[0] === '(auth)';
-    const inTabsGroup = segments[0] === '(tabs)' || segments.length === 0;
-
-    if (__DEV__) {
-      console.log('🚦 Root layout navigation check:', {
-        isAuthenticated,
-        isLoading,
-        currentSegments: segments,
-        inAuthGroup,
-        inTabsGroup,
-      });
-    }
 
     if (!isAuthenticated && !inAuthGroup) {
       // Not authenticated and not in auth screens - redirect to login

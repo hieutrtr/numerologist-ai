@@ -106,39 +106,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password,
       });
 
-      // Debug: Log raw response to understand structure
-      if (__DEV__) {
-        console.log('📦 Raw login response:', {
-          hasData: !!response.data,
-          dataKeys: response.data ? Object.keys(response.data) : [],
-          fullResponse: response.data,
-        });
-      }
-
       const { user, access_token } = response.data;
-
-      // Debug logging for development
-      if (__DEV__) {
-        console.log('🔐 Login successful:', {
-          userObject: user,  // Log full user object
-          userId: user?.id,
-          email: user?.email,
-          tokenLength: access_token?.length,
-          platform: Platform.OS,
-        });
-      }
 
       // Store token (platform-aware: SecureStore on native, localStorage on web)
       await tokenStorage.setItem(AUTH_TOKEN_KEY, access_token);
-
-      // Verify storage on web
-      if (__DEV__ && Platform.OS === 'web') {
-        const verifyToken = localStorage.getItem(AUTH_TOKEN_KEY);
-        console.log('🔍 Token verification:', {
-          stored: !!verifyToken,
-          matches: verifyToken === access_token,
-        });
-      }
 
       // Update store state
       set({
@@ -147,15 +118,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-
-      // Log final state
-      if (__DEV__) {
-        console.log('✅ Auth state updated:', {
-          isAuthenticated: true,
-          userStored: !!user,
-          tokenStored: !!access_token,
-        });
-      }
     } catch (error) {
       set({ isLoading: false });
       throw error;
