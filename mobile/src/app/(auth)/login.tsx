@@ -11,7 +11,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/useAuthStore';
 
@@ -45,7 +45,6 @@ export default function LoginScreen() {
 
   // Auth store and router
   const { login } = useAuthStore();
-  const router = useRouter();
 
   /**
    * Email validation using regex pattern
@@ -118,9 +117,9 @@ export default function LoginScreen() {
       // Call auth store login method
       await login(email, password);
 
-      // Navigate to home screen on success
-      // Use replace() instead of push() to prevent going back to login
-      router.replace('/');
+      // Navigation is handled automatically by root layout based on auth state
+      // No need to manually navigate - the root layout will detect isAuthenticated=true
+      // and redirect to home automatically
     } catch (err: any) {
       // Display user-friendly error messages
       let errorMessage = 'Login failed. Please try again.';

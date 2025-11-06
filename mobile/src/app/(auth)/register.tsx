@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -58,9 +58,8 @@ export default function RegisterScreen() {
   const passwordInputRef = useRef<TextInput>(null);
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
-  // Auth store and router
+  // Auth store
   const { register } = useAuthStore();
-  const router = useRouter();
 
   /**
    * Email validation using regex pattern
@@ -245,9 +244,9 @@ export default function RegisterScreen() {
         birth_date: birthDateISO,
       });
 
-      // Navigate to home screen on success
-      // Use replace() instead of push() to prevent going back to register
-      router.replace('/');
+      // Navigation is handled automatically by root layout based on auth state
+      // No need to manually navigate - the root layout will detect isAuthenticated=true
+      // and redirect to home automatically
     } catch (err: any) {
       // Display user-friendly error messages
       let errorMessage = 'Registration failed. Please try again.';
