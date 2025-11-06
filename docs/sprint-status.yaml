@@ -64,7 +64,7 @@ development_status:
   2-8-register-screen-ui: done
   2-9-profile-screen-ui: done
   2-10-auth-navigation-flow: done
-  2-11-oauth-account-model-google-signin: ready-for-dev
+  2-11-oauth-account-model-google-signin: in-progress
   epic-2-retrospective: optional
 
   # ============================================================================
