@@ -10,14 +10,17 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor for auth tokens (placeholder for Epic 2)
+// Request interceptor for auth tokens (Story 2.6)
 apiClient.interceptors.request.use(
   (config) => {
-    // TODO (Epic 2): Add Authorization header with JWT token
-    // const token = await SecureStore.getItemAsync('auth_token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Import here to avoid circular dependency (useAuthStore imports apiClient)
+    const { useAuthStore } = require('../stores/useAuthStore');
+    const token = useAuthStore.getState().token;
+
+    // Add Authorization header if token exists
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
     if (__DEV__) {
       console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
@@ -30,7 +33,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor for error handling and 401 auto-logout (Story 2.6)
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
@@ -46,6 +49,25 @@ apiClient.interceptors.response.use(
       // Server responded with error status
       const status = error.response.status;
       const message = (error.response.data as any)?.message || error.message;
+
+      // Handle 401 Unauthorized - auto-logout
+      if (status === 401) {
+        // Import here to avoid circular dependency
+        const { useAuthStore } = require('../stores/useAuthStore');
+        const logout = useAuthStore.getState().logout;
+
+        // Trigger logout to clear token and state (async, doesn't block error propagation)
+        logout().catch((err: any) => {
+          if (__DEV__) {
+            console.error('Error during auto-logout:', err);
+          }
+          // Note: Consider error tracking service for production
+          // Example: errorTrackingService.captureException(err, { context: '401_auto_logout' });
+        });
+
+        // Let error propagate for component-level handling
+        return Promise.reject(new Error('Session expired. Please log in again.'));
+      }
 
       return Promise.reject(new Error(`Server error (${status}): ${message}`));
     }

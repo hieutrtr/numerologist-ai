@@ -1,0 +1,298 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.6</storyId>
+    <title>Frontend Auth State Management (Zustand)</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-6-frontend-auth-state-management-zustand.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>frontend developer</asA>
+    <iWant>centralized auth state management with Zustand</iWant>
+    <soThat>the app knows if user is logged in and can access their token across all screens</soThat>
+    <tasks>
+      - Task 1: Install Zustand and Expo SecureStore Dependencies (AC: #1, #4)
+      - Task 2: Create TypeScript Types for Auth State (AC: #2, #8)
+      - Task 3: Create Zustand Auth Store with State and Actions (AC: #1, #2, #3)
+      - Task 4: Implement login() Action (AC: #3, #4)
+      - Task 5: Implement register() Action (AC: #3, #4)
+      - Task 6: Implement logout() Action (AC: #3, #4)
+      - Task 7: Implement checkAuth() for Token Validation (AC: #3, #5, #6)
+      - Task 8: Update API Client to Include Auth Token (AC: #7)
+      - Task 9: Add Response Interceptor for 401 Auto-Logout (AC: #7)
+      - Task 10: Integration Testing and Documentation (AC: all)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. AC1: Zustand store created in `mobile/src/stores/useAuthStore.ts`
+    2. AC2: State includes: `user`, `token`, `isAuthenticated`, `isLoading`
+    3. AC3: Actions: `login()`, `register()`, `logout()`, `checkAuth()`
+    4. AC4: Token stored in Expo SecureStore (encrypted storage)
+    5. AC5: On app load, check SecureStore for saved token
+    6. AC6: If token exists, validate with `GET /api/v1/auth/me`
+    7. AC7: Store provides auth context to entire app
+    8. AC8: TypeScript types for User and auth state
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <!-- Epic 2 Story Requirements -->
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 2: User Authentication & Profile</title>
+        <section>Story 2.6: Frontend Auth State Management (Zustand)</section>
+        <snippet>Technical notes include store structure with user/token/isAuthenticated/isLoading state, actions for login/register/logout/checkAuth, SecureStore for token persistence, and apiClient interceptor integration</snippet>
+      </doc>
+
+      <!-- Architecture Documentation -->
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Frontend Stack - State Management</section>
+        <snippet>Zustand (latest) chosen for lightweight state management with simple API. Frontend structure: mobile/src/stores/ for Zustand stores, mobile/src/services/api.ts for Axios client</snippet>
+      </doc>
+
+      <!-- Previous Story Context -->
+      <doc>
+        <path>docs/stories/2-5-get-current-user-endpoint-protected.md</path>
+        <title>Story 2.5: Get Current User Endpoint (Protected)</title>
+        <section>Learnings - Backend Authentication</section>
+        <snippet>Backend endpoints available: POST /api/v1/auth/register, POST /api/v1/auth/login, GET /api/v1/auth/me. JWT tokens expire after 15 minutes, use Bearer token format. UserResponse schema excludes hashed_password. All endpoints tested and passing (70/70 tests)</snippet>
+      </doc>
+
+      <!-- API Client Setup -->
+      <doc>
+        <path>docs/stories/1-6-frontend-api-service-setup.md</path>
+        <title>Story 1.6: Frontend API Service Setup</title>
+        <section>API Client Implementation</section>
+        <snippet>Axios instance created at mobile/src/services/api.ts with request/response interceptors. TODO placeholder exists for adding auth token in request interceptor (to be implemented in this story)</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <!-- Existing API Client Service -->
+      <file>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient</symbol>
+        <lines>1-71</lines>
+        <reason>Existing Axios instance with request/response interceptors. Need to update request interceptor to add Authorization header from auth store</reason>
+      </file>
+
+      <!-- Backend Auth Endpoints (for reference) -->
+      <file>
+        <path>backend/src/api/v1/endpoints/auth.py</path>
+        <kind>controller</kind>
+        <symbol>register, login, get_me</symbol>
+        <lines>N/A</lines>
+        <reason>Backend authentication endpoints that this story integrates with. Registration, login, and get current user endpoints</reason>
+      </file>
+
+      <!-- Backend User Model (for type reference) -->
+      <file>
+        <path>backend/src/models/user.py</path>
+        <kind>model</kind>
+        <symbol>User</symbol>
+        <lines>N/A</lines>
+        <reason>Backend User model structure - frontend User type should match UserResponse schema (id, email, full_name, birth_date, created_at, updated_at)</reason>
+      </file>
+
+      <!-- Backend User Schema (for type reference) -->
+      <file>
+        <path>backend/src/schemas/user.py</path>
+        <kind>schema</kind>
+        <symbol>UserResponse</symbol>
+        <lines>N/A</lines>
+        <reason>Pydantic UserResponse schema that frontend User interface should match. Excludes hashed_password for security</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <frontend>
+        <package name="zustand" version="^5.0.8" status="installed">Lightweight state management library (1kb)</package>
+        <package name="expo-secure-store" version="^15.0.7" status="installed">Encrypted storage for tokens (iOS Keychain, Android EncryptedSharedPreferences)</package>
+        <package name="axios" version="^1.13.1" status="installed">HTTP client with interceptor support</package>
+        <package name="expo-router" version="^6.0.14" status="installed">File-based routing for navigation</package>
+        <package name="react" version="19.1.0" status="installed">React framework</package>
+        <package name="react-native" version="0.81.5" status="installed">React Native framework</package>
+        <package name="typescript" version="~5.9.2" status="installed">TypeScript for type safety</package>
+      </frontend>
+      <backend>
+        <package name="fastapi" status="installed">Backend API framework</package>
+        <package name="jwt" status="installed">JWT token generation and verification</package>
+      </backend>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Use Expo SecureStore for token storage (encrypted) - NEVER use AsyncStorage for tokens
+    - Frontend User interface must match backend UserResponse schema exactly
+    - JWT tokens expire after 15 minutes (backend setting from Story 2.2)
+    - Use Bearer token format in Authorization header: "Bearer {token}"
+    - Token validation must happen on app load via checkAuth() function
+    - Auto-logout on 401 responses from any API call
+    - Store state should include: user (User | null), token (string | null), isAuthenticated (boolean), isLoading (boolean)
+    - Actions must be async: login(email, password), register(data), logout(), checkAuth()
+    - Use useAuthStore.getState() to access store outside React components (e.g., in API interceptors)
+    - Follow existing code style from mobile/src/services/api.ts
+    - No passwords stored in state - only token
+    - Throw errors from actions for component-level error handling
+    - Always set isLoading: false after checkAuth completes
+  </constraints>
+
+  <interfaces>
+    <!-- Backend API Endpoints -->
+    <interface>
+      <name>POST /api/v1/auth/register</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        Request: { email: string, password: string, full_name: string, birth_date: string }
+        Response: { user: UserResponse, access_token: string }
+      </signature>
+      <path>backend/src/api/v1/endpoints/auth.py</path>
+    </interface>
+
+    <interface>
+      <name>POST /api/v1/auth/login</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        Request: { email: string, password: string }
+        Response: { user: UserResponse, access_token: string }
+      </signature>
+      <path>backend/src/api/v1/endpoints/auth.py</path>
+    </interface>
+
+    <interface>
+      <name>GET /api/v1/auth/me</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        Headers: { Authorization: "Bearer {token}" }
+        Response (200): UserResponse
+        Response (401): { detail: "Invalid token" | "User not found" | "Not authenticated" }
+      </signature>
+      <path>backend/src/api/v1/endpoints/auth.py</path>
+    </interface>
+
+    <!-- TypeScript Interfaces to Create -->
+    <interface>
+      <name>User</name>
+      <kind>TypeScript interface</kind>
+      <signature>
+        interface User {
+          id: string;           // UUID from backend
+          email: string;
+          full_name: string;
+          birth_date: string;   // ISO date format
+          created_at: string;   // ISO datetime
+          updated_at: string;   // ISO datetime
+        }
+      </signature>
+      <path>mobile/src/types/user.types.ts (to create)</path>
+    </interface>
+
+    <interface>
+      <name>RegisterData</name>
+      <kind>TypeScript interface</kind>
+      <signature>
+        interface RegisterData {
+          email: string;
+          password: string;
+          full_name: string;
+          birth_date: string;
+        }
+      </signature>
+      <path>mobile/src/types/user.types.ts (to create)</path>
+    </interface>
+
+    <interface>
+      <name>LoginCredentials</name>
+      <kind>TypeScript interface</kind>
+      <signature>
+        interface LoginCredentials {
+          email: string;
+          password: string;
+        }
+      </signature>
+      <path>mobile/src/types/user.types.ts (to create)</path>
+    </interface>
+
+    <interface>
+      <name>AuthState</name>
+      <kind>Zustand store interface</kind>
+      <signature>
+        interface AuthState {
+          user: User | null;
+          token: string | null;
+          isAuthenticated: boolean;
+          isLoading: boolean;
+          login: (email: string, password: string) => Promise&lt;void&gt;;
+          register: (data: RegisterData) => Promise&lt;void&gt;;
+          logout: () => Promise&lt;void&gt;;
+          checkAuth: () => Promise&lt;void&gt;;
+        }
+      </signature>
+      <path>mobile/src/stores/useAuthStore.ts (to create)</path>
+    </interface>
+
+    <!-- Expo SecureStore API -->
+    <interface>
+      <name>SecureStore</name>
+      <kind>Expo API</kind>
+      <signature>
+        setItemAsync(key: string, value: string): Promise&lt;void&gt;
+        getItemAsync(key: string): Promise&lt;string | null&gt;
+        deleteItemAsync(key: string): Promise&lt;void&gt;
+      </signature>
+      <path>expo-secure-store (package)</path>
+    </interface>
+
+    <!-- Zustand API -->
+    <interface>
+      <name>create</name>
+      <kind>Zustand function</kind>
+      <signature>
+        create&lt;T&gt;(stateCreator: (set, get) => T): () => T
+
+        Usage in store:
+        - set({ key: value }) - Update state
+        - get() - Access current state inside actions
+        - useAuthStore() - React hook for components
+        - useAuthStore.getState() - Non-React access (interceptors)
+      </signature>
+      <path>zustand (package)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Frontend testing for this story is primarily manual/integration testing through UI screens in future stories (2.7-2.10).
+      Testing checklist covers: store initialization, login/register/logout flows, token persistence (SecureStore), token validation (checkAuth), API interceptor integration, auto-logout on 401 responses.
+      Future stories will add UI components that perform end-to-end testing of the auth store.
+    </standards>
+
+    <locations>
+      - Manual testing checklist in story Dev Notes section
+      - Future: Integration tests in mobile/src/__tests__/ (when test infrastructure added)
+      - Backend auth endpoints already tested: backend/tests/api/v1/endpoints/test_auth.py (70/70 tests passing)
+    </locations>
+
+    <ideas>
+      <test ac="AC1" idea="Verify useAuthStore.ts file created in mobile/src/stores/ with proper exports" />
+      <test ac="AC2" idea="Verify initial state: user=null, token=null, isAuthenticated=false, isLoading=true" />
+      <test ac="AC3" idea="Verify all actions are defined: login, register, logout, checkAuth" />
+      <test ac="AC4" idea="Test token storage: after login, verify token exists in SecureStore with key 'auth_token'" />
+      <test ac="AC5" idea="Test checkAuth on app load: call on mount, verify token retrieved from SecureStore" />
+      <test ac="AC6" idea="Test token validation: checkAuth calls GET /api/v1/auth/me with Bearer token, handles 200 and 401 responses" />
+      <test ac="AC7" idea="Test API interceptor: verify Authorization header added to requests when logged in, not added when logged out" />
+      <test ac="AC8" idea="Verify TypeScript types: User interface matches UserResponse, RegisterData and LoginCredentials defined" />
+      <test ac="integration" idea="Test full flow: login → token stored → checkAuth restores session → logout → token deleted" />
+      <test ac="integration" idea="Test 401 auto-logout: invalid token triggers logout(), state reset, and navigation to login" />
+      <test ac="edge-case" idea="Test expired token on app load: checkAuth detects 401, clears token, sets isLoading false" />
+      <test ac="edge-case" idea="Test no token on app load: checkAuth returns early, sets isLoading false, user sees login screen" />
+    </ideas>
+  </tests>
+</story-context>
