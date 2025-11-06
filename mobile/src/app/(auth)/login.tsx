@@ -8,9 +8,9 @@ import {
   Platform,
   ActivityIndicator,
   StyleSheet,
-  SafeAreaView,
   Keyboard,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -38,12 +38,13 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refs for keyboard navigation
   const passwordInputRef = useRef<TextInput>(null);
 
   // Auth store and router
-  const { login, isLoading } = useAuthStore();
+  const { login } = useAuthStore();
   const router = useRouter();
 
   /**
@@ -111,6 +112,9 @@ export default function LoginScreen() {
         return;
       }
 
+      // Set submitting state for this login attempt
+      setIsSubmitting(true);
+
       // Call auth store login method
       await login(email, password);
 
@@ -133,14 +137,15 @@ export default function LoginScreen() {
       }
 
       setError(errorMessage);
+      setIsSubmitting(false);
     }
   };
 
   /**
    * Determine if login button should be disabled
-   * Disabled when loading or required fields are empty
+   * Disabled when submitting or required fields are empty
    */
-  const isLoginDisabled = !email.trim() || !password || isLoading;
+  const isLoginDisabled = !email.trim() || !password || isSubmitting;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -174,7 +179,7 @@ export default function LoginScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
-                editable={!isLoading}
+                editable={!isSubmitting}
                 returnKeyType="next"
                 onChangeText={handleEmailChange}
                 onSubmitEditing={() => passwordInputRef.current?.focus()}
@@ -193,7 +198,7 @@ export default function LoginScreen() {
                   placeholder="••••••••"
                   placeholderTextColor="#999"
                   secureTextEntry={!showPassword}
-                  editable={!isLoading}
+                  editable={!isSubmitting}
                   returnKeyType="done"
                   onChangeText={handlePasswordChange}
                   onSubmitEditing={handleLogin}
@@ -222,7 +227,7 @@ export default function LoginScreen() {
             disabled={isLoginDisabled}
             testID="login-button"
           >
-            {isLoading ? (
+            {isSubmitting ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Text style={styles.loginButtonText}>Login</Text>
