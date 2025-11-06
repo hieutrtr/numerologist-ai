@@ -150,3 +150,26 @@ class UserResponse(BaseModel):
     is_active: bool = Field(default=True, description="Account active status")
 
     model_config = ConfigDict(from_attributes=True)  # Enable ORM mode for SQLModel compatibility
+
+
+class GoogleSignInRequest(BaseModel):
+    """
+    Schema for Google OAuth sign-in request.
+
+    Accepts a Google ID token from the frontend after successful Google authentication.
+    The token is verified on the backend to prevent forgery.
+
+    Attributes:
+        id_token: Google JWT ID token from frontend OAuth flow
+
+    Example:
+        {
+            "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjI4YTQyMWNhZmZjZjc..."
+        }
+    """
+
+    id_token: str = Field(
+        ...,
+        min_length=10,
+        description="Google OAuth ID token from frontend"
+    )

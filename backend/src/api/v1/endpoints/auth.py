@@ -7,12 +7,22 @@ login, and token management.
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+from datetime import datetime
+from uuid import UUID
 
 from src.core.database import get_session
 from src.core.security import hash_password, create_access_token, verify_password
 from src.core.deps import get_current_user
 from src.models.user import User
-from src.schemas.user import UserCreate, UserLogin, UserResponse
+from src.models.oauth_account import OAuthAccount
+from src.schemas.user import UserCreate, UserLogin, UserResponse, GoogleSignInRequest
+from src.services.oauth_service import (
+    verify_google_token,
+    InvalidTokenError,
+    TokenVerificationError,
+    get_oauth_provider_user_id,
+    get_oauth_user_email,
+)
 
 
 router = APIRouter()
@@ -292,3 +302,217 @@ async def get_me(
         ```
     """
     return UserResponse.model_validate(current_user)
+
+
+@router.post("/google", status_code=status.HTTP_200_OK)
+async def google_sign_in(
+    request: GoogleSignInRequest,
+    session: Session = Depends(get_session)
+) -> dict:
+    """
+    Authenticate user with Google OAuth ID token.
+
+    Implements Google Sign-In flow for Android app. Frontend sends Google ID token,
+    backend verifies it and either logs in existing user or creates new account.
+
+    Handles three OAuth user linking cases:
+    1. New user: Creates User + OAuthAccount
+    2. Existing OAuth user: Returns existing user (prevents duplicates)
+    3. Email match: Links OAuthAccount to existing password user
+
+    Args:
+        request: Google OAuth request with ID token
+        session: Database session (dependency injection)
+
+    Returns:
+        dict: Same format as /login endpoint
+            {
+                "user": UserResponse,
+                "access_token": str,
+                "token_type": "bearer"
+            }
+
+    Raises:
+        HTTPException 401: Invalid or expired Google ID token
+        HTTPException 500: Token verification error (Google API issues)
+
+    Security:
+        - Verifies Google ID token signature on backend (prevents token forgery)
+        - Uses GOOGLE_WEB_CLIENT_ID from environment for verification
+        - Returns same JWT token format as /login and /register
+        - For OAuth users, hashed_password is NULL
+        - Prevents email enumeration (same approach as /login)
+
+    Example Request:
+        POST /api/v1/auth/google
+        {
+            "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjI4YTQyMWNhZmZjZjc..."
+        }
+
+    Example Response (200 OK - New User):
+        {
+            "user": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "email": "user@gmail.com",
+                "full_name": "John Doe",
+                "birth_date": null,  # Not provided by Google OAuth
+                "created_at": "2025-11-06T15:30:00",
+                "updated_at": "2025-11-06T15:30:00",
+                "is_active": true
+            },
+            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "token_type": "bearer"
+        }
+
+    Example Response (200 OK - Existing User):
+        {
+            "user": { ... existing user data ... },
+            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "token_type": "bearer"
+        }
+
+    Example Error Response (401 Unauthorized - Invalid Token):
+        {
+            "detail": "Invalid Google token: Token expired"
+        }
+
+    Flow Diagram:
+        Frontend OAuth Flow:
+        1. Frontend calls GoogleSignIn.signIn()
+        2. User authenticates with Google
+        3. Frontend receives ID token
+        4. Frontend POST id_token to /api/v1/auth/google
+
+        Backend Processing:
+        5. Verify ID token signature with Google
+        6. Extract user info (email, name, etc.)
+        7. Query OAuthAccount by provider='google' + provider_user_id
+           - If exists: Get user and return token (Case 2)
+           - If not exists:
+             - Query User by email
+               - If exists: Create OAuthAccount link (Case 3)
+               - If not exists: Create User + OAuthAccount (Case 1)
+        8. Generate JWT token for user
+        9. Return user + token
+    """
+    try:
+        # Verify Google ID token and get user info
+        user_info = verify_google_token(request.id_token)
+    except InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e)
+        )
+    except TokenVerificationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Token verification failed"
+        )
+
+    # Extract user info from verified token
+    provider_user_id = get_oauth_provider_user_id(user_info)
+    provider_email = get_oauth_user_email(user_info)
+
+    if not provider_user_id or not provider_email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Google token: missing user ID or email"
+        )
+
+    # Case 2: Check if OAuth account already exists (prevent duplicates)
+    existing_oauth = session.exec(
+        select(OAuthAccount).where(
+            (OAuthAccount.provider == "google") &
+            (OAuthAccount.provider_user_id == provider_user_id)
+        )
+    ).first()
+
+    if existing_oauth:
+        # OAuth account exists, get associated user
+        user = session.exec(
+            select(User).where(User.id == existing_oauth.user_id)
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="OAuth account user not found"
+            )
+
+        # Update oauth_account last access time
+        existing_oauth.updated_at = datetime.utcnow()
+        session.add(existing_oauth)
+        session.commit()
+
+        access_token = create_access_token(data={"sub": str(user.id)})
+        return {
+            "user": UserResponse.model_validate(user),
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+
+    # Check if email matches existing user (Case 3 or Case 1)
+    existing_user = session.exec(
+        select(User).where(User.email.ilike(provider_email))
+    ).first()
+
+    if existing_user:
+        # Case 3: Email match - link OAuth account to existing user
+        oauth_account = OAuthAccount(
+            user_id=existing_user.id,
+            provider="google",
+            provider_user_id=provider_user_id,
+            provider_email=provider_email,
+            access_token=None,  # Google doesn't return access_token for web apps
+            refresh_token=None,
+            token_expires_at=None,
+        )
+        session.add(oauth_account)
+        session.commit()
+
+        access_token = create_access_token(data={"sub": str(existing_user.id)})
+        return {
+            "user": UserResponse.model_validate(existing_user),
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+
+    # Case 1: New user - create User + OAuthAccount
+    # Note: birth_date is required for User model but not provided by Google
+    # Use a placeholder date (user must update profile later)
+    from datetime import date
+    placeholder_birth_date = date(2000, 1, 1)
+
+    new_user = User(
+        email=provider_email,
+        hashed_password=None,  # OAuth user, no password
+        full_name=user_info.get('name', 'Google User'),
+        birth_date=placeholder_birth_date,
+    )
+
+    session.add(new_user)
+    session.flush()  # Get the ID without committing
+
+    # Create OAuth account for the new user
+    oauth_account = OAuthAccount(
+        user_id=new_user.id,
+        provider="google",
+        provider_user_id=provider_user_id,
+        provider_email=provider_email,
+        access_token=None,
+        refresh_token=None,
+        token_expires_at=None,
+    )
+
+    session.add(oauth_account)
+    session.commit()
+    session.refresh(new_user)
+
+    # Create JWT access token
+    access_token = create_access_token(data={"sub": str(new_user.id)})
+
+    return {
+        "user": UserResponse.model_validate(new_user),
+        "access_token": access_token,
+        "token_type": "bearer"
+    }

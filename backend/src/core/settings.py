@@ -142,6 +142,33 @@ class Settings(BaseSettings):
     """
 
     # =====================================================================
+    # GOOGLE OAUTH
+    # =====================================================================
+    google_web_client_id: str = ""
+    """
+    Google OAuth 2.0 Web Client ID for backend token verification.
+
+    Used to verify Google ID tokens returned by frontend.
+    Get from: https://console.cloud.google.com/
+    - Create OAuth 2.0 credentials (Web application type)
+    - Copy the Client ID
+
+    Environment variable: GOOGLE_WEB_CLIENT_ID
+    """
+
+    google_android_client_id: str = ""
+    """
+    Google OAuth 2.0 Android Client ID for frontend integration.
+
+    Used in mobile app for Google Sign-In SDK configuration.
+    Get from: https://console.cloud.google.com/
+    - Add Android as an Authorized JavaScript Origins
+    - Copy the Client ID
+
+    Environment variable: GOOGLE_ANDROID_CLIENT_ID
+    """
+
+    # =====================================================================
     # CORS & SECURITY
     # =====================================================================
     cors_origins: list[str] = ["*"]
