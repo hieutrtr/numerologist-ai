@@ -1,6 +1,6 @@
 # Story 2.9: Profile Screen UI
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -21,67 +21,67 @@ so that **I can see my account details**.
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1**: Set Up Profile Screen Component Structure (AC: #1)
-  - [ ] 1.1: Create `mobile/src/app/(tabs)/profile.tsx` file
-  - [ ] 1.2: Import required React Native components: View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator
-  - [ ] 1.3: Import useAuthStore from stores
-  - [ ] 1.4: Import useRouter from expo-router
-  - [ ] 1.5: Set up component state: loading, error, user data retrieval
+- [x] **Task 1**: Set Up Profile Screen Component Structure (AC: #1)
+  - [x] 1.1: Create `mobile/src/app/(tabs)/profile.tsx` file
+  - [x] 1.2: Import required React Native components: View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator
+  - [x] 1.3: Import useAuthStore from stores
+  - [x] 1.4: Import useRouter from expo-router
+  - [x] 1.5: Set up component state: loading, error, user data retrieval
 
-- [ ] **Task 2**: Implement User Data Display (AC: #2, #3)
-  - [ ] 2.1: Get current user data from useAuthStore
-  - [ ] 2.2: Create card layout to display user information
-  - [ ] 2.3: Display full name from user profile
-  - [ ] 2.4: Display email address
-  - [ ] 2.5: Display birth date formatted as readable string (e.g., "May 15, 1990")
-  - [ ] 2.6: Use date-fns for date formatting
+- [x] **Task 2**: Implement User Data Display (AC: #2, #3)
+  - [x] 2.1: Get current user data from useAuthStore
+  - [x] 2.2: Create card layout to display user information
+  - [x] 2.3: Display full name from user profile
+  - [x] 2.4: Display email address
+  - [x] 2.5: Display birth date formatted as readable string (e.g., "May 15, 1990")
+  - [x] 2.6: Use date-fns for date formatting
 
-- [ ] **Task 3**: Implement Logout Functionality (AC: #4, #5)
-  - [ ] 3.1: Get logout method from useAuthStore
-  - [ ] 3.2: Create handleLogout async function
-  - [ ] 3.3: Call logout() from useAuthStore
-  - [ ] 3.4: On logout success, navigate to /(auth)/login using router.replace()
-  - [ ] 3.5: Handle logout errors gracefully
+- [x] **Task 3**: Implement Logout Functionality (AC: #4, #5)
+  - [x] 3.1: Get logout method from useAuthStore
+  - [x] 3.2: Create handleLogout async function
+  - [x] 3.3: Call logout() from useAuthStore
+  - [x] 3.4: On logout success, navigate to /(auth)/login using router.replace()
+  - [x] 3.5: Handle logout errors gracefully
 
-- [ ] **Task 4**: Implement Loading State (AC: #6)
-  - [ ] 4.1: Add loading state variable
-  - [ ] 4.2: Show ActivityIndicator while loading user data
-  - [ ] 4.3: Disable logout button while loading
-  - [ ] 4.4: Show loading text or skeleton state
+- [x] **Task 4**: Implement Loading State (AC: #6)
+  - [x] 4.1: Add loading state variable
+  - [x] 4.2: Show ActivityIndicator while loading user data
+  - [x] 4.3: Disable logout button while loading
+  - [x] 4.4: Show loading text or skeleton state
 
-- [ ] **Task 5**: Implement Error Handling (AC: #7)
-  - [ ] 5.1: Add error state variable
-  - [ ] 5.2: Display error message if user data fails to load
-  - [ ] 5.3: Provide option to retry loading user data
-  - [ ] 5.4: Handle missing user data gracefully
+- [x] **Task 5**: Implement Error Handling (AC: #7)
+  - [x] 5.1: Add error state variable
+  - [x] 5.2: Display error message if user data fails to load
+  - [x] 5.3: Provide option to retry loading user data
+  - [x] 5.4: Handle missing user data gracefully
 
-- [ ] **Task 6**: Design and Style Profile Screen (AC: #8)
-  - [ ] 6.1: Create StyleSheet with consistent spacing and layout
-  - [ ] 6.2: Use React Native StyleSheet for performance
-  - [ ] 6.3: Design card-based layout for user information
-  - [ ] 6.4: Style logout button with danger/primary color
-  - [ ] 6.5: Add appropriate padding and margins
-  - [ ] 6.6: Ensure responsive design for various screen sizes
-  - [ ] 6.7: Match visual style with login and register screens
-  - [ ] 6.8: Add SafeAreaView for mobile to avoid notch/status bar
+- [x] **Task 6**: Design and Style Profile Screen (AC: #8)
+  - [x] 6.1: Create StyleSheet with consistent spacing and layout
+  - [x] 6.2: Use React Native StyleSheet for performance
+  - [x] 6.3: Design card-based layout for user information
+  - [x] 6.4: Style logout button with danger/primary color
+  - [x] 6.5: Add appropriate padding and margins
+  - [x] 6.6: Ensure responsive design for various screen sizes
+  - [x] 6.7: Match visual style with login and register screens
+  - [x] 6.8: Add SafeAreaView for mobile to avoid notch/status bar
 
-- [ ] **Task 7**: Implement Tabs Navigation Integration (AC: #1)
-  - [ ] 7.1: Verify profile.tsx is automatically discoverable by Expo Router
-  - [ ] 7.2: Verify profile screen appears in tabs layout
-  - [ ] 7.3: Test navigation to/from profile screen via tabs
-  - [ ] 7.4: Verify proper stack-in-tabs nesting
+- [x] **Task 7**: Implement Tabs Navigation Integration (AC: #1)
+  - [x] 7.1: Verify profile.tsx is automatically discoverable by Expo Router
+  - [x] 7.2: Verify profile screen appears in tabs layout
+  - [x] 7.3: Test navigation to/from profile screen via tabs
+  - [x] 7.4: Verify proper stack-in-tabs nesting
 
-- [ ] **Task 8**: Integration Testing (AC: all)
-  - [ ] 8.1: Test successful profile data load and display
-  - [ ] 8.2: Test logout functionality
-  - [ ] 8.3: Test navigation to login after logout
-  - [ ] 8.4: Test loading state display
-  - [ ] 8.5: Test error state display
-  - [ ] 8.6: Test date formatting for various dates
-  - [ ] 8.7: Test logout button disabled during submission
-  - [ ] 8.8: Test retry functionality for failed data loading
-  - [ ] 8.9: Test tab navigation to profile screen
-  - [ ] 8.10: Test profile screen layout on various device sizes
+- [x] **Task 8**: Integration Testing (AC: all)
+  - [x] 8.1: Test successful profile data load and display
+  - [x] 8.2: Test logout functionality
+  - [x] 8.3: Test navigation to login after logout
+  - [x] 8.4: Test loading state display
+  - [x] 8.5: Test error state display
+  - [x] 8.6: Test date formatting for various dates
+  - [x] 8.7: Test logout button disabled during submission
+  - [x] 8.8: Test retry functionality for failed data loading
+  - [x] 8.9: Test tab navigation to profile screen
+  - [x] 8.10: Test profile screen layout on various device sizes
 
 ## Dev Notes
 
@@ -409,6 +409,61 @@ Claude Haiku 4.5 (claude-haiku-4-5-20251001)
 
 ### Debug Log References
 
+**Implementation Plan:**
+- Task 1-7 were completed by creating all required React Native components with proper TypeScript typing
+- Task 8 comprehensive tests were created covering all 12 test scenarios mapped to acceptance criteria
+- Used date-fns v3.6.0 for birth date formatting from ISO strings to readable format (e.g., "May 15, 1990")
+- Implemented cross-platform support with SafeAreaView for mobile notch avoidance and responsive styling
+- All error states, loading states, and retry functionality properly implemented
+
 ### Completion Notes List
 
+✅ **AC1 Complete**: Profile screen component created at `mobile/src/app/(tabs)/profile.tsx` with full functionality
+
+✅ **AC2 Complete**: User data display implemented showing full name, email, and birth date from useAuthStore.user
+
+✅ **AC3 Complete**: Birth date formatting working correctly - ISO date (YYYY-MM-DD) formatted to readable string using date-fns format() function (e.g., "May 15, 1990")
+
+✅ **AC4 Complete**: Logout button fully functional, calls useAuthStore.logout() method with proper error handling
+
+✅ **AC5 Complete**: On logout success, navigation to login screen via router.replace('/(auth)/login') prevents back button return to profile
+
+✅ **AC6 Complete**: Loading state implemented with ActivityIndicator display and logout button disabled during submission showing "Logging out..." text
+
+✅ **AC7 Complete**: Error handling with user-friendly error messages, retry functionality, and graceful fallback for null user data
+
+✅ **AC8 Complete**: Clean, readable layout using React Native StyleSheet with card-based design, proper spacing, responsive styling matching login/register screens
+
+### Completed Implementation Files
+
+**Component Files Created:**
+- `mobile/src/app/(tabs)/profile.tsx` (main Profile Screen component - 300+ lines)
+- `mobile/src/app/(tabs)/_layout.tsx` (Tabs navigation layout - new)
+- `mobile/src/app/(tabs)/index.tsx` (Conversation tab placeholder - new)
+- `mobile/src/app/(tabs)/history.tsx` (History tab placeholder - new)
+
+**Test Files Created:**
+- `mobile/__tests__/screens/ProfileScreen.test.tsx` (comprehensive test suite - 500+ lines, 50+ test cases)
+
+**Dependency Added:**
+- `date-fns@^3.6.0` - installed for date formatting functionality
+
+**Key Implementation Details:**
+1. Profile screen uses Zustand auth store for user data (single source of truth)
+2. Logout uses local isSubmitting state to control button loading (learned from Story 2.8)
+3. Date formatting handles edge cases (invalid dates, empty strings, leap years)
+4. Error handling with retry button for graceful failure recovery
+5. Cross-platform support: Works on Web (PWA), iOS, Android with Platform.OS awareness
+6. Responsive design with SafeAreaView for mobile notch/status bar avoidance
+7. Visual consistency with login/register screens established in earlier stories
+
 ### File List
+
+- `mobile/src/app/(tabs)/profile.tsx` - NEW (Profile Screen component)
+- `mobile/src/app/(tabs)/_layout.tsx` - NEW (Tabs navigation layout)
+- `mobile/src/app/(tabs)/index.tsx` - NEW (Conversation tab placeholder)
+- `mobile/src/app/(tabs)/history.tsx` - NEW (History tab placeholder)
+- `mobile/__tests__/screens/ProfileScreen.test.tsx` - NEW (Integration tests)
+- `mobile/package.json` - MODIFIED (added date-fns@^3.6.0)
+- `docs/sprint-status.yaml` - MODIFIED (updated story status to in-progress)
+- `docs/stories/2-9-profile-screen-ui.md` - MODIFIED (this file with all tasks checked)
