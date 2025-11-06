@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="2-11-oauth-account-model-google-signin" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.11</storyId>
+    <title>OAuth Account Model & Google Sign-In</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-06</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-11-oauth-account-model-google-signin.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Android user</asA>
+    <iWant>to sign in with my Google account</iWant>
+    <soThat>I can quickly access the app without creating a separate password</soThat>
+    <tasks>
+      <task n="1">Create OAuthAccount Model (AC: #1, #2)</task>
+      <task n="2">Generate and Apply OAuth Migration (AC: #3, #4)</task>
+      <task n="3">Implement Google Token Verification Service (AC: #5)</task>
+      <task n="4">Create Google Sign-In Backend Endpoint (AC: #6, #7)</task>
+      <task n="5">Implement Frontend Google Sign-In Button (AC: #8, #9)</task>
+      <task n="6">Add Google OAuth to Frontend Auth Store (AC: #8)</task>
+      <task n="7">Integration Testing (AC: #10)</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion n="1">OAuthAccount Model Created with 10 fields, unique constraint on (provider, provider_user_id), foreign key to User</criterion>
+    <criterion n="2">OAuthAccount Model Registered with Alembic and relationships defined</criterion>
+    <criterion n="3">Alembic Migration Generated for OAuth Accounts table</criterion>
+    <criterion n="4">Migration Applied Successfully - table exists in database with constraints</criterion>
+    <criterion n="5">Google OAuth Verification Utility Created - verify_google_token() function</criterion>
+    <criterion n="6">Google Sign-In Backend Endpoint Created - POST /api/v1/auth/google</criterion>
+    <criterion n="7">Database Queries for OAuth Operations - CRUD operations on OAuth accounts</criterion>
+    <criterion n="8">Frontend Google Sign-In Button - React Native component with OAuth flow</criterion>
+    <criterion n="9">Google OAuth Configuration - environment variables and SDK initialization</criterion>
+    <criterion n="10">Integration Testing - all user linking cases work correctly</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/2-11-ANALYSIS-SUMMARY.md</path>
+        <title>OAuth Architecture Analysis Summary</title>
+        <section>Quick Reference for Implementation</section>
+        <snippet>Architecture overview, critical files, implementation checklist, database schema, environment variables</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-11-auth-architecture-analysis.md</path>
+        <title>Complete Authentication Architecture Analysis</title>
+        <section>Comprehensive Analysis Across All Layers</section>
+        <snippet>Backend structure, frontend patterns, dependencies, configuration, gaps analysis, security considerations</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Project Architecture Documentation</title>
+        <section>Authentication and OAuth Design</section>
+        <snippet>High-level architecture, API structure, state management patterns, security patterns</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 2.11: OAuth Account Model & Google Sign-In</section>
+        <snippet>User story, business value, acceptance criteria overview</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>apps/api/src/models/user.py</path>
+        <kind>model</kind>
+        <symbol>User</symbol>
+        <lines>1-80</lines>
+        <reason>Existing User model. Note: hashed_password is nullable, already designed for OAuth. Used as template for OAuthAccount relationships.</reason>
+      </artifact>
+      <artifact>
+        <path>apps/api/src/api/v1/endpoints/auth.py</path>
+        <kind>routes</kind>
+        <symbol>router</symbol>
+        <lines>1-150</lines>
+        <reason>Existing auth endpoints (register, login, me). POST /api/v1/auth/google endpoint will follow same patterns: request model → business logic → response</reason>
+      </artifact>
+      <artifact>
+        <path>apps/api/src/core/security.py</path>
+        <kind>utility</kind>
+        <symbol>create_access_token, verify_password, get_password_hash</symbol>
+        <lines>1-100</lines>
+        <reason>JWT token generation and password hashing. Will reuse create_access_token() for OAuth sign-in response.</reason>
+      </artifact>
+      <artifact>
+        <path>apps/api/src/core/settings.py</path>
+        <kind>config</kind>
+        <symbol>Settings</symbol>
+        <lines>1-50</lines>
+        <reason>Environment configuration. Must add GOOGLE_WEB_CLIENT_ID for token verification.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/stores/useAuthStore.ts</path>
+        <kind>service</kind>
+        <symbol>useAuthStore</symbol>
+        <lines>1-250</lines>
+        <reason>Zustand auth store. Will add googleSignIn() action method that calls POST /api/v1/auth/google endpoint.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(auth)/login.tsx</path>
+        <kind>component</kind>
+        <symbol>LoginScreen</symbol>
+        <lines>1-50</lines>
+        <reason>Existing login screen. Google Sign-In button will be placed above/below existing form, following same styling patterns.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/utils/storage.ts</path>
+        <kind>utility</kind>
+        <symbol>tokenStorage</symbol>
+        <lines>1-100</lines>
+        <reason>Platform-aware token storage. OAuth tokens stored via same pattern as login tokens.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <dependency>
+        <ecosystem>pip</ecosystem>
+        <package>google-auth</package>
+        <version>>=2.25.0</version>
+        <reason>Google OAuth token verification - verify_google_token() requires google.auth.transport.requests and google.oauth2.id_token</reason>
+      </dependency>
+      <dependency>
+        <ecosystem>pip</ecosystem>
+        <package>google-auth-httplib2</package>
+        <version>>=0.2.0</version>
+        <reason>HTTP transport for Google Auth library</reason>
+      </dependency>
+      <dependency>
+        <ecosystem>npm</ecosystem>
+        <package>@react-native-google-signin/google-signin</package>
+        <version>^11.0.0</version>
+        <reason>React Native Google Sign-In SDK - triggers OAuth flow, returns ID token</reason>
+      </dependency>
+      <dependency>
+        <ecosystem>pip</ecosystem>
+        <package>SQLModel</package>
+        <version>^0.0.16</version>
+        <reason>Already installed. Used for OAuthAccount model definition and relationships</reason>
+      </dependency>
+      <dependency>
+        <ecosystem>pip</ecosystem>
+        <package>alembic</package>
+        <version>^1.13.0</version>
+        <reason>Already installed. Used for database migrations</reason>
+      </dependency>
+      <dependency>
+        <ecosystem>npm</ecosystem>
+        <package>zustand</package>
+        <version>^5.0.0</version>
+        <reason>Already installed. Used for frontend auth state management</reason>
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">
+      <name>OAuth User Creation Logic</name>
+      <description>Three cases: (1) New user → create User + OAuthAccount, (2) Existing OAuth user → return user (prevent duplicates), (3) Email match → link OAuthAccount to existing user. All three must return same JWT response format.</description>
+      <source>Story 2.11 AC6</source>
+    </constraint>
+    <constraint type="pattern">
+      <name>Token Response Format</name>
+      <description>OAuth endpoint must return identical response to /auth/login: {user: UserResponse, access_token: string, token_type: "bearer"}. This ensures frontend code can reuse same token storage and auth store logic.</description>
+      <source>Story 2.11 AC6</source>
+    </constraint>
+    <constraint type="pattern">
+      <name>Platform-Aware Storage</name>
+      <description>OAuth tokens stored via same mechanism as login tokens: SecureStore on iOS/Android (encrypted), localStorage on Web. Use existing tokenStorage utility from mobile/src/utils/storage.ts</description>
+      <source>Story 2.11 AC8, AC9</source>
+    </constraint>
+    <constraint type="security">
+      <name>Google Token Verification</name>
+      <description>Must verify Google ID tokens on backend using google.auth library. Never trust ID token claims without verification. Use GOOGLE_WEB_CLIENT_ID from environment for verification.</description>
+      <source>Story 2.11 AC5, AC6</source>
+    </constraint>
+    <constraint type="database">
+      <name>Unique Constraint on OAuth Account</name>
+      <description>OAuthAccount table must have unique constraint on (provider, provider_user_id) to prevent duplicate OAuth accounts for same provider/user combo.</description>
+      <source>Story 2.11 AC1, AC3</source>
+    </constraint>
+    <constraint type="requirement">
+      <name>Migration Reversibility</name>
+      <description>Alembic migration must be reversible - downgrade must successfully drop oauth_account table without affecting other tables.</description>
+      <source>Story 2.11 AC3</source>
+    </constraint>
+    <constraint type="testing">
+      <name>All Three OAuth Cases Tested</name>
+      <description>Integration tests must verify: (1) New user creates user + oauth_account, (2) Re-login as existing OAuth user, (3) Email match links OAuth to existing user. Test on actual Google OAuth flow, not mocked.</description>
+      <source>Story 2.11 AC10</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>verify_google_token()</name>
+      <kind>Python Function</kind>
+      <signature>def verify_google_token(id_token: str) -> dict</signature>
+      <path>apps/api/src/services/oauth_service.py</path>
+      <description>Verifies Google ID token and returns user info. Must validate token signature, expiry, and audience. Returns dict with keys: sub (user ID), email, name, picture. Raises ValueError on invalid token.</description>
+    </interface>
+    <interface>
+      <name>OAuthAccount Model</name>
+      <kind>SQLModel</kind>
+      <signature>class OAuthAccount(SQLModel, table=True)</signature>
+      <path>apps/api/src/models/oauth_account.py</path>
+      <description>Database model for OAuth accounts. Fields: id, user_id (FK), provider, provider_user_id, provider_email, access_token, refresh_token, token_expires_at, created_at, updated_at. Unique constraint on (provider, provider_user_id).</description>
+    </interface>
+    <interface>
+      <name>POST /api/v1/auth/google</name>
+      <kind>API Endpoint</kind>
+      <signature>POST /api/v1/auth/google { "id_token": string }</signature>
+      <path>apps/api/src/api/v1/endpoints/auth.py</path>
+      <description>Backend endpoint for Google sign-in. Verifies Google ID token, creates or retrieves user and OAuth account, returns JWT tokens same as /auth/login</description>
+    </interface>
+    <interface>
+      <name>GoogleSignInButton Component</name>
+      <kind>React Native Component</kind>
+      <signature>export function GoogleSignInButton({ onSuccess, onError })</signature>
+      <path>mobile/src/components/auth/GoogleSignInButton.tsx</path>
+      <description>Frontend Google Sign-In button component. Triggers OAuth flow, returns ID token. On success, calls onSuccess(idToken). On error, calls onError(error).</description>
+    </interface>
+    <interface>
+      <name>useAuthStore.googleSignIn()</name>
+      <kind>Zustand Action</kind>
+      <signature>const { googleSignIn } = useAuthStore(); await googleSignIn(idToken: string)</signature>
+      <path>mobile/src/stores/useAuthStore.ts</path>
+      <description>Auth store method to handle Google sign-in. Sends ID token to backend /api/v1/auth/google, stores JWT tokens, updates auth state. Same as login() but takes ID token instead of credentials.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Backend Tests: Use pytest with sqlalchemy test database. Mock Google token verification for unit tests, use real Google tokens for integration tests. Test all three user linking cases. Test error cases: invalid token, expired token, network errors.</standard>
+      <standard>Frontend Tests: Use Jest with @testing-library/react-native. Mock Google Sign-In SDK, mock useAuthStore, test component rendering and button press. Test error handling and loading states. Integration tests via Expo Go on physical device or emulator.</standard>
+      <standard>OAuth Tests: Use real Google OAuth credentials (test credentials from Google Cloud Console). Test complete flow: GoogleSignInButton press → Google auth → ID token returned → backend verification → JWT tokens returned → stored in secure storage → user logged in.</standard>
+    </standards>
+    <locations>
+      <location>apps/api/tests/test_oauth_service.py - OAuth service unit tests (verify_google_token)</location>
+      <location>apps/api/tests/test_auth_endpoints.py - Auth endpoint tests including /api/v1/auth/google</location>
+      <location>mobile/__tests__/components/GoogleSignInButton.test.tsx - Component unit tests</location>
+      <location>mobile/__tests__/stores/useAuthStore.oauth.test.ts - Auth store OAuth action tests</location>
+      <location>Manual Integration Test Checklist - End-to-end OAuth flow testing</location>
+    </locations>
+    <ideas>
+      <idea acId="1,2">Test OAuthAccount model creation and relationships to User</idea>
+      <idea acId="3,4">Test migration up/down cycle - table created and dropped correctly</idea>
+      <idea acId="5">Test verify_google_token with valid token, invalid token, expired token, network error</idea>
+      <idea acId="6">Test /api/v1/auth/google endpoint with three user cases: new user, existing oauth user, email match</idea>
+      <idea acId="7">Test OAuth CRUD operations - create, read, update, delete OAuth accounts</idea>
+      <idea acId="8,9">Test GoogleSignInButton renders, triggers OAuth flow, returns ID token</idea>
+      <idea acId="8">Test useAuthStore.googleSignIn() calls backend, stores tokens, updates state</idea>
+      <idea acId="9">Test environment variables loaded correctly (GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID)</idea>
+      <idea acId="10">Test complete flow: Open app → tap Google Sign-In → authenticate with Google → redirected to home as logged-in user</idea>
+      <idea acId="10">Test app reload after Google sign-in - user stays logged in</idea>
+      <idea acId="10">Test logout after Google sign-in - user redirected to login</idea>
+      <idea acId="10">Test linking Google to existing email/password account</idea>
+    </ideas>
+  </tests>
+
+  <implementation-notes>
+    <note type="backend-setup">
+      <title>Backend Dependencies</title>
+      <content>Before starting backend implementation:
+1. Add google-auth >=2.25.0 and google-auth-httplib2 >=0.2.0 to apps/api/pyproject.toml
+2. Run: make install (or poetry install in api directory)
+3. Add GOOGLE_WEB_CLIENT_ID to .env file (get from Google Cloud Console)
+4. Add to apps/api/src/core/settings.py: google_web_client_id: str = Field(default="", env="GOOGLE_WEB_CLIENT_ID")
+      </content>
+    </note>
+    <note type="frontend-setup">
+      <title>Frontend Dependencies</title>
+      <content>Before starting frontend implementation:
+1. Run: npm install @react-native-google-signin/google-signin
+2. Add GOOGLE_ANDROID_CLIENT_ID to .env file
+3. Initialize Google Sign-In in mobile/src/app/_layout.tsx (call GoogleSignin.configure in useEffect)
+4. Test on Android device/emulator (web support limited)
+      </content>
+    </note>
+    <note type="database">
+      <title>Migration Strategy</title>
+      <content>OAuthAccount model fields:
+- id: int (primary key, auto-increment)
+- user_id: int (foreign key to user.id, ON DELETE CASCADE)
+- provider: str (e.g., 'google', allow for future 'apple', 'microsoft')
+- provider_user_id: str (Google's 'sub' claim)
+- provider_email: str (Google's email)
+- access_token: str (nullable, for future token refresh)
+- refresh_token: str (nullable, Google doesn't return for web apps typically)
+- token_expires_at: datetime (nullable)
+- created_at: datetime (default now)
+- updated_at: datetime (default now, update on each access)
+- Unique constraint: (provider, provider_user_id)
+- Index: user_id (for fast lookups)
+      </content>
+    </note>
+    <note type="three-user-cases">
+      <title>Three OAuth User Linking Cases</title>
+      <content>
+Case 1 - New User:
+- Google ID token received with email: user@example.com
+- Query: OAuthAccount where provider='google' and provider_user_id=token.sub → NOT FOUND
+- Query: User where email='user@example.com' → NOT FOUND
+- Action: Create new User (with NULL hashed_password), create OAuthAccount linked to user
+- Return: UserResponse + JWT tokens
+
+Case 2 - Existing OAuth User:
+- Google ID token received with provider_user_id that exists
+- Query: OAuthAccount where provider='google' and provider_user_id=token.sub → FOUND
+- Action: Get associated User, return tokens
+- Return: UserResponse + JWT tokens (same user as before)
+
+Case 3 - Email Match (Existing Password User):
+- Google ID token received with email: user@example.com
+- Query: OAuthAccount where provider='google' and provider_user_id=token.sub → NOT FOUND
+- Query: User where email='user@example.com' → FOUND (user with password auth)
+- Action: Create new OAuthAccount linked to existing user (now user can login via Google OR password)
+- Return: UserResponse + JWT tokens for existing user
+      </content>
+    </note>
+  </implementation-notes>
+
+</story-context>
