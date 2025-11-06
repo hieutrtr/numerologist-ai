@@ -1,6 +1,6 @@
 # Story 2.7: Login Screen UI
 
-Status: review
+Status: done
 
 ## Story
 
