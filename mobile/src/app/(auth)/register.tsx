@@ -51,6 +51,7 @@ export default function RegisterScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refs for keyboard navigation
   const emailInputRef = useRef<TextInput>(null);
@@ -210,10 +211,11 @@ export default function RegisterScreen() {
    * Flow:
    * 1. Clear previous errors
    * 2. Validate form
-   * 3. Format birth date as ISO string (YYYY-MM-DD)
-   * 4. Call auth store register
-   * 5. On success, navigate to home with replace (prevents back navigation)
-   * 6. On error, display user-friendly message
+   * 3. Set submitting state
+   * 4. Format birth date as ISO string (YYYY-MM-DD)
+   * 5. Call auth store register
+   * 6. On success, navigate to home with replace (prevents back navigation)
+   * 7. On error, display user-friendly message and reset submitting state
    */
   const handleRegister = async () => {
     try {
@@ -228,6 +230,9 @@ export default function RegisterScreen() {
       if (!validateForm()) {
         return;
       }
+
+      // Set submitting state for this registration attempt
+      setIsSubmitting(true);
 
       // Format birth date for API (ISO 8601: YYYY-MM-DD)
       const birthDateISO = birthDate!.toISOString().split('T')[0];
@@ -259,12 +264,13 @@ export default function RegisterScreen() {
       }
 
       setError(errorMessage);
+      setIsSubmitting(false);
     }
   };
 
   /**
    * Determine if register button should be disabled
-   * Disabled when loading or any required field is empty
+   * Disabled when submitting or any required field is empty
    */
   const isRegisterDisabled =
     !fullName.trim() ||
@@ -272,7 +278,7 @@ export default function RegisterScreen() {
     !password ||
     !confirmPassword ||
     !birthDate ||
-    isLoading;
+    isSubmitting;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -313,7 +319,7 @@ export default function RegisterScreen() {
                   placeholderTextColor="#999"
                   autoCapitalize="words"
                   autoComplete="name"
-                  editable={!isLoading}
+                  editable={!isSubmitting}
                   returnKeyType="next"
                   onChangeText={(text) =>
                     handleFieldChange(text, 'fullName', setFullName)
@@ -338,7 +344,7 @@ export default function RegisterScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
-                  editable={!isLoading}
+                  editable={!isSubmitting}
                   returnKeyType="next"
                   onChangeText={(text) =>
                     handleFieldChange(text, 'email', setEmail)
@@ -366,7 +372,7 @@ export default function RegisterScreen() {
                     placeholder="••••••••"
                     placeholderTextColor="#999"
                     secureTextEntry={!showPassword}
-                    editable={!isLoading}
+                    editable={!isSubmitting}
                     returnKeyType="next"
                     onChangeText={(text) =>
                       handleFieldChange(text, 'password', setPassword)
@@ -380,6 +386,7 @@ export default function RegisterScreen() {
                   <TouchableOpacity
                     style={styles.toggleButton}
                     onPress={() => setShowPassword(!showPassword)}
+                    disabled={isSubmitting}
                     testID="toggle-password"
                   >
                     <MaterialIcons
@@ -410,7 +417,7 @@ export default function RegisterScreen() {
                     placeholder="••••••••"
                     placeholderTextColor="#999"
                     secureTextEntry={!showConfirmPassword}
-                    editable={!isLoading}
+                    editable={!isSubmitting}
                     returnKeyType="done"
                     onChangeText={(text) =>
                       handleFieldChange(
@@ -428,6 +435,7 @@ export default function RegisterScreen() {
                     onPress={() =>
                       setShowConfirmPassword(!showConfirmPassword)
                     }
+                    disabled={isSubmitting}
                     testID="toggle-confirm-password"
                   >
                     <MaterialIcons
@@ -469,7 +477,7 @@ export default function RegisterScreen() {
                         }
                       }}
                       style={styles.webDateInput}
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                   </View>
                 ) : (
@@ -481,7 +489,7 @@ export default function RegisterScreen() {
                         fieldErrors.birthDate && styles.inputError,
                       ]}
                       onPress={() => setShowDatePicker(true)}
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                       testID="birthdate-button"
                     >
                       <Text
