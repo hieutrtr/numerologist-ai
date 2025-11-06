@@ -1,6 +1,6 @@
 # Story 2.10: Auth Navigation Flow
 
-Status: review
+Status: done
 
 ## Story
 

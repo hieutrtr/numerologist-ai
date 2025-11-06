@@ -6,9 +6,10 @@ This model stores core user information including authentication credentials
 (hashed passwords) and personal information required for numerology calculations.
 """
 
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from datetime import date, datetime
 from uuid import UUID, uuid4
+from typing import Optional, List
 
 
 class User(SQLModel, table=True):
@@ -67,4 +68,10 @@ class User(SQLModel, table=True):
     is_active: bool = Field(
         default=True,
         description="Whether the user account is active (False = soft delete)"
+    )
+
+    # Relationships
+    oauth_accounts: Optional[List["OAuthAccount"]] = Relationship(
+        back_populates="user",
+        cascade_delete=True,
     )

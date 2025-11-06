@@ -7,6 +7,7 @@ for automatic migration generation.
 """
 
 from src.models.user import User
+from src.models.oauth_account import OAuthAccount
 
 # Export all models
-__all__ = ["User"]
+__all__ = ["User", "OAuthAccount"]
