@@ -59,7 +59,7 @@ export default function RegisterScreen() {
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
   // Auth store and router
-  const { register, isLoading } = useAuthStore();
+  const { register } = useAuthStore();
   const router = useRouter();
 
   /**
@@ -532,7 +532,7 @@ export default function RegisterScreen() {
               disabled={isRegisterDisabled}
               testID="register-button"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Text style={styles.registerButtonText}>Register</Text>
