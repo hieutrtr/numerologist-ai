@@ -650,6 +650,7 @@ export function EmptyState() {
 - `mobile/tailwind.config.js` - Celestial Gold theme configuration
 - `mobile/global.css` - Tailwind CSS directives
 - `mobile/metro.config.js` - NativeWind Metro bundler configuration
+- `mobile/postcss.config.js` - PostCSS with @tailwindcss/postcss for web platform CSS support
 - `mobile/src/components/conversation/RecordButton.tsx` - Voice recording button component
 - `mobile/src/components/conversation/MessageCard.tsx` - Conversation message display component
 - `mobile/src/components/conversation/LoadingWaveform.tsx` - AI thinking animation component
@@ -673,6 +674,11 @@ export function EmptyState() {
 - Conversation screen implemented with state management and mock API integration
 - Login screen converted to use Celestial Gold theme
 - CSS import path corrected for Expo/metro bundler compatibility
+- Fixed CSS display on web platform:
+  - Added @tailwindcss/postcss, postcss, and autoprefixer dependencies
+  - Created postcss.config.js with @tailwindcss/postcss plugin (Tailwind v4 requirement)
+  - Web bundle now successfully builds with Tailwind classes processed
+  - Verified web dev server starting successfully with CSS processing
 
 ### Completion Notes
 Successfully implemented UI Polish Story 2.12 with:
@@ -681,8 +687,9 @@ Successfully implemented UI Polish Story 2.12 with:
 3. **Conversation Screen** - Implemented content-first layout with message history, empty state, loading animation, and record button
 4. **Theme Application** - Applied dark backgrounds, gold text, and purple accents to login screen
 5. **Developer Experience** - Single source of truth (tailwind.config.js) for all design tokens
+6. **Web Platform Support** - Added PostCSS configuration for web CSS processing (separate from mobile NativeWind preset)
 
-All tasks marked complete. Story ready for review and testing on mobile devices with custom dev client.
+All tasks marked complete. Story ready for review and testing on mobile devices with custom dev client. Web platform CSS verified working.
 
 ---
 
@@ -693,6 +700,7 @@ All tasks marked complete. Story ready for review and testing on mobile devices 
 | 1.0     | 2025-11-07 | Dev    | Initial story draft - UI polish and UX design alignment |
 | 1.1     | 2025-11-08 | Dev    | Updated to use NativeWind v4 instead of vanilla StyleSheet approach |
 | 1.2     | 2025-11-08 | Dev    | Implementation complete - All tasks done, ready for review |
+| 1.3     | 2025-11-08 | Dev    | Fixed web platform CSS support - Added PostCSS with @tailwindcss/postcss |
 
 ---
 
