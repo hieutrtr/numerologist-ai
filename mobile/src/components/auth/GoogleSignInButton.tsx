@@ -92,6 +92,13 @@ export function GoogleSignInButton({
   useEffect(() => {
     const initializeGoogleSignIn = async () => {
       try {
+        // Check if GoogleSignin module is available (not on Expo Go)
+        if (!GoogleSignin) {
+          console.warn('Google Sign-In not available - native module not linked');
+          setIsInitialized(false);
+          return;
+        }
+
         await GoogleSignin.hasPlayServices();
 
         // Configure Google Sign-In with Web Client ID
@@ -123,7 +130,7 @@ export function GoogleSignInButton({
    * Triggers OAuth flow and retrieves ID token
    */
   const handleGoogleSignIn = async () => {
-    if (!isInitialized || isLoading || disabled) {
+    if (!GoogleSignin || !isInitialized || isLoading || disabled) {
       return;
     }
 
@@ -150,12 +157,16 @@ export function GoogleSignInButton({
       // Handle specific error codes
       let errorMessage = 'Google Sign-In failed';
 
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        errorMessage = 'Sign-in was cancelled';
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        errorMessage = 'Sign-in is already in progress';
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        errorMessage = 'Google Play Services not available';
+      if (statusCodes) {
+        if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+          errorMessage = 'Sign-in was cancelled';
+        } else if (error.code === statusCodes.IN_PROGRESS) {
+          errorMessage = 'Sign-in is already in progress';
+        } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+          errorMessage = 'Google Play Services not available';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
       } else if (error.message) {
         errorMessage = error.message;
       }
