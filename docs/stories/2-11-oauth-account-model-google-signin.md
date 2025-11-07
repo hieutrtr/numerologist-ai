@@ -2,7 +2,7 @@
 
 **Epic:** Epic 2 - User Authentication & Profile
 **Story ID:** 2-11-oauth-account-model-google-signin
-**Status:** drafted
+**Status:** done
 **Created:** 2025-11-05
 **Updated:** 2025-11-05
 
