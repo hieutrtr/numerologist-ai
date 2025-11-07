@@ -26,13 +26,14 @@ export default function RootLayout() {
     if (isLoading) return; // Don't redirect while loading
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inTabsGroup = segments[0] === '(tabs)';
 
     if (!isAuthenticated && !inAuthGroup) {
       // Not authenticated and not in auth screens - redirect to login
       router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuthGroup) {
-      // Authenticated but still in auth screens - redirect to home
-      router.replace('/');
+      // Authenticated but still in auth screens - redirect to conversation/tabs
+      router.replace('/(tabs)');
     }
   }, [isAuthenticated, isLoading, segments]);
 

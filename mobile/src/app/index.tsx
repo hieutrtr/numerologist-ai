@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ActivityIndicator, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { apiClient, HealthCheckResponse } from '@/services/api';
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +31,15 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
+    // If authenticated, redirect to conversation screen
+    if (isAuthenticated) {
+      router.replace('/(tabs)');
+      return;
+    }
+
+    // Otherwise, show health check (development only)
     checkHealth();
-  }, []);
+  }, [isAuthenticated, router]);
 
   return (
     <View style={styles.container}>
