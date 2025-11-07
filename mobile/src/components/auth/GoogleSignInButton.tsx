@@ -23,9 +23,19 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { MaterialIcons } from '@expo/vector-icons';
+
+// Conditionally import Google Sign-In to avoid crashes on Expo Go
+let GoogleSignin: any;
+let statusCodes: any;
+try {
+  const GoogleSignInModule = require('@react-native-google-signin/google-signin');
+  GoogleSignin = GoogleSignInModule.GoogleSignin;
+  statusCodes = GoogleSignInModule.statusCodes;
+} catch (error) {
+  console.warn('Google Sign-In native module not available. Using Expo Go? Use a custom dev client instead.');
+}
 
 interface GoogleSignInButtonProps {
   /**
@@ -164,6 +174,17 @@ export function GoogleSignInButton({
     }
   };
 
+  // Don't render if not available (e.g., Expo Go, native module not linked)
+  if (!GoogleSignin) {
+    return (
+      <View style={styles.disabledContainer}>
+        <Text style={styles.disabledText}>
+          Google Sign-In not available. Please use a custom Expo dev client.
+        </Text>
+      </View>
+    );
+  }
+
   // Don't render if not initialized
   if (!isInitialized) {
     return (
@@ -247,6 +268,23 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     color: '#666',
+  },
+  disabledContainer: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+    marginVertical: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  disabledText: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'center',
   },
 });
 
