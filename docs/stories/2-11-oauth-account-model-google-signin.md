@@ -627,6 +627,36 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
 ## Dev Notes
 
+### Expo Custom Dev Client Requirement
+
+**Important:** Google Sign-In requires **Expo Custom Dev Client**, not Expo Go.
+
+**Why?** The `@react-native-google-signin/google-signin` library uses native modules that are not available in Expo Go.
+
+**Setup Options:**
+
+1. **Android Device (Recommended for Development):**
+   ```bash
+   cd mobile
+   eas build --platform android --profile preview
+   # Scan QR code with device or emulator
+   ```
+
+2. **Android Emulator:**
+   ```bash
+   eas build --platform android --profile preview
+   # Build will provide installation instructions
+   ```
+
+3. **Local Development (Requires Android NDK):**
+   ```bash
+   cd mobile
+   expo run:android
+   # This builds a dev client locally
+   ```
+
+**Web/iOS:** Google Sign-In button will show a message: "Google Sign-In not available. Please use a custom Expo dev client." (Feature requires native module).
+
 ### Google Cloud Console Setup
 
 **Step-by-Step Configuration:**
