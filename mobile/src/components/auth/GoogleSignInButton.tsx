@@ -124,7 +124,7 @@ export function GoogleSignInButton({
       const response = await GoogleSignin.signIn();
 
       // Get the ID token from the response
-      const idToken = response.data?.idToken;
+      const idToken = response.idToken;
 
       if (!idToken) {
         throw new Error('No ID token in Google Sign-In response');
