@@ -1,3 +1,5 @@
+import '../../global.css'; // NativeWind CSS
+
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';

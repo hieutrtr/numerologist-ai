@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  StyleSheet,
   Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -148,34 +147,36 @@ export default function LoginScreen() {
   const isLoginDisabled = !email.trim() || !password || isSubmitting;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-dark">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        className="flex-1 justify-center"
       >
-        <View style={styles.content}>
+        <View className="px-lg py-lg">
           {/* Header */}
-          <View style={styles.headerContainer}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to your account</Text>
+          <View className="mb-xxl items-center">
+            <Text className="text-display font-bold text-text-primary mb-sm">Welcome Back</Text>
+            <Text className="text-body text-text-secondary font-normal">Sign in to your account</Text>
           </View>
 
           {/* Error Message Display */}
           {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
+            <View className="bg-error/20 border border-error rounded-lg p-md mb-lg">
+              <Text className="text-small text-error font-semibold">{error}</Text>
             </View>
           )}
 
           {/* Form Fields */}
-          <View style={styles.formContainer}>
+          <View className="mb-lg">
             {/* Email Input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
+            <View className="mb-md">
+              <Text className="text-small font-semibold text-text-primary mb-xs">Email</Text>
               <TextInput
-                style={[styles.input, error && styles.inputError]}
+                className={`border rounded-lg px-md py-md text-body font-normal text-text-primary ${
+                  error ? 'border-error bg-error/10' : 'border-border bg-light'
+                }`}
                 placeholder="your@email.com"
-                placeholderTextColor="#999"
+                placeholderTextColor="#6b7280"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
@@ -189,14 +190,16 @@ export default function LoginScreen() {
             </View>
 
             {/* Password Input with Show/Hide Toggle */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.passwordContainer}>
+            <View className="mb-md">
+              <Text className="text-small font-semibold text-text-primary mb-xs">Password</Text>
+              <View className="flex-row items-center relative">
                 <TextInput
                   ref={passwordInputRef}
-                  style={[styles.input, styles.passwordInput, error && styles.inputError]}
+                  className={`flex-1 border rounded-lg px-md py-md text-body font-normal text-text-primary ${
+                    error ? 'border-error bg-error/10' : 'border-border bg-light'
+                  }`}
                   placeholder="••••••••"
-                  placeholderTextColor="#999"
+                  placeholderTextColor="#6b7280"
                   secureTextEntry={!showPassword}
                   editable={!isSubmitting}
                   returnKeyType="done"
@@ -206,14 +209,14 @@ export default function LoginScreen() {
                   testID="password-input"
                 />
                 <TouchableOpacity
-                  style={styles.toggleButton}
+                  className="absolute right-md py-md px-sm"
                   onPress={() => setShowPassword(!showPassword)}
                   testID="toggle-password"
                 >
                   <MaterialIcons
                     name={showPassword ? 'visibility' : 'visibility-off'}
                     size={20}
-                    color="#666"
+                    color="#6b7280"
                   />
                 </TouchableOpacity>
               </View>
@@ -222,7 +225,9 @@ export default function LoginScreen() {
 
           {/* Login Button */}
           <TouchableOpacity
-            style={[styles.loginButton, isLoginDisabled && styles.loginButtonDisabled]}
+            className={`bg-primary rounded-lg py-sm px-md items-center justify-center mb-lg min-h-[50px] ${
+              isLoginDisabled ? 'opacity-60' : ''
+            }`}
             onPress={handleLogin}
             disabled={isLoginDisabled}
             testID="login-button"
@@ -230,26 +235,26 @@ export default function LoginScreen() {
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Login</Text>
+              <Text className="text-body font-semibold text-white">Login</Text>
             )}
           </TouchableOpacity>
 
           {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
+          <View className="flex-row items-center my-lg">
+            <View className="flex-1 h-px bg-border" />
+            <Text className="mx-md text-small text-text-muted font-semibold">or</Text>
+            <View className="flex-1 h-px bg-border" />
           </View>
 
           {/* Google Sign-In Button */}
           <GoogleSignInButton />
 
           {/* Register Link */}
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account? </Text>
+          <View className="flex-row justify-center items-center py-sm">
+            <Text className="text-small text-text-secondary">Don't have an account? </Text>
             <Link href="/(auth)/register" asChild>
               <TouchableOpacity testID="register-link">
-                <Text style={styles.registerLink}>Register</Text>
+                <Text className="text-small text-primary font-semibold">Register</Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -258,139 +263,3 @@ export default function LoginScreen() {
     </SafeAreaView>
   );
 }
-
-/**
- * React Native StyleSheet
- * Provides performant styling with platform-specific optimizations
- */
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-  },
-  headerContainer: {
-    marginBottom: 32,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '400',
-  },
-  errorContainer: {
-    backgroundColor: '#FFE5E5',
-    borderWidth: 1,
-    borderColor: '#FF3B30',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  formContainer: {
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: '#000',
-    backgroundColor: '#f9f9f9',
-  },
-  inputError: {
-    borderColor: '#FF3B30',
-    backgroundColor: '#FFEDED',
-  },
-  passwordContainer: {
-    position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passwordInput: {
-    flex: 1,
-  },
-  toggleButton: {
-    position: 'absolute',
-    right: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-  },
-  loginButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    minHeight: 50,
-  },
-  loginButtonDisabled: {
-    opacity: 0.6,
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E0E0E0',
-  },
-  dividerText: {
-    marginHorizontal: 12,
-    color: '#999',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  registerText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  registerLink: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-});
