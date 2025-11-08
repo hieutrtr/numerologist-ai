@@ -2,7 +2,7 @@
 
 **Epic:** Epic 2 - User Authentication & Profile
 **Story ID:** 2-12-ui-polish-ux-design-alignment
-**Status:** ready
+**Status:** done
 **Created:** 2025-11-07
 **Updated:** 2025-11-07
 
