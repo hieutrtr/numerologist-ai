@@ -1,7 +1,7 @@
 const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
 
 const config = getDefaultConfig(__dirname);
 
-// NativeWind v4 with Expo - the preset handles CSS processing
-// No need for explicit metro integration in Expo 54+
-module.exports = config;
+// Enable NativeWind v4 CSS processing
+module.exports = withNativeWind(config, { input: './global.css' });

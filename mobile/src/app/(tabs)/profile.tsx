@@ -3,11 +3,10 @@ import {
   View,
   Text,
   TouchableOpacity,
-  SafeAreaView,
-  ActivityIndicator,
-  StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/stores/useAuthStore';
 
@@ -103,10 +102,10 @@ export default function ProfileScreen() {
   // Render loading state
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}>Loading profile...</Text>
+      <SafeAreaView className="flex-1 bg-dark">
+        <View className="flex-1 justify-center items-center p-lg">
+          <ActivityIndicator size="large" color="#d4af37" />
+          <Text className="text-body text-text-muted mt-md text-center">Loading profile...</Text>
         </View>
       </SafeAreaView>
     );
@@ -115,20 +114,22 @@ export default function ProfileScreen() {
   // Render error state
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView className="flex-1 bg-dark">
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={handleRetry}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.retryButtonText}>Retry</Text>
-            </TouchableOpacity>
+          <View className="flex-1 p-lg">
+            <View className="bg-error/20 border border-error rounded-lg p-md mb-lg">
+              <Text className="text-error font-semibold mb-md">{error}</Text>
+              <TouchableOpacity
+                className="bg-error rounded-lg px-md py-sm items-center"
+                onPress={handleRetry}
+                disabled={isSubmitting}
+              >
+                <Text className="text-white font-semibold text-small">Retry</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -138,22 +139,24 @@ export default function ProfileScreen() {
   // Handle case where user data is missing
   if (!user) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView className="flex-1 bg-dark">
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>
-              Unable to load profile data. Please try logging out and back in.
-            </Text>
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={handleLogout}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.retryButtonText}>Logout and Login Again</Text>
-            </TouchableOpacity>
+          <View className="flex-1 p-lg">
+            <View className="bg-error/20 border border-error rounded-lg p-md mb-lg">
+              <Text className="text-error font-semibold mb-md">
+                Unable to load profile data. Please try logging out and back in.
+              </Text>
+              <TouchableOpacity
+                className="bg-error rounded-lg px-md py-sm items-center"
+                onPress={handleLogout}
+                disabled={isSubmitting}
+              >
+                <Text className="text-white font-semibold text-small">Logout and Login Again</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -162,196 +165,65 @@ export default function ProfileScreen() {
 
   // Render profile information
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-dark">
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.cardSection}>
-            <Text style={styles.sectionTitle}>Profile Information</Text>
-          </View>
+        <View className="flex-1 p-lg">
+          {/* Profile Card */}
+          <View className="bg-card rounded-lg p-lg mb-xxl border border-border">
+            <View className="pb-md mb-md border-b border-border">
+              <Text className="text-h1 font-bold text-text-primary">Profile Information</Text>
+            </View>
 
-          {/* Full Name */}
-          <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Full Name</Text>
-            <Text style={styles.value}>
-              {user.full_name || 'Not provided'}
-            </Text>
-          </View>
-
-          {/* Email */}
-          <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Email Address</Text>
-            <Text style={styles.value}>{user.email || 'Not provided'}</Text>
-          </View>
-
-          {/* Birth Date */}
-          <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Birth Date</Text>
-            <Text style={styles.value}>
-              {getFormattedBirthDate(user.birth_date)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Logout Button */}
-        <TouchableOpacity
-          style={[
-            styles.logoutButton,
-            isSubmitting && styles.logoutButtonDisabled,
-          ]}
-          onPress={handleLogout}
-          disabled={isSubmitting}
-          activeOpacity={isSubmitting ? 1 : 0.7}
-          testID="logout-button"
-        >
-          {isSubmitting ? (
-            <View style={styles.logoutButtonContent}>
-              <ActivityIndicator size="small" color="#fff" />
-              <Text style={[styles.logoutButtonText, { marginLeft: 8 }]}>
-                Logging out...
+            {/* Full Name */}
+            <View className="mb-md">
+              <Text className="text-tiny font-semibold text-text-muted uppercase mb-xs">Full Name</Text>
+              <Text className="text-body font-medium text-text-primary">
+                {user.full_name || 'Not provided'}
               </Text>
             </View>
-          ) : (
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          )}
-        </TouchableOpacity>
 
-        {/* Footer spacing */}
-        <View style={styles.footerSpacer} />
+            {/* Email */}
+            <View className="mb-md">
+              <Text className="text-tiny font-semibold text-text-muted uppercase mb-xs">Email Address</Text>
+              <Text className="text-body font-medium text-text-primary">{user.email || 'Not provided'}</Text>
+            </View>
+
+            {/* Birth Date */}
+            <View className="mb-md">
+              <Text className="text-tiny font-semibold text-text-muted uppercase mb-xs">Birth Date</Text>
+              <Text className="text-body font-medium text-text-primary">
+                {getFormattedBirthDate(user.birth_date)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Logout Button */}
+          <TouchableOpacity
+            className={`bg-error rounded-lg py-sm px-md items-center justify-center min-h-[50px] mb-sm ${
+              isSubmitting ? 'opacity-60' : ''
+            }`}
+            onPress={handleLogout}
+            disabled={isSubmitting}
+            activeOpacity={isSubmitting ? 1 : 0.7}
+            testID="logout-button"
+          >
+            {isSubmitting ? (
+              <View className="flex-row items-center justify-center">
+                <ActivityIndicator size="small" color="#fff" />
+                <Text className="text-body font-semibold text-white ml-md">
+                  Logging out...
+                </Text>
+              </View>
+            ) : (
+              <Text className="text-body font-semibold text-white">Logout</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-/**
- * StyleSheet for Profile Screen
- * Uses React Native StyleSheet for performance optimization
- * Consistent with login and register screen styling
- */
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  centerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-
-  // Profile Card Styles
-  profileCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#e8e8e8',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardSection: {
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-  },
-
-  // Field Styles
-  fieldContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#777',
-    marginBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
-
-  // Logout Button Styles
-  logoutButton: {
-    backgroundColor: '#FF3B30',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 50,
-    marginBottom: 12,
-  },
-  logoutButtonDisabled: {
-    opacity: 0.6,
-  },
-  logoutButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoutButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  // Error Styles
-  errorContainer: {
-    backgroundColor: '#ffebee',
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ef5350',
-    marginBottom: 20,
-  },
-  errorText: {
-    color: '#c62828',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  retryButton: {
-    backgroundColor: '#c62828',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-
-  // Footer Spacing
-  footerSpacer: {
-    height: 20,
-  },
-});

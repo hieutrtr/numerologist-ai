@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, ScrollView, SafeAreaView, Alert, Text } from 'react-native';
+import { View, ScrollView, Alert, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { RecordButton, MessageCard, LoadingWaveform, EmptyState } from '@/components/conversation';
 
 interface Message {
