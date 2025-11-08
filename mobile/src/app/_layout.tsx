@@ -2,8 +2,17 @@ import '../../global.css'; // NativeWind CSS
 
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useAuthStore } from '@/stores/useAuthStore';
+
+// Configure StyleSheet for web dark mode compatibility with NativeWind
+if (Platform.OS === 'web') {
+  // @ts-ignore - RN Web internal API
+  if (StyleSheet.configure) {
+    // @ts-ignore
+    StyleSheet.configure({ colorScheme: 'light' });
+  }
+}
 
 /**
  * Root Layout Component

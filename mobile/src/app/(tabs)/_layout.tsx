@@ -18,12 +18,12 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: '#d4af37', // primary gold
+        tabBarInactiveTintColor: '#6b7280', // text-muted
         tabBarStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: '#0d0d1a', // bg-dark
           borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
+          borderTopColor: '#333', // border-DEFAULT
           paddingBottom: 5,
           paddingTop: 5,
         },
