@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/story-context/3-1-add-voice-pipeline-dependencies" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.1</storyId>
+    <storyKey>3-1-add-voice-pipeline-dependencies</storyKey>
+    <title>Add Voice Pipeline Dependencies</title>
+    <status>drafted</status>
+    <createdDate>2025-11-08</createdDate>
+    <generatedAt>2025-11-08</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-1-add-voice-pipeline-dependencies.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <role>backend developer</role>
+    <action>all voice pipeline dependencies installed</action>
+    <benefit>I can build the Pipecat-ai voice bot</benefit>
+    <asA>As a backend developer</asA>
+    <iWant>I want all voice pipeline dependencies installed</iWant>
+    <soThat>So that I can build the Pipecat-ai voice bot</soThat>
+
+    <acceptanceCriteria>
+      <criterion id="AC1">Add pipecat-ai with extras to pyproject.toml dependencies with correct version constraints</criterion>
+      <criterion id="AC2">Add Azure OpenAI SDK (openai>=1.0.0) for GPT integration</criterion>
+      <criterion id="AC3">Add Daily.co Python SDK (daily-python>=0.9.0) for WebRTC</criterion>
+      <criterion id="AC4">Add Deepgram SDK v5.2.0+ for speech-to-text service</criterion>
+      <criterion id="AC5">Add ElevenLabs SDK v2.17.0+ for text-to-speech service</criterion>
+      <criterion id="AC6">Update .env.example with all voice service API key variables and documentation</criterion>
+      <criterion id="AC7">Verify uv sync installs all dependencies without errors or conflicts</criterion>
+      <criterion id="AC8">Create and run import verification script to confirm all packages importable</criterion>
+    </acceptanceCriteria>
+
+    <tasks>
+      <task id="T1">Update pyproject.toml with voice dependencies (AC1-5)</task>
+      <task id="T2">Run dependency installation and verify with uv sync (AC7)</task>
+      <task id="T3">Update .env.example with voice service variables (AC6)</task>
+      <task id="T4">Create import verification script (AC8)</task>
+      <task id="T5">Documentation and final testing</task>
+    </tasks>
+
+    <businessValue>
+      <summary>Establishes foundational dependencies for voice conversation pipeline - core product differentiator</summary>
+      <benefits>
+        <benefit>Enables voice-first numerology conversations (core differentiator)</benefit>
+        <benefit>Integrates industry-standard voice AI services (Deepgram, ElevenLabs, Azure OpenAI)</benefit>
+        <benefit>Provides WebRTC infrastructure via Daily.co for real-time audio</benefit>
+        <benefit>Sets up Pipecat-ai framework for voice pipeline orchestration</benefit>
+        <benefit>Foundation for Epic 3 and Epic 4 (Numerology Engine Integration)</benefit>
+      </benefits>
+    </businessValue>
+  </story>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Epic 3: Voice Infrastructure &amp; Basic Conversation</section>
+        <snippet>Goal: Enable real-time voice conversations between user and AI through Pipecat-ai pipeline. Business Value: Core product differentiator - voice-first numerology conversations. Prerequisites: Epic 2 complete (authenticated users).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Epic 3 Requirements</section>
+        <snippet>Voice infrastructure must support real-time conversation with sub-5-second latency. Integrate with Deepgram for STT, ElevenLabs for TTS, and Azure OpenAI for LLM.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture</title>
+        <section>Backend Voice Architecture</section>
+        <snippet>Voice pipeline uses Pipecat-ai framework with Daily.co WebRTC transport. Services: Deepgram (STT), Azure OpenAI (LLM), ElevenLabs (TTS). All async/await patterns with FastAPI.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>backend/pyproject.toml</path>
+        <kind>configuration</kind>
+        <description>Python project dependencies - add voice pipeline packages here</description>
+        <section>dependencies array</section>
+        <lines>7-20</lines>
+        <reason>Core location for all Python dependencies. Add pipecat-ai, deepgram-sdk, elevenlabs, openai, daily-python</reason>
+      </artifact>
+      <artifact>
+        <path>backend/.env.example</path>
+        <kind>configuration</kind>
+        <description>Example environment variables - document all voice service API keys</description>
+        <reason>Must update with DAILY_API_KEY, DEEPGRAM_API_KEY, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, ELEVENLABS_API_KEY</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src</path>
+        <kind>directory</kind>
+        <description>Backend source code - where voice pipeline modules will be created</description>
+        <reason>Story 3.3+ will create backend/src/voice_pipeline/ directory for Pipecat bot implementation</reason>
+      </artifact>
+      <artifact>
+        <path>backend/uv.lock</path>
+        <kind>lockfile</kind>
+        <description>uv lock file - will be auto-updated by uv sync</description>
+        <reason>Must be committed after uv sync to lock all dependency versions</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="python">
+        <package name="pipecat-ai" version=">=0.0.30" extras="daily,deepgram,openai,elevenlabs">Voice pipeline orchestration framework with transport and service plugins</package>
+        <package name="openai" version=">=2.7.1">Azure OpenAI SDK for GPT-5-mini LLM service</package>
+        <package name="daily-python" version=">=0.21.0">Daily.co Python SDK for WebRTC room management</package>
+        <package name="deepgram-sdk" version=">=5.2.0">Deepgram speech-to-text service SDK</package>
+        <package name="elevenlabs" version=">=2.17.0">ElevenLabs text-to-speech service SDK</package>
+      </ecosystem>
+      <ecosystem name="external-services">
+        <service name="Daily.co">WebRTC infrastructure for real-time voice sessions</service>
+        <service name="Deepgram">Speech-to-text (STT) service</service>
+        <service name="Azure OpenAI">GPT-5-mini LLM service via Azure</service>
+        <service name="ElevenLabs">Text-to-speech (TTS) service</service>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="architecture">All voice services must be async/await compatible with FastAPI event loop</constraint>
+    <constraint source="backend-structure">Dependencies managed with uv package manager - use uv sync, not pip</constraint>
+    <constraint source="environment">Python 3.11+ (already set from Story 1.2)</constraint>
+    <constraint source="dependencies">Voice ML models add ~100-200 MB to virtual environment size</constraint>
+    <constraint source="versioning">Pipecat-ai v0.0.30+ required; specific versions for Deepgram (5.2.0+) and ElevenLabs (2.17.0+)</constraint>
+    <constraint source="api-keys">This story installs packages only - API keys not needed yet, configured in .env.example for future use</constraint>
+    <constraint source="testing">Must verify all imports succeed without errors; no actual API calls in this story</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Pipecat Pipeline API</name>
+      <kind>Python Framework</kind>
+      <signature>from pipecat.pipeline.pipeline import Pipeline; from pipecat.pipeline.runner import PipelineRunner</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py (to be created in Story 3.3)</path>
+      <description>Core Pipecat framework for composing voice pipeline stages</description>
+    </interface>
+    <interface>
+      <name>Daily Transport</name>
+      <kind>Python Service</kind>
+      <signature>from pipecat.transports.services.daily import DailyTransport, DailyParams</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py (to be created)</path>
+      <description>WebRTC transport for connecting to Daily.co rooms</description>
+    </interface>
+    <interface>
+      <name>Deepgram STT Service</name>
+      <kind>Python Service</kind>
+      <signature>from pipecat.services.deepgram import DeepgramSTTService</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py (to be created)</path>
+      <description>Speech-to-text service powered by Deepgram API</description>
+    </interface>
+    <interface>
+      <name>Azure OpenAI LLM Service</name>
+      <kind>Python Service</kind>
+      <signature>from pipecat.services.azure import AzureOpenAILLMService; from openai import AzureOpenAI</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py (to be created)</path>
+      <description>LLM service for GPT-5-mini via Azure OpenAI</description>
+    </interface>
+    <interface>
+      <name>ElevenLabs TTS Service</name>
+      <kind>Python Service</kind>
+      <signature>from pipecat.services.elevenlabs import ElevenLabsTTSService</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py (to be created)</path>
+      <description>Text-to-speech service powered by ElevenLabs API</description>
+    </interface>
+    <interface>
+      <name>Daily Room API</name>
+      <kind>REST API</kind>
+      <signature>POST /api/v1/rooms (create), DELETE /api/v1/rooms/{name} (delete)</signature>
+      <path>backend/src/services/daily_service.py (to be created in Story 3.2)</path>
+      <description>API for creating/managing Daily.co rooms for conversations</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <summary>Python testing uses pytest framework with FastAPI test client. Backend tests located in backend/tests/ directory following test_*.py naming convention. Async tests use pytest-asyncio plugin. Test structure mirrors src/ directory structure. All dependencies must pass import verification before deployment.</summary>
+      <framework>pytest</framework>
+      <async-support>pytest-asyncio</async-support>
+      <pattern>Test files mirror src structure: backend/tests/test_voice_pipeline.py, etc.</pattern>
+      <coverage-target>Minimum 80% coverage for critical paths</coverage-target>
+    </standards>
+
+    <locations>
+      <location>backend/tests/</location>
+      <location>backend/tests/test_voice_imports.py (new - import verification script)</location>
+      <location>backend/tests/test_dependencies.py (future - dependency integration tests)</location>
+    </locations>
+
+    <ideas>
+      <idea ac-ref="AC8">Unit Test: test_voice_imports.py - Verify all voice pipeline packages can be imported successfully</idea>
+      <idea ac-ref="AC7">Integration Test: Run 'uv sync' and verify no dependency conflicts reported</idea>
+      <idea ac-ref="AC1-5">Smoke Test: Check pyproject.toml syntax and version constraints are valid</idea>
+      <idea ac-ref="AC6">Documentation Test: Verify .env.example contains all required API key variables with descriptions</idea>
+      <idea ac-ref="AC7">Dependency Lock Test: Verify uv.lock file updated with all new packages and versions</idea>
+    </ideas>
+  </tests>
+
+  <developmentGuidance>
+    <prerequisite epic="2" story="12">Story 2.12 (UI Polish) establishes conversation UI components and NativeWind styling that will integrate with voice backend in Story 3.7</prerequisite>
+    <blocking>All subsequent Epic 3 stories (3.2 through 3.10) depend on these voice pipeline dependencies being properly installed</blocking>
+    <effortEstimate>30-60 minutes</effortEstimate>
+    <complexity>Low - primarily configuration and dependency management</complexity>
+    <priority>Critical - Epic 3 foundation</priority>
+
+    <apiKeySetup>
+      <key name="DAILY_API_KEY">
+        <service>Daily.co</service>
+        <source>https://dashboard.daily.co/ → Developers → API Keys</source>
+        <description>API key for creating/managing WebRTC rooms</description>
+      </key>
+      <key name="DEEPGRAM_API_KEY">
+        <service>Deepgram</service>
+        <source>https://console.deepgram.com/ → Create Project → API Keys</source>
+        <description>API key for speech-to-text service</description>
+      </key>
+      <key name="AZURE_OPENAI_API_KEY">
+        <service>Azure OpenAI</service>
+        <source>https://portal.azure.com/ → Azure OpenAI Service → Keys and Endpoint</source>
+        <description>API key for GPT-5-mini LLM</description>
+      </key>
+      <key name="AZURE_OPENAI_ENDPOINT">
+        <service>Azure OpenAI</service>
+        <source>https://portal.azure.com/ → Azure OpenAI Service → Keys and Endpoint</source>
+        <description>Service endpoint URL (e.g., https://your-resource.openai.azure.com/)</description>
+      </key>
+      <key name="ELEVENLABS_API_KEY">
+        <service>ElevenLabs</service>
+        <source>https://elevenlabs.io/ → Profile → API Keys</source>
+        <description>API key for text-to-speech service</description>
+      </key>
+    </apiKeySetup>
+
+    <references>
+      <reference title="Pipecat-ai Documentation" url="https://docs.pipecat.ai/" />
+      <reference title="Daily.co API Reference" url="https://docs.daily.co/reference/rest-api" />
+      <reference title="Deepgram Developer Docs" url="https://developers.deepgram.com/" />
+      <reference title="Azure OpenAI Documentation" url="https://learn.microsoft.com/en-us/azure/ai-services/openai/" />
+      <reference title="ElevenLabs API Reference" url="https://elevenlabs.io/docs/api-reference/introduction" />
+    </references>
+  </developmentGuidance>
+
+</story-context>
