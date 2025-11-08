@@ -27,11 +27,11 @@ export function MessageCard({ message, type, timestamp }: MessageCardProps) {
       style={{ opacity: fadeAnim }}
     >
       {/* Wrapper for avatar + bubble on same line */}
-      <View className={`flex-row items-center ${isUser ? 'flex-row-reverse' : ''}`}>
+      <View className={`flex-row items-start ${isUser ? 'flex-row-reverse' : ''}`}>
         {/* Avatar */}
         <View
           className={`
-            w-10 h-10 rounded-full items-center justify-center
+            mt-xl w-10 h-10 rounded-full items-center justify-center
             ${isUser ? 'bg-chat-user ml-sm' : 'bg-chat-assistant mr-sm'}
           `}
           style={{
