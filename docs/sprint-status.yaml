@@ -73,7 +73,7 @@ development_status:
   # ============================================================================
   epic-3: backlog
   3-1-add-voice-pipeline-dependencies: done
-  3-2-daily-co-room-management-service: drafted
+  3-2-daily-co-room-management-service: review
   3-3-basic-pipecat-bot-with-greeting: backlog
   3-4-conversation-model-start-endpoint: backlog
   3-5-frontend-conversation-state-zustand: backlog

@@ -1,0 +1,260 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3-2</storyId>
+    <title>Daily.co Room Management Service</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-08</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-2-daily-co-room-management-service.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>a service to create and manage Daily.co rooms</iWant>
+    <soThat>users can connect for voice conversations</soThat>
+    <tasks>
+      Task 1: Create Daily Service Module Structure (AC1, AC6)
+      Task 2: Implement Create Room Function (AC2)
+      Task 3: Implement Delete Room Function (AC3)
+      Task 4: Implement Meeting Token Generation (AC4)
+      Task 5: Error Handling &amp; Custom Exceptions (AC5)
+      Task 6: Write Unit Tests (AC7)
+      Task 7: Manual Testing &amp; Documentation (AC8)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Daily Service Module Created
+    - Create backend/src/services/daily_service.py module
+    - Import required dependencies: httpx (async HTTP), typing, os
+    - Load DAILY_API_KEY from environment variables
+    - Define Daily.co API base URL constant: https://api.daily.co/v1
+    - Module follows async/await patterns for FastAPI compatibility
+
+    AC2: Create Room Function
+    - Implement async def create_room(conversation_id: str) -&gt; Dict[str, str]
+    - Generate unique room name using conversation_id
+    - Make async POST request to /rooms endpoint with httpx
+    - Set room properties: expiry (2 hours), disable chat/screenshare
+    - Include Authorization: Bearer {DAILY_API_KEY} header
+    - Return dict with room_url, room_name, and meeting_token
+
+    AC3: Delete Room Function
+    - Implement async def delete_room(room_name: str) -&gt; bool
+    - Make async DELETE request to /rooms/{room_name}
+    - Include proper authorization header
+    - Return True on success, False otherwise
+
+    AC4: Meeting Token Generation
+    - Implement async def create_meeting_token(room_name: str) -&gt; str
+    - Make POST request to /meeting-tokens
+    - Return meeting token string for client authorization
+
+    AC5: Error Handling
+    - Handle httpx.HTTPStatusError for failed API calls
+    - Handle httpx.RequestError for network/connection issues
+    - Raise custom DailyRoomCreationError exception
+    - Log errors with room details for debugging
+
+    AC6: Environment Variable Validation
+    - Validate DAILY_API_KEY is present at module import
+    - Raise ValueError with clear message if key missing
+
+    AC7: Unit Tests
+    - Create backend/tests/services/test_daily_service.py
+    - Test create_room() with mocked httpx responses
+    - Test delete_room() success and failure cases
+    - Test error handling for API failures
+    - Achieve &gt;80% code coverage
+
+    AC8: Manual Testing &amp; Documentation
+    - Can manually create room with Python REPL or script
+    - Verify room creation in Daily.co dashboard
+    - Document curl commands for manual API testing
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Daily.co Integration</title>
+        <section>Integration Points - Daily.co (WebRTC Infrastructure)</section>
+        <snippet>Daily.co provides WebRTC infrastructure with REST API for room management. Backend creates Daily.co room + Conversation record. Room TTL: 2 hours. Features: Real-time audio streaming, participant management.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Implementation Patterns</title>
+        <section>Voice Pipeline Patterns</section>
+        <snippet>Pipecat Bot Lifecycle: Create Daily room -&gt; Generate meeting token -&gt; Initialize Pipecat services -&gt; Set up LLM context -&gt; Create pipeline -&gt; Run bot.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Error Handling Pattern</title>
+        <section>Backend Error Handling Pattern</section>
+        <snippet>All services raise specific exceptions. Service layer raises custom exceptions (e.g., DailyRoomCreationError). API layer catches and converts to HTTP responses with success/error structure.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 3 - Story 3.2</title>
+        <section>Story 3.2: Daily.co Room Management Service</section>
+        <snippet>Create service in backend/src/services/daily_service.py with create_room(), delete_room() functions. Uses Daily.co REST API with API key from env. Error handling for API failures. Unit tests required.</snippet>
+      </doc>
+      <doc>
+        <path>backend/.env.example</path>
+        <title>Environment Variables - Voice Pipeline Services</title>
+        <section>Daily.co Configuration</section>
+        <snippet>DAILY_API_KEY documented with acquisition instructions: https://dashboard.daily.co/ → Developers → API Keys. Used to create and manage WebRTC rooms for voice conversations.</snippet>
+      </doc>
+      <doc>
+        <path>backend/README.md</path>
+        <title>Backend README - Voice Pipeline Setup</title>
+        <section>Voice Pipeline Setup - Daily.co</section>
+        <snippet>Daily.co manages WebRTC rooms for real-time voice sessions. Get Key: https://dashboard.daily.co/ → Developers → API Keys. Environment Variable: DAILY_API_KEY. Free tier available.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-1-add-voice-pipeline-dependencies.md</path>
+        <title>Story 3.1 - Learnings</title>
+        <section>Dev Agent Record - Completion Notes</section>
+        <snippet>Voice pipeline dependencies installed successfully (105 packages, 0 conflicts). Daily.co SDK: daily-python==0.21.0. DAILY_API_KEY documented in backend/.env.example. httpx available as dependency for async HTTP.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/services/oauth_service.py</path>
+        <kind>service</kind>
+        <symbol>verify_google_token</symbol>
+        <lines>N/A</lines>
+        <reason>Example service pattern: async function with API calls, error handling, returns structured data</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/settings.py</path>
+        <kind>config</kind>
+        <symbol>Settings</symbol>
+        <lines>22-238</lines>
+        <reason>Configuration pattern for environment variables using Pydantic BaseSettings. Use this pattern for DAILY_API_KEY loading.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/tests/api/v1/endpoints/test_auth.py</path>
+        <kind>test</kind>
+        <symbol>test_*</symbol>
+        <lines>N/A</lines>
+        <reason>Example pytest test pattern: async tests, mocking, FastAPI TestClient usage</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/deps.py</path>
+        <kind>core</kind>
+        <symbol>get_db</symbol>
+        <lines>N/A</lines>
+        <reason>Dependency injection pattern for FastAPI endpoints (if needed for future stories)</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="pipecat-ai[daily,deepgram,azure]" version="&gt;=0.0.31">Voice pipeline orchestration with Daily.co integration</package>
+        <package name="httpx" version="&gt;=0.27.0">Async HTTP client for Daily.co REST API calls</package>
+        <package name="elevenlabs" version="&gt;=2.17.0">Text-to-speech service SDK</package>
+        <package name="openai" version="&gt;=2.7.1">Azure OpenAI integration</package>
+        <package name="fastapi" version="&gt;=0.109.0">Web framework</package>
+        <package name="pydantic" version="&gt;=2.5.0">Data validation and settings</package>
+        <package name="pytest" version="&gt;=7.4.0">Testing framework</package>
+        <package name="pytest-asyncio" version="">Async pytest support</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Use async/await patterns consistently for FastAPI compatibility
+    - Load DAILY_API_KEY from environment using Settings class pattern (backend/src/core/settings.py)
+    - Follow service pattern: backend/src/services/{service_name}_service.py
+    - Use httpx for async HTTP requests (NOT requests library)
+    - Room naming convention: "numerologist-{conversation_id}"
+    - Room expiry: 2 hours (7200 seconds) from creation
+    - Error handling: Raise custom exceptions, log with context
+    - Testing: Unit tests in backend/tests/services/, use pytest with async support
+    - Code coverage: Target &gt;80% for service module
+    - No actual API calls in unit tests: Mock httpx responses
+    - Follow architecture error handling pattern: Service layer raises custom exceptions
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Daily.co REST API - Create Room</name>
+      <kind>REST endpoint</kind>
+      <signature>POST https://api.daily.co/v1/rooms</signature>
+      <path>External API</path>
+      <details>
+        Headers: Authorization: Bearer {DAILY_API_KEY}, Content-Type: application/json
+        Body: {"name": "room-name", "properties": {"exp": timestamp, "enable_chat": false, "enable_screenshare": false}}
+        Response: {"url": "https://example.daily.co/room-name", "name": "room-name", "id": "room-id"}
+      </details>
+    </interface>
+    <interface>
+      <name>Daily.co REST API - Delete Room</name>
+      <kind>REST endpoint</kind>
+      <signature>DELETE https://api.daily.co/v1/rooms/{room_name}</signature>
+      <path>External API</path>
+      <details>
+        Headers: Authorization: Bearer {DAILY_API_KEY}
+        Response: 200/204 on success, 404 if room not found
+      </details>
+    </interface>
+    <interface>
+      <name>Daily.co REST API - Create Meeting Token</name>
+      <kind>REST endpoint</kind>
+      <signature>POST https://api.daily.co/v1/meeting-tokens</signature>
+      <path>External API</path>
+      <details>
+        Headers: Authorization: Bearer {DAILY_API_KEY}, Content-Type: application/json
+        Body: {"properties": {"room_name": "room-name"}}
+        Response: {"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+      </details>
+    </interface>
+    <interface>
+      <name>create_room</name>
+      <kind>Python async function</kind>
+      <signature>async def create_room(conversation_id: str) -&gt; Dict[str, str]</signature>
+      <path>backend/src/services/daily_service.py</path>
+      <details>Creates Daily.co room, generates meeting token. Returns: {"room_url": str, "room_name": str, "meeting_token": str}. Raises: DailyRoomCreationError on failure.</details>
+    </interface>
+    <interface>
+      <name>delete_room</name>
+      <kind>Python async function</kind>
+      <signature>async def delete_room(room_name: str) -&gt; bool</signature>
+      <path>backend/src/services/daily_service.py</path>
+      <details>Deletes Daily.co room. Returns True on success, False on failure. Handles 404 gracefully.</details>
+    </interface>
+    <interface>
+      <name>create_meeting_token</name>
+      <kind>Python async function</kind>
+      <signature>async def create_meeting_token(room_name: str) -&gt; str</signature>
+      <path>backend/src/services/daily_service.py</path>
+      <details>Generates meeting token for room. Returns token string. Raises: DailyRoomCreationError on failure.</details>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing uses pytest with pytest-asyncio for async test support. All service tests located in backend/tests/services/.
+      Mock external API calls using unittest.mock.AsyncMock. Test both success and failure scenarios.
+      Target coverage: &gt;80% for service modules. Use pytest fixtures for common test setup.
+      Run tests: pytest backend/tests/services/test_daily_service.py -v
+      Check coverage: pytest --cov=backend/src/services/daily_service
+    </standards>
+    <locations>
+      backend/tests/services/test_daily_service.py (CREATE THIS)
+      backend/tests/conftest.py (for fixtures if needed)
+    </locations>
+    <ideas>
+      AC1: Test environment variable validation (missing DAILY_API_KEY raises ValueError)
+      AC2: Test create_room() success - mock httpx POST response with room data, verify correct payload sent, assert returned dict has required keys
+      AC2: Test create_room() with meeting token - verify create_meeting_token is called and token included in result
+      AC3: Test delete_room() success - mock 200 response, assert returns True
+      AC3: Test delete_room() handles 404 - mock 404 response, assert returns False
+      AC4: Test create_meeting_token() success - mock token response, assert token string returned
+      AC5: Test error handling - mock HTTPStatusError (500), verify DailyRoomCreationError raised with message
+      AC5: Test network error - mock RequestError, verify DailyRoomCreationError raised
+      AC7: Integration test idea (manual): Create real room, verify in Daily.co dashboard, cleanup
+    </ideas>
+  </tests>
+</story-context>

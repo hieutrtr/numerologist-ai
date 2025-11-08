@@ -227,6 +227,72 @@ class Settings(BaseSettings):
     enable_redoc: bool = True
     """Enable ReDoc documentation (/redoc endpoint)."""
 
+    # =====================================================================
+    # VOICE PIPELINE SERVICES (Epic 3)
+    # =====================================================================
+    daily_api_key: str = ""
+    """
+    Daily.co API key for WebRTC room management.
+
+    Get from: https://dashboard.daily.co/ → Developers → API Keys
+    Environment variable: DAILY_API_KEY
+    Required for voice conversation infrastructure.
+    """
+
+    deepgram_api_key: str = ""
+    """
+    Deepgram API key for speech-to-text transcription.
+
+    Get from: https://console.deepgram.com/ → API Keys
+    Environment variable: DEEPGRAM_API_KEY
+    """
+
+    azure_openai_api_key: str = ""
+    """
+    Azure OpenAI API key for language model (GPT-5-mini).
+
+    Get from: https://portal.azure.com/ → Azure OpenAI Service → Keys and Endpoint
+    Environment variable: AZURE_OPENAI_API_KEY
+    """
+
+    azure_openai_endpoint: str = ""
+    """
+    Azure OpenAI endpoint URL.
+
+    Format: https://your-resource.openai.azure.com/
+    Environment variable: AZURE_OPENAI_ENDPOINT
+    """
+
+    azure_openai_model_deployment_name: str = "gpt-5-mini-deployment"
+    """
+    Azure OpenAI deployment name (created in Azure).
+
+    Environment variable: AZURE_OPENAI_MODEL_DEPLOYMENT_NAME
+    """
+
+    azure_openai_model_name: str = "gpt-5-mini"
+    """
+    Azure OpenAI model name specification.
+
+    Environment variable: AZURE_OPENAI_MODEL_NAME
+    """
+
+    elevenlabs_api_key: str = ""
+    """
+    ElevenLabs API key for text-to-speech synthesis.
+
+    Get from: https://elevenlabs.io/ → Profile → API Keys
+    Environment variable: ELEVENLABS_API_KEY
+    """
+
+    elevenlabs_voice_id: str = "21m00Tcm4TlvDq8ikWAM"
+    """
+    ElevenLabs voice ID (default: Rachel).
+
+    Other options: Charlie (N2lVS1w4EtoT3dr4eOWO), Grace (JBFqnCBsd6RMkjW3i8ZA)
+    Environment variable: ELEVENLABS_VOICE_ID
+    """
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
