@@ -34,12 +34,22 @@ module.exports = {
         card: '#1a1235',
         elevated: '#2d1b69',
 
+        // Chat bubble backgrounds (lighter, more inviting)
+        chat: {
+          user: '#7C4DFF', // Vibrant purple for user messages
+          userLight: '#9575CD', // Lighter purple variant
+          assistant: '#FFCA28', // Warm gold for assistant messages
+          assistantLight: '#FFD54F', // Lighter gold variant
+        },
+
         // Text colors
         text: {
-          primary: '#fef3c7', // Pale gold
-          secondary: '#a8960b', // Darker gold
-          muted: '#6b7280', // Gray
+          primary: '#ffffff', // Pure white for better contrast
+          secondary: '#FFD54F', // Bright warm gold
+          muted: '#9E9E9E', // Lighter gray for better visibility
           inverse: '#0d0d1a',
+          onPurple: '#ffffff', // White text on purple background
+          onGold: '#1a1a33', // Dark text on gold background
         },
 
         // Borders

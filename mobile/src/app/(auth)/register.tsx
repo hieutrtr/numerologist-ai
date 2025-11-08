@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  StyleSheet,
   Keyboard,
   ScrollView,
 } from 'react-native';
@@ -280,42 +279,41 @@ export default function RegisterScreen() {
     isSubmitting;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-dark">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.content}>
+          <View className="px-lg py-xxl">
             {/* Header */}
-            <View style={styles.headerContainer}>
-              <Text style={styles.title}>Create Account</Text>
-              <Text style={styles.subtitle}>Join us to start your journey</Text>
+            <View className="mb-xxxl items-center">
+              <Text className="text-display font-bold text-text-primary mb-md">Create Account</Text>
+              <Text className="text-body text-text-secondary font-normal">Join us to start your journey</Text>
             </View>
 
             {/* Error Message Display */}
             {error && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
+              <View className="bg-error/20 border border-error rounded-lg p-md mb-lg">
+                <Text className="text-error font-semibold text-small">{error}</Text>
               </View>
             )}
 
             {/* Form Fields */}
-            <View style={styles.formContainer}>
+            <View className="mb-lg">
               {/* Full Name Input */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Full Name</Text>
+              <View className="mb-md">
+                <Text className="text-small font-semibold text-text-primary mb-xs">Full Name</Text>
                 <TextInput
-                  style={[
-                    styles.input,
-                    fieldErrors.fullName && styles.inputError,
-                  ]}
+                  className={`border rounded-lg px-md py-md text-body font-normal text-text-primary ${
+                    fieldErrors.fullName ? 'border-error bg-error/10' : 'border-border bg-light'
+                  }`}
                   placeholder="John Doe"
-                  placeholderTextColor="#999"
+                  placeholderTextColor="#6b7280"
                   autoCapitalize="words"
                   autoComplete="name"
                   editable={!isSubmitting}
@@ -328,18 +326,20 @@ export default function RegisterScreen() {
                   testID="fullname-input"
                 />
                 {fieldErrors.fullName && (
-                  <Text style={styles.fieldErrorText}>{fieldErrors.fullName}</Text>
+                  <Text className="text-error text-tiny mt-xs font-medium">{fieldErrors.fullName}</Text>
                 )}
               </View>
 
               {/* Email Input */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Email</Text>
+              <View className="mb-md">
+                <Text className="text-small font-semibold text-text-primary mb-xs">Email</Text>
                 <TextInput
                   ref={emailInputRef}
-                  style={[styles.input, fieldErrors.email && styles.inputError]}
+                  className={`border rounded-lg px-md py-md text-body font-normal text-text-primary ${
+                    fieldErrors.email ? 'border-error bg-error/10' : 'border-border bg-light'
+                  }`}
                   placeholder="your@email.com"
-                  placeholderTextColor="#999"
+                  placeholderTextColor="#6b7280"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
@@ -353,23 +353,21 @@ export default function RegisterScreen() {
                   testID="email-input"
                 />
                 {fieldErrors.email && (
-                  <Text style={styles.fieldErrorText}>{fieldErrors.email}</Text>
+                  <Text className="text-error text-tiny mt-xs font-medium">{fieldErrors.email}</Text>
                 )}
               </View>
 
               {/* Password Input with Show/Hide Toggle */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Password</Text>
-                <View style={styles.passwordContainer}>
+              <View className="mb-md">
+                <Text className="text-small font-semibold text-text-primary mb-xs">Password</Text>
+                <View className="flex-row items-center relative">
                   <TextInput
                     ref={passwordInputRef}
-                    style={[
-                      styles.input,
-                      styles.passwordInput,
-                      fieldErrors.password && styles.inputError,
-                    ]}
+                    className={`flex-1 border rounded-lg px-md py-md text-body font-normal text-text-primary ${
+                      fieldErrors.password ? 'border-error bg-error/10' : 'border-border bg-light'
+                    }`}
                     placeholder="••••••••"
-                    placeholderTextColor="#999"
+                    placeholderTextColor="#6b7280"
                     secureTextEntry={!showPassword}
                     editable={!isSubmitting}
                     returnKeyType="next"
@@ -383,7 +381,7 @@ export default function RegisterScreen() {
                     testID="password-input"
                   />
                   <TouchableOpacity
-                    style={styles.toggleButton}
+                    className="absolute right-md py-md px-sm"
                     onPress={() => setShowPassword(!showPassword)}
                     disabled={isSubmitting}
                     testID="toggle-password"
@@ -391,30 +389,28 @@ export default function RegisterScreen() {
                     <MaterialIcons
                       name={showPassword ? 'visibility' : 'visibility-off'}
                       size={20}
-                      color="#666"
+                      color="#6b7280"
                     />
                   </TouchableOpacity>
                 </View>
                 {fieldErrors.password && (
-                  <Text style={styles.fieldErrorText}>
+                  <Text className="text-error text-tiny mt-xs font-medium">
                     {fieldErrors.password}
                   </Text>
                 )}
               </View>
 
               {/* Confirm Password Input with Show/Hide Toggle */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Confirm Password</Text>
-                <View style={styles.passwordContainer}>
+              <View className="mb-md">
+                <Text className="text-small font-semibold text-text-primary mb-xs">Confirm Password</Text>
+                <View className="flex-row items-center relative">
                   <TextInput
                     ref={confirmPasswordInputRef}
-                    style={[
-                      styles.input,
-                      styles.passwordInput,
-                      fieldErrors.confirmPassword && styles.inputError,
-                    ]}
+                    className={`flex-1 border rounded-lg px-md py-md text-body font-normal text-text-primary ${
+                      fieldErrors.confirmPassword ? 'border-error bg-error/10' : 'border-border bg-light'
+                    }`}
                     placeholder="••••••••"
-                    placeholderTextColor="#999"
+                    placeholderTextColor="#6b7280"
                     secureTextEntry={!showConfirmPassword}
                     editable={!isSubmitting}
                     returnKeyType="done"
@@ -430,7 +426,7 @@ export default function RegisterScreen() {
                     testID="confirm-password-input"
                   />
                   <TouchableOpacity
-                    style={styles.toggleButton}
+                    className="absolute right-md py-md px-sm"
                     onPress={() =>
                       setShowConfirmPassword(!showConfirmPassword)
                     }
@@ -440,23 +436,23 @@ export default function RegisterScreen() {
                     <MaterialIcons
                       name={showConfirmPassword ? 'visibility' : 'visibility-off'}
                       size={20}
-                      color="#666"
+                      color="#6b7280"
                     />
                   </TouchableOpacity>
                 </View>
                 {fieldErrors.confirmPassword && (
-                  <Text style={styles.fieldErrorText}>
+                  <Text className="text-error text-tiny mt-xs font-medium">
                     {fieldErrors.confirmPassword}
                   </Text>
                 )}
               </View>
 
               {/* Birth Date Input */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Birth Date</Text>
+              <View className="mb-md">
+                <Text className="text-small font-semibold text-text-primary mb-xs">Birth Date</Text>
                 {Platform.OS === 'web' ? (
                   // Web: HTML date input
-                  <View style={styles.webDateInputWrapper}>
+                  <View className="border border-border rounded-lg overflow-hidden bg-light">
                     <input
                       type="date"
                       max={new Date().toISOString().split('T')[0]}
@@ -475,7 +471,16 @@ export default function RegisterScreen() {
                           }
                         }
                       }}
-                      style={styles.webDateInput}
+                      style={{
+                        width: '100%',
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                        paddingTop: 16,
+                        paddingBottom: 16,
+                        fontSize: 16,
+                        borderWidth: 0,
+                        fontFamily: 'System',
+                      }}
                       disabled={isSubmitting}
                     />
                   </View>
@@ -483,19 +488,17 @@ export default function RegisterScreen() {
                   // Mobile: Touchable button with date picker modal
                   <>
                     <TouchableOpacity
-                      style={[
-                        styles.dateButton,
-                        fieldErrors.birthDate && styles.inputError,
-                      ]}
+                      className={`border rounded-lg px-md py-md justify-center ${
+                        fieldErrors.birthDate ? 'border-error bg-error/10' : 'border-border bg-light'
+                      }`}
                       onPress={() => setShowDatePicker(true)}
                       disabled={isSubmitting}
                       testID="birthdate-button"
                     >
                       <Text
-                        style={[
-                          styles.dateButtonText,
-                          !birthDate && styles.dateButtonPlaceholder,
-                        ]}
+                        className={`text-body ${
+                          !birthDate ? 'text-text-muted' : 'text-text-primary'
+                        }`}
                       >
                         {formatBirthDate(birthDate)}
                       </Text>
@@ -514,7 +517,7 @@ export default function RegisterScreen() {
                   </>
                 )}
                 {fieldErrors.birthDate && (
-                  <Text style={styles.fieldErrorText}>
+                  <Text className="text-error text-tiny mt-xs font-medium">
                     {fieldErrors.birthDate}
                   </Text>
                 )}
@@ -523,10 +526,9 @@ export default function RegisterScreen() {
 
             {/* Register Button */}
             <TouchableOpacity
-              style={[
-                styles.registerButton,
-                isRegisterDisabled && styles.registerButtonDisabled,
-              ]}
+              className={`bg-primary rounded-lg py-sm px-md items-center justify-center mb-lg min-h-[50px] ${
+                isRegisterDisabled ? 'opacity-60' : ''
+              }`}
               onPress={handleRegister}
               disabled={isRegisterDisabled}
               testID="register-button"
@@ -534,16 +536,16 @@ export default function RegisterScreen() {
               {isSubmitting ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.registerButtonText}>Register</Text>
+                <Text className="text-body font-semibold text-white">Register</Text>
               )}
             </TouchableOpacity>
 
             {/* Login Link */}
-            <View style={styles.loginContainer}>
-              <Text style={styles.loginText}>Already have an account? </Text>
+            <View className="flex-row justify-center items-center py-sm">
+              <Text className="text-small text-text-secondary">Already have an account? </Text>
               <Link href="/(auth)/login" asChild>
                 <TouchableOpacity testID="login-link">
-                  <Text style={styles.loginLink}>Login</Text>
+                  <Text className="text-small text-primary font-semibold">Login</Text>
                 </TouchableOpacity>
               </Link>
             </View>
@@ -553,163 +555,3 @@ export default function RegisterScreen() {
     </SafeAreaView>
   );
 }
-
-/**
- * React Native StyleSheet
- * Provides performant styling with platform-specific optimizations
- */
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-  },
-  headerContainer: {
-    marginBottom: 32,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '400',
-  },
-  errorContainer: {
-    backgroundColor: '#FFE5E5',
-    borderWidth: 1,
-    borderColor: '#FF3B30',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  formContainer: {
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: '#000',
-    backgroundColor: '#f9f9f9',
-  },
-  inputError: {
-    borderColor: '#FF3B30',
-    backgroundColor: '#FFEDED',
-  },
-  fieldErrorText: {
-    color: '#FF3B30',
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  passwordContainer: {
-    position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passwordInput: {
-    flex: 1,
-  },
-  toggleButton: {
-    position: 'absolute',
-    right: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-  },
-  dateButton: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
-    justifyContent: 'center',
-  },
-  dateButtonText: {
-    fontSize: 14,
-    color: '#000',
-  },
-  dateButtonPlaceholder: {
-    color: '#999',
-  },
-  webDateInputWrapper: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: '#f9f9f9',
-  },
-  webDateInput: {
-    width: '100%',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
-    borderWidth: 0,
-    fontFamily: 'System',
-  },
-  registerButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    minHeight: 50,
-  },
-  registerButtonDisabled: {
-    opacity: 0.6,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  loginText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  loginLink: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-});

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, ScrollView, Alert, Text } from 'react-native';
+import { View, ScrollView, Alert, Text, TouchableOpacity, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { RecordButton, MessageCard, LoadingWaveform, EmptyState } from '@/components/conversation';
 
 interface Message {
@@ -27,12 +28,23 @@ export default function ConversationScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const headerHeight = useRef(new Animated.Value(1)).current;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages, isLoading]);
+
+  // Handle header collapse animation
+  useEffect(() => {
+    Animated.timing(headerHeight, {
+      toValue: headerCollapsed ? 0 : 1,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [headerCollapsed, headerHeight]);
 
   // Get relative timestamp
   const getRelativeTime = (minutesAgo: number) => {
@@ -94,9 +106,39 @@ export default function ConversationScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-dark">
-      {/* Header */}
-      <View className="px-lg py-md border-b border-border">
-        <Text className="text-h1 font-bold text-text-primary">Conversation</Text>
+      {/* Enhanced Header with Collapse */}
+      <View className="border-b border-border/50">
+        <TouchableOpacity
+          className="px-lg py-md flex-row items-center justify-between"
+          onPress={() => setHeaderCollapsed(!headerCollapsed)}
+          activeOpacity={0.7}
+        >
+          <View className="flex-1">
+            <View className="flex-row items-center gap-sm">
+              <MaterialIcons name="auto-awesome" size={20} color="#d4af37" />
+              <Text className="text-h2 font-bold text-text-primary">Numerology Guide</Text>
+            </View>
+            <Animated.View
+              style={{
+                maxHeight: headerHeight.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 40],
+                }),
+                opacity: headerHeight,
+                overflow: 'hidden',
+              }}
+            >
+              <Text className="text-small text-text-secondary mt-xs">
+                Try asking about your destiny number or life path
+              </Text>
+            </Animated.View>
+          </View>
+          <MaterialIcons
+            name={headerCollapsed ? 'expand-more' : 'expand-less'}
+            size={24}
+            color="#9E9E9E"
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Messages Area */}
@@ -128,7 +170,7 @@ export default function ConversationScreen() {
       </ScrollView>
 
       {/* Record Button (Fixed at Bottom) */}
-      <View className="items-center py-lg pb-xxl bg-dark border-t border-border">
+      <View className="items-center py-lg pb-xxl bg-dark border-t border-border/50">
         <RecordButton
           onPress={handleRecordPress}
           isRecording={isRecording}
