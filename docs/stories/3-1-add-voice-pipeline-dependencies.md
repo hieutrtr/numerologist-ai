@@ -2,7 +2,7 @@
 
 **Epic:** Epic 3 - Voice Infrastructure & Basic Conversation
 **Story ID:** 3-1-add-voice-pipeline-dependencies
-**Status:** in-progress
+**Status:** done
 **Created:** 2025-11-08
 **Updated:** 2025-11-08
 **Dev Start:** 2025-11-08 15:04 UTC
