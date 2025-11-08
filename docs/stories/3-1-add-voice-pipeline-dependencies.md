@@ -59,14 +59,19 @@ This story establishes the foundational dependencies for the voice conversation 
 - [x] Can import: `from elevenlabs import ElevenLabs` ✓
 
 ### AC6: Environment Variables Documented
-- [x] `.env.example` created with comprehensive voice service variables
+- [x] `.env.example` created with comprehensive voice service variables and all required configs
 - [x] `DAILY_API_KEY` documented with description and acquisition link
 - [x] `DEEPGRAM_API_KEY` documented with description and acquisition link
 - [x] `AZURE_OPENAI_API_KEY` documented with description and acquisition link
-- [x] `AZURE_OPENAI_ENDPOINT` documented with example format
+- [x] `AZURE_OPENAI_ENDPOINT` documented with example format (https://your-resource.openai.azure.com/)
+- [x] `AZURE_OPENAI_MODEL_DEPLOYMENT_NAME` documented (e.g., gpt-5-mini-deployment) - Required for Azure
+- [x] `AZURE_OPENAI_MODEL_NAME` documented (gpt-5-mini) - Required LLM model specification
 - [x] `ELEVENLABS_API_KEY` documented with description and acquisition link
+- [x] `ELEVENLABS_VOICE_ID` documented with default (Rachel: 21m00Tcm4TlvDq8ikWAM) and alternatives (Charlie, Grace)
 - [x] Complete instructions for obtaining each API key including links to dashboards
 - [x] Dev vs production note included
+- [x] JWT SECRET_KEY documented with secure generation instructions
+- [x] All environment variables cross-referenced with PR requirements
 
 ### AC7: Dependency Installation Verification
 - [x] Run `uv sync` completes without errors - All 105 packages resolved
@@ -185,13 +190,18 @@ DAILY_API_KEY=your_daily_api_key_here
 DEEPGRAM_API_KEY=your_deepgram_api_key_here
 
 # Azure OpenAI - Large Language Model (GPT-5-mini)
-# Get key from: https://portal.azure.com/ → Azure OpenAI Service
+# Get credentials from: https://portal.azure.com/ → Azure OpenAI Service
+# Required: API Key, Endpoint, Deployment Name (created in Azure), Model Name
 AZURE_OPENAI_API_KEY=your_azure_openai_key_here
 AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_MODEL_DEPLOYMENT_NAME=gpt-5-mini-deployment
+AZURE_OPENAI_MODEL_NAME=gpt-5-mini
 
 # ElevenLabs - Text-to-Speech (TTS) service
 # Get key from: https://elevenlabs.io/api
+# Voice IDs: Rachel (21m00Tcm4TlvDq8ikWAM), Charlie (N2lVS1w4EtoT3dr4eOWO), Grace (JBFqnCBsd6RMkjW3i8ZA)
 ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
 ```
 
 ### Testing Strategy
