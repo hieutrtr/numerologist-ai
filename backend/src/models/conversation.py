@@ -96,7 +96,6 @@ class Conversation(SQLModel, table=True):
     # Relationships
     user: Optional["User"] = Relationship(
         back_populates="conversations",
-        description="User who owns this conversation"
     )
 
     def calculate_duration(self) -> None:
