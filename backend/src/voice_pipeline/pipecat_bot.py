@@ -60,6 +60,8 @@ from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.services.azure.llm import AzureLLMService
 from pipecat.services.elevenlabs.tts import ElevenLabsTTSService
+from deepgram import LiveOptions
+from pipecat.transcriptions.language import Language
 
 # Message aggregators for conversation history
 from pipecat.processors.aggregators.llm_response import (
@@ -145,9 +147,23 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
 
         # Deepgram: Speech-to-Text with language configuration
         logger.info(f"Configuring Deepgram for language: {settings.voice_language}")
+
+        # Map language code to Language enum
+        language_map = {
+            "en": Language.EN,
+            "vi": Language.VI,
+            "es": Language.ES,
+            "fr": Language.FR,
+            "de": Language.DE,
+            "ja": Language.JA,
+            "zh": Language.ZH,
+            "pt": Language.PT,
+        }
+        language_enum = language_map.get(settings.voice_language, Language.EN)
+
         stt = DeepgramSTTService(
             api_key=settings.deepgram_api_key,
-            language=settings.voice_language,
+            live_options=LiveOptions(language=language_enum),
         )
 
         # Azure OpenAI: Language Model
