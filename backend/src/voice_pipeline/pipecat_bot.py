@@ -48,6 +48,7 @@ from typing import Optional
 # Pipecat core components
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.task import PipelineParams, PipelineTask
+from pipecat.pipeline.runner import PipelineRunner
 
 # Daily.co WebRTC transport
 from pipecat.transports.daily.transport import DailyTransport, DailyParams
@@ -61,10 +62,17 @@ from pipecat.services.azure.llm import AzureLLMService
 from pipecat.services.elevenlabs.tts import ElevenLabsTTSService
 
 # Message aggregators for conversation history
-from pipecat.processors.aggregators.llm_response import (
-    LLMAssistantResponseAggregator,
-    LLMUserResponseAggregator,
-)
+# Try to import from new location first, fall back to deprecated location
+try:
+    from pipecat.processors.aggregators.llm_context import (
+        LLMAssistantContextAggregator as LLMAssistantResponseAggregator,
+        LLMUserContextAggregator as LLMUserResponseAggregator,
+    )
+except ImportError:
+    from pipecat.processors.aggregators.llm_response import (
+        LLMAssistantResponseAggregator,
+        LLMUserResponseAggregator,
+    )
 
 # Application settings
 from src.core.settings import settings
@@ -134,7 +142,6 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
             DailyParams(
                 audio_in_enabled=True,
                 audio_out_enabled=True,
-                vad_enabled=True,
                 vad_analyzer=SileroVADAnalyzer(),
             )
         )
@@ -187,8 +194,9 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
         logger.info("Starting pipeline runner")
         task = PipelineTask(pipeline, params=PipelineParams())
 
-        # Run pipeline (this is a blocking async call that runs until stopped)
-        await task.run()
+        # Run pipeline using PipelineRunner (this is a blocking async call that runs until stopped)
+        runner = PipelineRunner()
+        await runner.run(task)
 
         logger.info("Pipeline execution completed")
         return task

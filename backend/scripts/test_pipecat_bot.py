@@ -75,7 +75,7 @@ async def test_pipecat_bot():
 
         # Create Daily.co room
         print("📞 Creating Daily.co room...")
-        conversation_id = "manual-test-pipecat-bot"
+        conversation_id = "manual-test-pipecat-bot-1"
         room_info = await daily_service.create_room(conversation_id)
 
         print("✅ Room created successfully!")
