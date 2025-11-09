@@ -78,7 +78,7 @@ development_status:
   3-4-conversation-model-start-endpoint: done
   3-5-frontend-conversation-state-zustand: review
   3-6-microphone-permission-setup: done
-  3-7-conversation-screen-ui: ready-for-dev
+  3-7-conversation-screen-ui: review
   3-8-daily-co-react-native-integration: backlog
   3-9-end-conversation-cleanup: backlog
   3-10-end-to-end-voice-test: backlog
