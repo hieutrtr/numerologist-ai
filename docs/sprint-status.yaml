@@ -77,7 +77,7 @@ development_status:
   3-3-basic-pipecat-bot-with-greeting: review
   3-4-conversation-model-start-endpoint: done
   3-5-frontend-conversation-state-zustand: review
-  3-6-microphone-permission-setup: backlog
+  3-6-microphone-permission-setup: ready-for-dev
   3-7-conversation-screen-ui: backlog
   3-8-daily-co-react-native-integration: backlog
   3-9-end-conversation-cleanup: backlog

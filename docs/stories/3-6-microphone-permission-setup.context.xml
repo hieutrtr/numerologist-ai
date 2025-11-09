@@ -1,0 +1,250 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3-6-microphone-permission-setup</storyId>
+    <title>Microphone Permission & Setup</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-6-microphone-permission-setup.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>the app to request microphone permission</iWant>
+    <soThat>I can speak during voice conversations</soThat>
+    <tasks>
+      <task id="task-1" title="Create Audio Service File & Setup (AC1, AC2)">
+        <subtasks>
+          <subtask>Create file: mobile/src/services/audio.service.ts</subtask>
+          <subtask>Add file header with module documentation</subtask>
+          <subtask>Import dependencies: Audio from expo-av, Platform from react-native, __DEV__ from expo-constants</subtask>
+          <subtask>Export empty functions (will implement in next tasks)</subtask>
+        </subtasks>
+      </task>
+      <task id="task-2" title="Implement requestMicrophonePermission() - Web Platform (AC1, AC6)">
+        <subtasks>
+          <subtask>Check if platform is 'web'</subtask>
+          <subtask>If web: Use navigator.mediaDevices.getUserMedia({ audio: true })</subtask>
+          <subtask>Wrap in try/catch for error handling</subtask>
+          <subtask>Stop all media tracks after permission check</subtask>
+          <subtask>Return true on success, false on error</subtask>
+        </subtasks>
+      </task>
+      <task id="task-3" title="Implement requestMicrophonePermission() - Mobile Platform (AC1, AC7)">
+        <subtasks>
+          <subtask>Check if platform is 'android' or 'ios'</subtask>
+          <subtask>If mobile: Call Audio.requestPermissionsAsync()</subtask>
+          <subtask>Capture response and check status</subtask>
+          <subtask>Return true if granted, false if denied</subtask>
+          <subtask>Wrap in try/catch and log errors in __DEV__</subtask>
+        </subtasks>
+      </task>
+      <task id="task-4" title="Implement checkMicrophonePermission() - Web (AC2, AC6)">
+        <subtasks>
+          <subtask>Check if platform is 'web'</subtask>
+          <subtask>If web: Use navigator.permissions.query({ name: 'microphone' })</subtask>
+          <subtask>Check permission state and return boolean</subtask>
+          <subtask>Handle errors gracefully by returning false</subtask>
+        </subtasks>
+      </task>
+      <task id="task-5" title="Implement checkMicrophonePermission() - Mobile (AC2, AC7)">
+        <subtasks>
+          <subtask>Check if platform is 'android' or 'ios'</subtask>
+          <subtask>If mobile: Call Audio.getPermissionsAsync()</subtask>
+          <subtask>Check permission status and return boolean</subtask>
+          <subtask>Wrap in try/catch and log errors in __DEV__</subtask>
+        </subtasks>
+      </task>
+      <task id="task-6" title="Error Handling & Recovery (AC8)">
+        <subtasks>
+          <subtask>Handle permission cancellation gracefully</subtask>
+          <subtask>Handle browser/API unavailability with graceful fallback</subtask>
+          <subtask>Handle Expo Audio errors and log with __DEV__ guard</subtask>
+        </subtasks>
+      </task>
+      <task id="task-7" title="Platform Detection & Abstraction (AC6, AC7)">
+        <subtasks>
+          <subtask>Use Platform.OS to detect platform</subtask>
+          <subtask>Create clear separation between web and mobile code</subtask>
+          <subtask>Add comments explaining platform-specific logic</subtask>
+        </subtasks>
+      </task>
+      <task id="task-8" title="Integration Documentation (AC9)">
+        <subtasks>
+          <subtask>Add JSDoc example showing usage in conversation screen</subtask>
+          <subtask>Document expected usage pattern</subtask>
+          <subtask>Document error scenarios and handling</subtask>
+        </subtasks>
+      </task>
+      <task id="task-9" title="Type Safety & Exports (AC10)">
+        <subtasks>
+          <subtask>Ensure all functions have explicit return types: Promise&lt;boolean&gt;</subtask>
+          <subtask>Export both functions properly</subtask>
+          <subtask>Use proper TypeScript for error handling</subtask>
+          <subtask>Run TypeScript compiler and fix any errors</subtask>
+        </subtasks>
+      </task>
+      <task id="task-10" title="Testing Strategy & Edge Cases (AC8)">
+        <subtasks>
+          <subtask>Document test scenarios</subtask>
+          <subtask>Note: Actual test implementation in Story 3.7</subtask>
+        </subtasks>
+      </task>
+      <task id="task-11" title="Development Mode Helpers (AC8)">
+        <subtasks>
+          <subtask>Add __DEV__ guards around console.error statements</subtask>
+          <subtask>Consider adding debug logging for permission state</subtask>
+          <subtask>Document debugging tips in JSDoc</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">
+      <title>Microphone Permission Request Implementation</title>
+      <details>Create audio.service.ts module with requestMicrophonePermission() function that handles both web and mobile platforms differently. On web: Uses navigator.mediaDevices.getUserMedia() with audio constraint. On mobile: Uses Expo Audio API Audio.requestPermissionsAsync(). Returns boolean: true if permission granted, false if denied.</details>
+    </criterion>
+    <criterion id="AC2">
+      <title>Microphone Permission Checking</title>
+      <details>Implement checkMicrophonePermission() async function that checks current permission status without requesting. On web: Checks media device availability. On mobile: Uses Audio.getPermissionsAsync(). Returns boolean: true if granted, false if not granted or unknown.</details>
+    </criterion>
+    <criterion id="AC3">
+      <title>Permission Request Timing</title>
+      <details>Permission requested on first conversation attempt when user taps start, NOT during app startup (deferred until needed). Shows clear explanation text before permission dialog. Permission flow is non-blocking and handles user cancellation.</details>
+    </criterion>
+    <criterion id="AC4">
+      <title>User Feedback on Denial</title>
+      <details>If user denies permission, shows error alert/message explaining microphone is required. Provides link/button to open app settings for permission management. On mobile: Uses native settings app link. On web: Explains browser permission settings.</details>
+    </criterion>
+    <criterion id="AC5">
+      <title>Permission Caching & Persistence</title>
+      <details>Once permission granted, doesn't ask again (cached by OS). If permission previously denied, show settings link instead of requesting again. On app restart, respects previously granted/denied permissions. No unnecessary re-requests during conversation.</details>
+    </criterion>
+    <criterion id="AC6">
+      <title>Platform Compatibility - Web</title>
+      <details>Uses browser native permission prompt (not custom dialog). Integrates with browser's media device API. Works in Chrome, Firefox, Safari, Edge. Stops media stream after permission check (no lingering resources). Error handling for unsupported browsers.</details>
+    </criterion>
+    <criterion id="AC7">
+      <title>Platform Compatibility - Mobile</title>
+      <details>Uses Expo Audio API for permission handling. Integrates with native iOS/Android permission dialogs. On iOS: Uses AVAudioSession for microphone setup. On Android: Requests RECORD_AUDIO permission. Respects "Don't Ask Again" setting on Android.</details>
+    </criterion>
+    <criterion id="AC8">
+      <title>Error Handling & Robustness</title>
+      <details>Handles user cancellation gracefully (not an error). Handles API unavailability (older browsers, no media devices). Handles runtime permission revocation (user changes settings mid-app). Console errors logged in development mode only (__DEV__ guard). User-facing messages are clear and actionable.</details>
+    </criterion>
+    <criterion id="AC9">
+      <title>Integration with Conversation Store</title>
+      <details>audio.service.ts can be called from useConversationStore. Permission check happens before startConversation() is called. If permission denied, startConversation() is never called. Prevents unnecessary API calls without mic access. Clean separation: service handles permissions, store handles conversation state.</details>
+    </criterion>
+    <criterion id="AC10">
+      <title>TypeScript Type Safety</title>
+      <details>All functions have explicit return types (Promise&lt;boolean&gt;). Error handling uses typed catch blocks. Platform-specific code is clear and well-documented. No implicit any types. Exported functions are properly typed.</details>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/3-5-frontend-conversation-state-zustand.md</path>
+        <title>Story 3.5: Frontend Conversation State</title>
+        <section>Integration with Conversation Store</section>
+        <snippet>The microphone permission service will be called from useConversationStore before starting a conversation to ensure user has granted permission.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-7-conversation-screen-ui.md</path>
+        <title>Story 3.7: Conversation Screen UI</title>
+        <section>Permission Handling UI</section>
+        <snippet>The conversation screen will use audio.service.ts to request permissions before starting voice conversations.</snippet>
+      </doc>
+      <doc>
+        <path>mobile/package.json</path>
+        <title>Mobile Package Dependencies</title>
+        <section>Dependencies</section>
+        <snippet>Project uses expo-av for audio permission management and react-native for platform detection.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>mobile/src/stores/useConversationStore.ts</path>
+        <kind>service</kind>
+        <symbol>startConversation</symbol>
+        <lines>99-142</lines>
+        <reason>The conversation store initiates voice calls and will need to check microphone permission before attempting connection.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient</symbol>
+        <reason>May be used in error handling or permission-related API calls to backend if needed.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/__tests__/stores/useConversationStore.test.ts</path>
+        <kind>test</kind>
+        <symbol>useConversationStore tests</symbol>
+        <lines>1-532</lines>
+        <reason>Existing test patterns for store actions provide guidance for testing the audio permission service integration.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="expo-av" version="latest">Audio and video handling for React Native with permission management</package>
+        <package name="react-native" version="^0.73">Platform detection and native APIs</package>
+        <package name="expo" version="latest">Expo framework providing __DEV__ and constants</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="c1">Platform detection must use Platform.OS from react-native to distinguish web, ios, and android</constraint>
+    <constraint id="c2">Web implementation must use browser native APIs (navigator.mediaDevices, navigator.permissions) without custom dialogs</constraint>
+    <constraint id="c3">Mobile implementation must use Expo Audio API for iOS and Android compatibility</constraint>
+    <constraint id="c4">All functions must return Promise&lt;boolean&gt; - never throw, always return false on error</constraint>
+    <constraint id="c5">Console logging only in __DEV__ mode - no debug logs in production</constraint>
+    <constraint id="c6">Service must not hold any state - pure functions that query OS state</constraint>
+    <constraint id="c7">Media streams obtained during permission checks must be stopped immediately to prevent resource leaks</constraint>
+    <constraint id="c8">No custom permission dialogs - only use OS native dialogs and settings links</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>requestMicrophonePermission</name>
+      <kind>function</kind>
+      <signature>async (): Promise&lt;boolean&gt;</signature>
+      <path>mobile/src/services/audio.service.ts</path>
+      <description>Request microphone permission from the user using OS native dialog</description>
+    </interface>
+    <interface>
+      <name>checkMicrophonePermission</name>
+      <kind>function</kind>
+      <signature>async (): Promise&lt;boolean&gt;</signature>
+      <path>mobile/src/services/audio.service.ts</path>
+      <description>Check if microphone permission is already granted without showing dialog</description>
+    </interface>
+    <interface>
+      <name>startConversation</name>
+      <kind>store action</kind>
+      <signature>async (): Promise&lt;void&gt;</signature>
+      <path>mobile/src/stores/useConversationStore.ts:99</path>
+      <description>Will need to check microphone permission before connecting to Daily.co room</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Project uses Jest for unit testing with React Native testing library for hooks. Tests should mock navigator/Audio APIs for web/mobile respectively. Use renderHook from @testing-library/react-native for testing async permission functions.</standards>
+    <locations>mobile/__tests__/stores/ (existing hook tests), mobile/__tests__/services/ (new service tests)</locations>
+    <ideas>
+      <idea id="test-1" criterion="AC1">Test requestMicrophonePermission returns true when browser allows access (web platform)</idea>
+      <idea id="test-2" criterion="AC1">Test requestMicrophonePermission returns false when browser denies access (web platform)</idea>
+      <idea id="test-3" criterion="AC1">Test requestMicrophonePermission calls Audio.requestPermissionsAsync on mobile</idea>
+      <idea id="test-4" criterion="AC2">Test checkMicrophonePermission returns correct status on web using navigator.permissions.query</idea>
+      <idea id="test-5" criterion="AC2">Test checkMicrophonePermission returns correct status on mobile using Audio.getPermissionsAsync</idea>
+      <idea id="test-6" criterion="AC3">Test permission request returns false when user denies (simulating user action)</idea>
+      <idea id="test-7" criterion="AC5">Test that permission is not re-requested if already granted (caching behavior)</idea>
+      <idea id="test-8" criterion="AC6">Test web platform uses correct browser APIs (getUserMedia, permissions.query)</idea>
+      <idea id="test-9" criterion="AC7">Test mobile platform uses Expo Audio API correctly</idea>
+      <idea id="test-10" criterion="AC8">Test error handling when mediaDevices is unavailable (older browsers)</idea>
+    </ideas>
+  </tests>
+</story-context>
