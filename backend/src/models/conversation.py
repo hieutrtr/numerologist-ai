@@ -7,9 +7,9 @@ including room management, timing, and duration calculation.
 """
 
 from sqlmodel import SQLModel, Field, Relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
-from typing import Optional, List
+from typing import Optional
 
 
 class Conversation(SQLModel, table=True):
@@ -44,7 +44,7 @@ class Conversation(SQLModel, table=True):
     user_conversations = user.conversations  # Access via relationship
 
     # Calculate duration when ending
-    conversation.ended_at = datetime.utcnow()
+    conversation.ended_at = datetime.now(timezone.utc)
     conversation.calculate_duration()
     session.commit()
     ```
@@ -71,7 +71,7 @@ class Conversation(SQLModel, table=True):
 
     # Timing fields
     started_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp when conversation started"
     )
     ended_at: Optional[datetime] = Field(
@@ -85,11 +85,11 @@ class Conversation(SQLModel, table=True):
 
     # Audit fields
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp when record was created"
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp of last modification"
     )
 
@@ -108,7 +108,7 @@ class Conversation(SQLModel, table=True):
 
         Example:
         ```python
-        conversation.ended_at = datetime.utcnow()
+        conversation.ended_at = datetime.now(timezone.utc)
         conversation.calculate_duration()
         # Now conversation.duration_seconds is updated
         ```
