@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="3-7-conversation-screen-ui" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.7</storyId>
+    <title>Conversation Screen UI</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-7-conversation-screen-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>a conversation screen with microphone button</iWant>
+    <soThat>I can start and control voice conversations</soThat>
+    <tasks>
+      <task id="1" ac="AC1,AC2">Create Conversation Screen Component - Create file mobile/src/app/(tabs)/index.tsx with React Native imports and component structure</task>
+      <task id="2" ac="AC2,AC3">Implement Microphone Button - TouchableOpacity component with large sizing (60x60+), tap handler, state-based styling</task>
+      <task id="3" ac="AC3,AC8">Integrate Store State - useConversationStore hook, extract isConnected/isLoading/isAISpeaking state and actions</task>
+      <task id="4" ac="AC4,AC5">Implement Permission Checking - Check permission before start, request if needed, show alerts on denial</task>
+      <task id="5" ac="AC6">Implement Connection Status Display - Status text component that updates based on store state</task>
+      <task id="6" ac="AC7">Add Visual Feedback &amp; Animations - Pulsing animation when connected, loading spinner, state-based button styling</task>
+      <task id="7" ac="AC9">Error Handling &amp; User Feedback - Alert dialogs for errors, debouncing rapid taps, graceful error recovery</task>
+      <task id="8" ac="AC10">Responsive Design &amp; Layout - Test portrait/landscape/tablet/web, flexbox centering, padding/margins, safe areas</task>
+      <task id="9" ac="AC2,AC7">Integrate Icon Library - Choose icon library (Expo or React Native community), add microphone icon to button</task>
+      <task id="10" ac="AC1-AC10">Testing - Manual test all flows, permission scenarios, state transitions, platform compatibility</task>
+      <task id="11" ac="AC8">Documentation &amp; Review - JSDoc comments, store interface documentation, accessibility review, TypeScript validation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="1">Conversation Screen Component - Screen created in mobile/src/app/(tabs)/index.tsx, works on web/mobile, clean minimal design, proper React Native styling</ac>
+    <ac id="2">Microphone Button - Large central TouchableOpacity button (48dp+ touch target), text changes based on state (Start/End Conversation), centered positioning</ac>
+    <ac id="3">Button State Management - Integrates with useConversationStore, reflects connection states (not connected/connecting/connected/AI speaking), smooth state transitions</ac>
+    <ac id="4">Permission Handling - Checks permission before start, requests if needed, shows Alert on denial, permission check before startConversation() call</ac>
+    <ac id="5">Conversation Control Flow - Start flow: permission → startConversation() → connected UI. End flow: endConversation() → disconnected UI. Error handling with alerts</ac>
+    <ac id="6">Connection Status Display - Status text above/below button updates reactively with messages for each state (tap to start, connecting, connected, AI speaking)</ac>
+    <ac id="7">Visual Feedback &amp; Animations - Microphone icon in button, pulsing animation when connected, loading spinner when connecting, smooth state-based styling changes</ac>
+    <ac id="8">Integration with Store - Uses useConversationStore hook, accesses isConnected/isLoading/isAISpeaking state, calls startConversation()/endConversation() methods, no direct API calls</ac>
+    <ac id="9">Error Handling &amp; Edge Cases - Permission denial handled gracefully, start/end failures show alerts, rapid taps debounced, mic revocation detected, network errors handled</ac>
+    <ac id="10">Responsive Design - Works on mobile portrait/landscape, tablet, and web. Button/text readable at various sizes, proper margins/padding, safe area insets respected</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown - Epic 3</title>
+        <section>Story 3.7: Conversation Screen UI</section>
+        <snippet>Screen created with microphone button, shows different states (not connected/connecting/connected/AI speaking), permission handling, clean minimal design focused on voice interaction</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Documentation</title>
+        <section>Frontend Architecture - Component Structure</section>
+        <snippet>React Native components follow Expo Router patterns, state management via Zustand stores, services for cross-cutting concerns (audio, API)</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>mobile/src/stores/useConversationStore.ts</path>
+        <kind>service</kind>
+        <symbol>useConversationStore</symbol>
+        <reason>Zustand store providing conversation state (isConnected, isLoading, isAISpeaking, error) and actions (startConversation, endConversation). Screen UI depends entirely on this store.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/audio.service.ts</path>
+        <kind>service</kind>
+        <symbol>requestMicrophonePermission, checkMicrophonePermission</symbol>
+        <reason>Cross-platform microphone permission service. AC4 and AC5 require calling these functions before starting conversation. Story 3.6 deliverable.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(tabs)/_layout.tsx</path>
+        <kind>component</kind>
+        <symbol>TabLayout</symbol>
+        <reason>Tab navigation layout that defines the tabs structure. Story 3.7 screen (index.tsx) is the home tab, must integrate with existing tab layout.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/components/conversation/RecordButton.tsx</path>
+        <kind>component</kind>
+        <symbol>RecordButton</symbol>
+        <reason>Existing button component for reference. May reuse or adapt styling patterns for microphone button implementation.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/__tests__/services/audio.service.test.ts</path>
+        <kind>test</kind>
+        <symbol>Audio Service Tests</symbol>
+        <lines>1-475</lines>
+        <reason>Comprehensive test suite from Story 3.6 showing testing patterns for permission flows and platform-specific logic.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/__tests__/stores/useConversationStore.test.ts</path>
+        <kind>test</kind>
+        <symbol>Conversation Store Tests</symbol>
+        <reason>Test patterns for store testing that this story's component tests should follow.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(tabs)/index.tsx</path>
+        <kind>component</kind>
+        <symbol>ConversationScreen (to be implemented)</symbol>
+        <reason>Primary implementation target for this story. Must implement all ACs in this file.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="npm">
+        <package name="react-native" version="latest">Core React Native components (View, TouchableOpacity, Text, Alert, ActivityIndicator)</package>
+        <package name="expo" version="latest">Expo framework and utilities</package>
+        <package name="expo-av" version="latest">Audio/video APIs (from Story 3.6 dependencies)</package>
+        <package name="zustand" version="latest">State management (used by useConversationStore)</package>
+        <package name="@react-native-community/hooks" version="optional">Vector icons library option for microphone icon</package>
+        <package name="expo-vector-icons" version="optional">Alternative icon library using Expo vector icons</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface>
+      <name>useConversationStore</name>
+      <kind>Zustand Hook</kind>
+      <signature>
+const { isConnected, isLoading, isAISpeaking, error, startConversation, endConversation } = useConversationStore();
+
+// State properties:
+isConnected: boolean - True when connected to conversation
+isLoading: boolean - True while connecting or processing
+isAISpeaking: boolean - True when AI is currently speaking
+error: string | null - Error message if operation failed
+
+// Action methods:
+startConversation(): Promise&lt;void&gt; - Initiates conversation
+endConversation(): Promise&lt;void&gt; - Ends active conversation
+      </signature>
+      <path>mobile/src/stores/useConversationStore.ts</path>
+    </interface>
+
+    <interface>
+      <name>requestMicrophonePermission</name>
+      <kind>Service Function</kind>
+      <signature>
+export const requestMicrophonePermission = async (): Promise&lt;boolean&gt;
+- Shows native permission dialog (web: browser, mobile: iOS/Android)
+- Returns true if permission granted, false if denied or error
+- Never throws, always returns boolean
+      </signature>
+      <path>mobile/src/services/audio.service.ts</path>
+    </interface>
+
+    <interface>
+      <name>checkMicrophonePermission</name>
+      <kind>Service Function</kind>
+      <signature>
+export const checkMicrophonePermission = async (): Promise&lt;boolean&gt;
+- Non-intrusive check of current permission status
+- Returns true if already granted, false otherwise
+- Never shows dialog, never throws
+      </signature>
+      <path>mobile/src/services/audio.service.ts</path>
+    </interface>
+
+    <interface>
+      <name>ConversationScreen Component</name>
+      <kind>React Native Functional Component</kind>
+      <signature>
+export default function ConversationScreen() {
+  // Uses: useConversationStore hook
+  // Imports: requestMicrophonePermission, checkMicrophonePermission
+  // Returns: JSX.Element with View/TouchableOpacity/Text hierarchy
+  // Props: None (tab-based routing, gets props from Expo Router context)
+}
+      </signature>
+      <path>mobile/src/app/(tabs)/index.tsx</path>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint category="platform">
+      <title>Cross-Platform Compatibility</title>
+      <description>Must work on web (PWA), Android, and iOS. Use React Native core components. Platform-specific logic handled by stores/services, not in UI component.</description>
+    </constraint>
+
+    <constraint category="architecture">
+      <title>Separation of Concerns</title>
+      <description>Screen component handles UI and user interaction only. All conversation logic delegated to useConversationStore. All permission logic delegated to audio.service. No direct API calls from component.</description>
+    </constraint>
+
+    <constraint category="state-management">
+      <title>Single Source of Truth</title>
+      <description>All state comes from useConversationStore. Component is a pure view of store state. State changes trigger re-renders automatically via Zustand subscriptions.</description>
+    </constraint>
+
+    <constraint category="accessibility">
+      <title>Mobile Accessibility Standards</title>
+      <description>Button minimum touch target: 48dp (material design standard). Text must be readable at various font scales. Support device orientation changes. Proper contrast ratios for colors.</description>
+    </constraint>
+
+    <constraint category="testing">
+      <title>Jest Testing Framework</title>
+      <description>Follow patterns from Story 3.6 tests. Mock Zustand store, mock React Native components, test permission flows, test state transitions. Tests in mobile/__tests__/.</description>
+    </constraint>
+
+    <constraint category="coding-standards">
+      <title>TypeScript &amp; Type Safety</title>
+      <description>All functions have explicit return types. Component properly typed. Use interface imports from stores. No implicit any. Handle typed errors from async operations.</description>
+    </constraint>
+
+    <constraint category="dependencies">
+      <title>Dependency Management</title>
+      <description>Reuse existing services (audio.service from 3.6, useConversationStore from 3.5). Do not duplicate functionality. Use Zustand for state (already in project). Use React Native built-in icons or Expo vector icons.</description>
+    </constraint>
+
+    <constraint category="performance">
+      <title>Animation Performance</title>
+      <description>Use React Native Animated API for pulsing microphone. Avoid janky transitions. Test animations on real devices, not just emulator. Consider using useCallback for event handlers.</description>
+    </constraint>
+
+    <constraint category="error-handling">
+      <title>Graceful Error Recovery</title>
+      <description>Never let errors crash the app. Show user-friendly alerts for all error scenarios. Keep button functional for retry. Handle permission denial, network errors, and store operation failures.</description>
+    </constraint>
+
+    <constraint category="responsive-design">
+      <title>Layout Adaptation</title>
+      <description>Use flexbox for responsive centering. Test on multiple screen sizes (mobile, tablet, web). Use SafeAreaView for notches and status bars. Adjust padding/margins based on screen size if needed.</description>
+    </constraint>
+  </constraints>
+
+  <tests>
+    <standards>
+      Jest framework with React Native testing library. Mock Zustand store using jest.mock(). Mock React Native components as needed. Test permission flows with mocked audio.service. Test state transitions and re-renders. Follow patterns from Story 3.6 test suite (mobile/__tests__/services/audio.service.test.ts) which provides comprehensive mocking examples for cross-platform permission testing. Component tests should cover: permission grant/deny/retry flows, button state changes, error handling, rapid tap debouncing, store integration.
+    </standards>
+
+    <locations>
+      mobile/__tests__/app/(tabs)/index.test.tsx - Primary component tests
+      mobile/__tests__/services/audio.service.test.ts - Referenced permission test patterns (from Story 3.6)
+      mobile/__tests__/stores/useConversationStore.test.ts - Referenced store test patterns
+    </locations>
+
+    <ideas>
+      <idea ac="1">Test that ConversationScreen renders without crashing</idea>
+      <idea ac="2">Test microphone button is rendered with correct sizing (touchable area)</idea>
+      <idea ac="3">Test button label changes from "Start" to "End" based on isConnected state</idea>
+      <idea ac="3">Test button styling changes between states (colors, disabled state while loading)</idea>
+      <idea ac="4">Test permission flow: checkMicrophonePermission() called before requestMicrophonePermission()</idea>
+      <idea ac="4">Test permission denied shows Alert with proper message</idea>
+      <idea ac="4">Test permission granted proceeds to startConversation()</idea>
+      <idea ac="5">Test startConversation() called when permission granted and button tapped</idea>
+      <idea ac="5">Test endConversation() called when end button tapped</idea>
+      <idea ac="5">Test error alerts show on startConversation/endConversation failures</idea>
+      <idea ac="6">Test status text displays correct message for each store state</idea>
+      <idea ac="6">Test status text updates reactively when store state changes</idea>
+      <idea ac="7">Test loading spinner shown when isLoading=true</idea>
+      <idea ac="7">Test pulsing animation applied when isConnected=true</idea>
+      <idea ac="8">Test store actions (startConversation, endConversation) called with correct timing</idea>
+      <idea ac="8">Test store state changes trigger component re-renders</idea>
+      <idea ac="9">Test permission denial keeps button functional for retry</idea>
+      <idea ac="9">Test rapid taps debounced to prevent multiple rapid starts</idea>
+      <idea ac="9">Test error messages display and don't crash app</idea>
+      <idea ac="10">Test responsive layout on mobile portrait (375px)</idea>
+      <idea ac="10">Test responsive layout on mobile landscape (812px)</idea>
+      <idea ac="10">Test responsive layout on tablet (768px)</idea>
+      <idea ac="10">Test responsive layout on web (1024px+)</idea>
+      <idea ac="10">Integration test: Full flow from permission request to conversation start to end</idea>
+    </ideas>
+  </tests>
+</story-context>

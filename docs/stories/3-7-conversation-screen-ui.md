@@ -2,7 +2,7 @@
 
 **Epic:** Epic 3 - Voice Infrastructure & Basic Conversation
 **Story ID:** 3-7-conversation-screen-ui
-**Status:** drafted
+**Status:** ready-for-dev
 **Created:** 2025-11-10
 **Context Reference:** docs/stories/3-7-conversation-screen-ui.context.xml
 
