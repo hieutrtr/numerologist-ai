@@ -55,10 +55,12 @@ async def test_pipecat_bot():
     Create Daily.co room and run Pipecat bot for manual testing.
 
     Steps:
-        1. Create Daily.co room with test conversation ID
-        2. Print room URL for manual browser access
-        3. Spawn bot in room
-        4. Bot runs until Ctrl+C or room closes
+        1. Clean up any existing test room from previous runs
+        2. Create Daily.co room with test conversation ID
+        3. Print room URL for manual browser access
+        4. Spawn bot in room
+        5. Bot runs until Ctrl+C or room closes
+        6. Clean up room on exit
 
     Returns:
         None
@@ -67,15 +69,24 @@ async def test_pipecat_bot():
         ValueError: If API keys are not configured
         Exception: If room creation or bot initialization fails
     """
+    room_info = None
+
     try:
         print("=" * 70)
         print("🤖 Pipecat Voice AI Bot - Manual Test")
         print("=" * 70)
         print()
 
+        # Clean up any existing test room from previous runs
+        print("🧹 Cleaning up any existing test rooms...")
+        conversation_id = "manual-test-pipecat-bot-1"
+        room_name = f"numerologist-{conversation_id}"
+        await daily_service.delete_room(room_name)
+        print("✅ Cleanup completed")
+        print()
+
         # Create Daily.co room
         print("📞 Creating Daily.co room...")
-        conversation_id = "manual-test-pipecat-bot-1"
         room_info = await daily_service.create_room(conversation_id)
 
         print("✅ Room created successfully!")
@@ -128,8 +139,6 @@ async def test_pipecat_bot():
         print("🛑 Test stopped by user (Ctrl+C)")
         print("=" * 70)
         print()
-        print("✅ Bot shut down successfully")
-        return 0
 
     except Exception as e:
         # Other errors
@@ -142,6 +151,18 @@ async def test_pipecat_bot():
         import traceback
         traceback.print_exc()
         return 1
+
+    finally:
+        # Always clean up the room on exit (success, error, or Ctrl+C)
+        if room_info:
+            print()
+            print("🧹 Cleaning up test room...")
+            deleted = await daily_service.delete_room(room_info["room_name"])
+            if deleted:
+                print("✅ Room deleted successfully")
+            else:
+                print("⚠️  Room cleanup failed or already deleted")
+        print()
 
     print()
     print("=" * 70)
