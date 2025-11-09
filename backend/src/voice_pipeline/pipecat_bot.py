@@ -62,17 +62,11 @@ from pipecat.services.azure.llm import AzureLLMService
 from pipecat.services.elevenlabs.tts import ElevenLabsTTSService
 
 # Message aggregators for conversation history
-# Try to import from new location first, fall back to deprecated location
-try:
-    from pipecat.processors.aggregators.llm_context import (
-        LLMAssistantContextAggregator as LLMAssistantResponseAggregator,
-        LLMUserContextAggregator as LLMUserResponseAggregator,
-    )
-except ImportError:
-    from pipecat.processors.aggregators.llm_response import (
-        LLMAssistantResponseAggregator,
-        LLMUserResponseAggregator,
-    )
+from pipecat.processors.aggregators.llm_response import (
+    LLMAssistantContextAggregator,
+    LLMUserContextAggregator,
+)
+from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 
 # Application settings
 from src.core.settings import settings
@@ -173,9 +167,12 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
             }
         ]
 
+        # Create LLM context for managing conversation history
+        llm_context = OpenAILLMContext(messages=messages)
+
         # Create message aggregators for conversation history
-        user_aggregator = LLMUserResponseAggregator(messages)
-        assistant_aggregator = LLMAssistantResponseAggregator(messages)
+        user_aggregator = LLMUserContextAggregator(llm_context)
+        assistant_aggregator = LLMAssistantContextAggregator(llm_context)
 
         # Build complete pipeline
         # Order is critical: input → stt → user_agg → llm → tts → output → assistant_agg
