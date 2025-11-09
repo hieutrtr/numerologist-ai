@@ -288,6 +288,11 @@ class Settings(BaseSettings):
 
     Environment variable: AZURE_OPENAI_MODEL_NAME
     """
+    azure_openai_api_version: str = "2024-09-01-preview"
+    """
+    Azure OpenAI API version.
+    Environment variable: AZURE_OPENAI_API_VERSION
+    """
 
     elevenlabs_api_key: str = ""
     """

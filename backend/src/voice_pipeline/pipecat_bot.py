@@ -151,6 +151,7 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
             api_key=settings.azure_openai_api_key,
             endpoint=settings.azure_openai_endpoint,
             model=settings.azure_openai_model_deployment_name,
+            api_version=settings.azure_openai_api_version,
         )
 
         # ElevenLabs: Text-to-Speech
