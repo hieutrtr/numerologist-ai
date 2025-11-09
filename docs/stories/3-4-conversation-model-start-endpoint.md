@@ -2,8 +2,9 @@
 
 **Epic:** Epic 3 - Voice Infrastructure & Basic Conversation
 **Story ID:** 3-4-conversation-model-start-endpoint
-**Status:** drafted
+**Status:** ready-for-dev
 **Created:** 2025-11-09
+**Context Reference:** docs/stories/3-4-conversation-model-start-endpoint.context.xml
 
 ---
 

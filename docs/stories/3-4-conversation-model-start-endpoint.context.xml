@@ -1,0 +1,298 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/output" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3-4-conversation-model-start-endpoint</storyId>
+    <title>Conversation Model & Start Endpoint</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-09T00:00:00Z</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-4-conversation-model-start-endpoint.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to start a voice conversation via API</iWant>
+    <soThat>I can begin talking to the AI numerologist</soThat>
+    <tasks>
+      <task n="1">Create Conversation Model (AC1)
+        - Create backend/src/models/conversation.py
+        - Define SQLAlchemy model with id, user_id, daily_room_id, timestamps
+        - Add User relationship and helper methods</task>
+      <task n="2">Create Alembic Migration (AC2)
+        - Generate migration: alembic revision --autogenerate -m "Add conversations table"
+        - Review and apply migration: alembic upgrade head
+        - Verify table in PostgreSQL</task>
+      <task n="3">Create Conversations Endpoint Router (AC3)
+        - Create backend/src/api/v1/endpoints/conversations.py
+        - Import dependencies and create APIRouter</task>
+      <task n="4">Implement Start Endpoint (AC4, AC8, AC10)
+        - Implement POST /api/v1/conversations/start
+        - Create conversation record, Daily.co room, spawn bot
+        - Handle errors and logging</task>
+      <task n="5">Wire Endpoint in API Router (AC5)
+        - Update backend/src/api/v1/router.py
+        - Include conversations router with correct prefix</task>
+      <task n="6">Update User Model (AC6)
+        - Add conversations relationship to User model</task>
+      <task n="7">Verify Session Dependency (AC7)
+        - Check backend/src/core/deps.py for get_session()
+        - Create if missing</task>
+      <task n="8">Manual Testing with Postman (AC8)
+        - Test endpoint with authentication
+        - Verify response and database</task>
+      <task n="9">Integration Testing (AC9)
+        - Verify bot spawning and room joining
+        - Test concurrent conversations
+        - Test user interaction</task>
+      <task n="10">Error Scenario Testing (AC10)
+        - Test auth failures (401)
+        - Test service failures (500)
+        - Test transaction rollback</task>
+      <task n="11">Code Review &amp; Documentation (AC11)
+        - Verify code patterns and style
+        - Update API documentation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Conversation Model Created
+      - Create backend/src/models/conversation.py module
+      - Define Conversation SQLAlchemy model with: id (UUID), user_id (FK), daily_room_id, started_at, ended_at, duration_seconds, created_at, updated_at
+      - Add relationship to User model
+      - Add validation and calculate_duration() helper method</criterion>
+    <criterion id="AC2">Alembic Database Migration
+      - Generate migration: alembic revision --autogenerate
+      - Migration creates conversations table with all fields, FK to users, indexes, constraints
+      - Apply with: alembic upgrade head
+      - Verify table in PostgreSQL: \d conversations</criterion>
+    <criterion id="AC3">Conversation Endpoints Router
+      - Create backend/src/api/v1/endpoints/conversations.py
+      - Import FastAPI, SQLAlchemy, models, services, dependencies
+      - Create APIRouter with tags=["conversations"]</criterion>
+    <criterion id="AC4">POST /api/v1/conversations/start Endpoint
+      - Route: POST /api/v1/conversations/start (auth required)
+      - Create Conversation record in database
+      - Call daily_service.create_room()
+      - Update conversation with daily_room_id
+      - Spawn pipecat_bot.run_bot() as background task
+      - Return {conversation_id, daily_room_url, daily_token}
+      - Handle errors: 401 unauthorized, 500 server errors</criterion>
+    <criterion id="AC5">Endpoint Wiring
+      - Update backend/src/api/v1/router.py
+      - Import conversations endpoint
+      - Include router: api_router.include_router(conversations.router, prefix="/conversations")
+      - Verify route: POST /api/v1/conversations/start</criterion>
+    <criterion id="AC6">User Model Update
+      - Add to backend/src/models/user.py:
+      - conversations = relationship("Conversation", back_populates="user")</criterion>
+    <criterion id="AC7">Session Dependency
+      - Verify backend/src/core/deps.py has get_session()
+      - Returns database session from SessionLocal
+      - Create if missing</criterion>
+    <criterion id="AC8">Manual Testing - Postman
+      - Test POST /api/v1/conversations/start with JWT auth
+      - Verify 200 response with conversation_id and daily_room_url
+      - Confirm conversation appears in database</criterion>
+    <criterion id="AC9">Integration Testing
+      - Bot spawns and joins room within 5 seconds
+      - User can join room URL and hear bot greeting
+      - Multiple concurrent conversations work independently</criterion>
+    <criterion id="AC10">Error Scenarios
+      - 401 Unauthorized without auth token
+      - 400 BadRequest with invalid user
+      - 500 ServerError if daily_service fails
+      - 500 ServerError if bot spawn fails
+      - Database transaction rolls back on failure</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epic 3 - Voice Infrastructure &amp; Basic Conversation</title>
+        <section>Story 3.4: Conversation Model &amp; Start Endpoint</section>
+        <snippet>Endpoint creates Daily.co room, creates Conversation record, spawns Pipecat bot process, returns room URL and token for frontend integration. Prerequisites: Stories 3.3 complete.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>System Architecture</title>
+        <section>API Layer &amp; Database Models</section>
+        <snippet>FastAPI endpoints with SQLAlchemy ORM models, Alembic migrations, dependency injection pattern for auth and database sessions.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Voice Conversation Feature</section>
+        <snippet>Users can initiate voice conversations via API endpoint. Backend manages conversation lifecycle, Daily.co rooms, and Pipecat bot processes.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/stories/3-3-basic-pipecat-bot-with-greeting.md</path>
+        <title>Story 3.3 - Basic Pipecat Bot with Greeting</title>
+        <section>Pipecat Pipeline Architecture</section>
+        <snippet>Implements voice pipeline using Pipecat framework with Daily.co transport, Deepgram STT, Azure OpenAI LLM, ElevenLabs TTS. This story 3.4 wraps that pipeline in conversation management API.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/stories/3-2-daily-co-room-management-service.md</path>
+        <title>Story 3.2 - Daily.co Room Management Service</title>
+        <section>Room Creation API</section>
+        <snippet>Provides daily_service.create_room() function that this story depends on. Returns room_url and meeting_token for bot access.</snippet>
+      </artifact>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/models/user.py</path>
+        <kind>model</kind>
+        <symbol>User</symbol>
+        <reason>Need to add conversations relationship (one-to-many) for User to access their conversations</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/database.py</path>
+        <kind>database-config</kind>
+        <symbol>Base, SessionLocal</symbol>
+        <reason>Base class for SQLAlchemy models, SessionLocal for database session factory in get_session() dependency</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/deps.py</path>
+        <kind>dependencies</kind>
+        <symbol>get_current_user, get_session</symbol>
+        <reason>Authentication dependency to get current user; need to verify get_session() exists for Session injection in endpoint</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/services/daily_service.py</path>
+        <kind>service</kind>
+        <symbol>create_room</symbol>
+        <reason>Service function to create Daily.co rooms. Returns room_url and meeting_token needed for bot access and user join.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+        <kind>service</kind>
+        <symbol>run_bot</symbol>
+        <reason>Async function to spawn Pipecat bot in Daily.co room. Called as background task after conversation created.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/router.py</path>
+        <kind>router</kind>
+        <symbol>api_router</symbol>
+        <reason>Main API router where conversations endpoint must be registered with include_router()</reason>
+      </artifact>
+      <artifact>
+        <path>backend/alembic/versions/</path>
+        <kind>migrations</kind>
+        <reason>Directory where Alembic migration files are generated. New migration for conversations table will be created here.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="python">
+        <package name="fastapi" version="&gt;=0.104">REST API framework for endpoint</package>
+        <package name="sqlalchemy" version="&gt;=2.0">ORM for Conversation model</package>
+        <package name="alembic" version="&gt;=1.13">Database migrations</package>
+        <package name="psycopg2-binary" version="&gt;=2.9">PostgreSQL adapter</package>
+        <package name="pydantic" version="&gt;=2.0">Data validation</package>
+      </ecosystem>
+      <external name="Daily.co API">daily_service.create_room() wraps Daily API for room creation</external>
+      <external name="PostgreSQL Database">Stores Conversation records with user FK constraint</external>
+      <external name="Pipecat Framework">run_bot() depends on pipecat services for voice pipeline</external>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Must use async/await pattern consistent with existing FastAPI endpoints</constraint>
+    <constraint>Conversation model must use UUID primary key matching User model pattern</constraint>
+    <constraint>Foreign key user_id must NOT be nullable (conversation requires valid user)</constraint>
+    <constraint>Endpoint must require JWT authentication (get_current_user dependency)</constraint>
+    <constraint>Background bot task must not block endpoint response (use asyncio.create_task)</constraint>
+    <constraint>Database transactions must be explicit: commit on success, rollback on error</constraint>
+    <constraint>Alembic migration must include foreign key and index constraints</constraint>
+    <constraint>Error responses must be descriptive (log full exception, return sanitized message to client)</constraint>
+    <constraint>All database changes must be reversible via Alembic downgrade</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>POST /api/v1/conversations/start</name>
+      <kind>REST endpoint</kind>
+      <signature>
+async def start_conversation(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+) -> dict
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py</path>
+      <description>Create new voice conversation, create Daily.co room, spawn bot, return room details</description>
+      <requestBody>None (auth in headers, user_id from JWT)</requestBody>
+      <responseBody>
+{
+  "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+  "daily_room_url": "https://domain.daily.co/room-name",
+  "daily_token": "eyJhbGciOiJIUzI1NiIs..."
+}
+      </responseBody>
+      <statusCodes>
+        <code>200 OK - Conversation created successfully</code>
+        <code>401 Unauthorized - Missing or invalid JWT token</code>
+        <code>500 Internal Server Error - Daily.co or database failure</code>
+      </statusCodes>
+    </interface>
+    <interface>
+      <name>Conversation Model</name>
+      <kind>SQLAlchemy ORM Model</kind>
+      <signature>
+class Conversation(Base):
+    __tablename__ = "conversations"
+    id: UUID = primary key
+    user_id: UUID = ForeignKey("users.id")
+    daily_room_id: str | None
+    started_at: datetime = auto-set
+    ended_at: datetime | None
+    duration_seconds: int | None
+    created_at: datetime = auto-set
+    updated_at: datetime = auto-set
+      </signature>
+      <path>backend/src/models/conversation.py</path>
+      <description>Represents active or historical voice conversation between user and AI bot</description>
+    </interface>
+    <interface>
+      <name>daily_service.create_room(room_id: str)</name>
+      <kind>Function interface</kind>
+      <signature>async def create_room(room_id: str) -> dict</signature>
+      <path>backend/src/services/daily_service.py</path>
+      <description>Create Daily.co room, return {room_url, room_name, meeting_token}</description>
+      <returnType>dict with keys: room_url (str), room_name (str), meeting_token (str)</returnType>
+    </interface>
+    <interface>
+      <name>pipecat_bot.run_bot(room_url: str, token: str)</name>
+      <kind>Function interface</kind>
+      <signature>async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+      <description>Spawn Pipecat bot in room, connect to Daily.co, run voice pipeline until room closes</description>
+      <notes>Spawned as background task, errors logged but don't block caller</notes>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses pytest with FastAPI TestClient for endpoint testing. Database tests use fixture-based setup/teardown with PostgreSQL test database. Tests should follow Arrange-Act-Assert pattern. Mock external services (Daily.co, Pipecat) for unit tests; integration tests use real services in test environment.
+    </standards>
+    <locations>
+      backend/tests/api/v1/test_conversations.py - Endpoint tests
+      backend/tests/models/test_conversation.py - Model validation tests
+      backend/tests/services/test_conversation_service.py - Service layer tests (if extracted)
+    </locations>
+    <ideas>
+      <test ac="AC1">Verify Conversation model created with required fields and relationships</test>
+      <test ac="AC2">Verify Alembic migration creates conversations table with correct schema</test>
+      <test ac="AC3">Verify APIRouter created with correct prefix and tags</test>
+      <test ac="AC4">Test POST /start with valid JWT returns 200 with conversation_id and room_url</test>
+      <test ac="AC4">Test POST /start creates Conversation record in database</test>
+      <test ac="AC4">Test POST /start calls daily_service.create_room() with conversation_id</test>
+      <test ac="AC4">Test POST /start spawns background task with run_bot()</test>
+      <test ac="AC5">Test route is registered in API router (verify Swagger docs)</test>
+      <test ac="AC6">Test User.conversations relationship loads related conversations</test>
+      <test ac="AC8">Integration test: Full flow from endpoint call to bot spawning</test>
+      <test ac="AC10">Test 401 Unauthorized without JWT token</test>
+      <test ac="AC10">Test 500 ServerError if daily_service.create_room() raises exception</test>
+      <test ac="AC10">Test database transaction rolled back on exception</test>
+      <test ac="AC10">Test concurrent conversation creation (multiple simultaneous requests)</test>
+    </ideas>
+  </tests>
+</story-context>
