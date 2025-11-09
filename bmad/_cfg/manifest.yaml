@@ -1,9 +1,10 @@
 installation:
-  version: 6.0.0-alpha.4
-  installDate: '2025-11-03T07:04:54.490Z'
-  lastUpdated: '2025-11-03T07:04:54.490Z'
+  version: 6.0.0-alpha.7
+  installDate: '2025-11-09T16:50:17.542Z'
+  lastUpdated: '2025-11-09T16:50:17.542Z'
 modules:
   - core
   - bmm
+  - core
 ides:
   - claude-code
