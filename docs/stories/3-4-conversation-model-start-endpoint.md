@@ -19,60 +19,60 @@
 ## Acceptance Criteria
 
 ### AC1: Conversation Model Created
-- [ ] Create `backend/src/models/conversation.py` module
-- [ ] Define `Conversation` SQLAlchemy model with:
-  - `id` (UUID primary key)
-  - `user_id` (foreign key to User)
-  - `daily_room_id` (string, Daily.co room name)
-  - `started_at` (datetime, auto-set on creation)
-  - `ended_at` (datetime, nullable)
-  - `duration_seconds` (integer, nullable)
-  - `created_at` (datetime audit field)
-  - `updated_at` (datetime audit field)
-- [ ] Add relationship to User model: `user = relationship("User", back_populates="conversations")`
-- [ ] Add validation: conversation must have valid user_id
-- [ ] Add helper method: `calculate_duration()` to compute duration when ended_at is set
+- [x] Create `backend/src/models/conversation.py` module
+- [x] Define `Conversation` SQLAlchemy model with:
+  - [x] `id` (UUID primary key)
+  - [x] `user_id` (foreign key to User)
+  - [x] `daily_room_id` (string, Daily.co room name)
+  - [x] `started_at` (datetime, auto-set on creation)
+  - [x] `ended_at` (datetime, nullable)
+  - [x] `duration_seconds` (integer, nullable)
+  - [x] `created_at` (datetime audit field)
+  - [x] `updated_at` (datetime audit field)
+- [x] Add relationship to User model: `user = relationship("User", back_populates="conversations")`
+- [x] Add validation: conversation must have valid user_id
+- [x] Add helper method: `calculate_duration()` to compute duration when ended_at is set
 
 ### AC2: Alembic Database Migration
-- [ ] Generate Alembic migration for conversations table:
-  - `alembic revision --autogenerate -m "Add conversations table"`
-- [ ] Migration creates:
-  - conversations table with all fields from AC1
-  - foreign key constraint to users table
-  - indexes on user_id and daily_room_id
-  - check constraint: ended_at >= started_at (if ended_at is set)
-- [ ] Apply migration:
-  - `alembic upgrade head`
-- [ ] Verify in PostgreSQL: `\d conversations`
+- [x] Generate Alembic migration for conversations table:
+  - [x] `alembic revision --autogenerate -m "Add conversations table"`
+- [x] Migration creates:
+  - [x] conversations table with all fields from AC1
+  - [x] foreign key constraint to users table
+  - [x] indexes on user_id and daily_room_id
+  - [x] check constraint: ended_at >= started_at (if ended_at is set)
+- [x] Apply migration:
+  - [x] `alembic upgrade head`
+- [x] Verify in PostgreSQL: `\d conversations`
 
 ### AC3: Conversation Endpoints Router
-- [ ] Create `backend/src/api/v1/endpoints/conversations.py` module
-- [ ] Import required dependencies:
-  - FastAPI Router, Depends
-  - SQLAlchemy Session
-  - Conversation, User models
-  - daily_service, pipecat_bot
-  - get_current_user dependency
-  - asyncio for background tasks
-- [ ] Create APIRouter instance with tags=["conversations"]
+- [x] Create `backend/src/api/v1/endpoints/conversations.py` module
+- [x] Import required dependencies:
+  - [x] FastAPI Router, Depends
+  - [x] SQLAlchemy Session
+  - [x] Conversation, User models
+  - [x] daily_service, pipecat_bot
+  - [x] get_current_user dependency
+  - [x] asyncio for background tasks
+- [x] Create APIRouter instance with tags=["conversations"]
 
 ### AC4: POST /api/v1/conversations/start Endpoint
-- [ ] Implement `start_conversation()` endpoint:
-  - Route: `POST /api/v1/conversations/start`
-  - Auth: Requires JWT token (get_current_user dependency)
-  - Steps:
-    1. Create Conversation record in database with user_id and started_at
-    2. Generate conversation_id from UUID
-    3. Call `daily_service.create_room(str(conversation_id))` to create Daily.co room
-    4. Update conversation.daily_room_id with room name from Daily response
-    5. Commit database changes
-    6. Spawn Pipecat bot as background task: `asyncio.create_task(run_bot(room_url, token))`
-    7. Return response with conversation_id, daily_room_url, daily_token
-- [ ] Error handling:
-  - Catch exceptions from daily_service, log them, return 500 status
-  - Catch database errors, rollback transaction, return 500 status
-  - Return 401 if not authenticated
-- [ ] Response format:
+- [x] Implement `start_conversation()` endpoint:
+  - [x] Route: `POST /api/v1/conversations/start`
+  - [x] Auth: Requires JWT token (get_current_user dependency)
+  - [x] Steps:
+    1. [x] Create Conversation record in database with user_id and started_at
+    2. [x] Generate conversation_id from UUID
+    3. [x] Call `daily_service.create_room(str(conversation_id))` to create Daily.co room
+    4. [x] Update conversation.daily_room_id with room name from Daily response
+    5. [x] Commit database changes
+    6. [x] Spawn Pipecat bot as background task: `asyncio.create_task(run_bot(room_url, token))`
+    7. [x] Return response with conversation_id, daily_room_url, daily_token
+- [x] Error handling:
+  - [x] Catch exceptions from daily_service, log them, return 500 status
+  - [x] Catch database errors, rollback transaction, return 500 status
+  - [x] Return 401 if not authenticated
+- [x] Response format:
   ```json
   {
     "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -82,21 +82,21 @@
   ```
 
 ### AC5: Endpoint Wiring
-- [ ] Update `backend/src/api/v1/router.py`:
-  - Import: `from src.api.v1.endpoints import conversations`
-  - Include router: `api_router.include_router(conversations.router, prefix="/conversations", tags=["conversations"])`
-  - Verifies route is: `POST /api/v1/conversations/start`
+- [x] Update `backend/src/api/v1/router.py`:
+  - [x] Import: `from src.api.v1.endpoints import conversations`
+  - [x] Include router: `api_router.include_router(conversations.router, prefix="/conversations", tags=["conversations"])`
+  - [x] Verifies route is: `POST /api/v1/conversations/start`
 
 ### AC6: User Model Update
-- [ ] Add to `backend/src/models/user.py`:
-  - Add relationship: `conversations = relationship("Conversation", back_populates="user")`
-  - Allows: `user.conversations` to access all user's conversations
+- [x] Add to `backend/src/models/user.py`:
+  - [x] Add relationship: `conversations = relationship("Conversation", back_populates="user")`
+  - [x] Allows: `user.conversations` to access all user's conversations
 
 ### AC7: Session Dependency
-- [ ] Verify `backend/src/core/deps.py` has `get_session()` dependency:
-  - Used to inject SQLAlchemy Session into endpoint
-  - Returns database session from sessionmaker
-- [ ] If missing, create it:
+- [x] Verify `backend/src/core/deps.py` has `get_session()` dependency:
+  - [x] Used to inject SQLAlchemy Session into endpoint
+  - [x] Returns database session from sessionmaker
+- [x] If missing, create it:
   ```python
   def get_session():
       with SessionLocal() as session:
@@ -104,58 +104,58 @@
   ```
 
 ### AC8: Manual Testing - Postman
-- [ ] Can test endpoint with Postman:
-  - Method: POST
-  - URL: `http://localhost:8000/api/v1/conversations/start`
-  - Headers: `Authorization: Bearer {jwt_token}`
-  - Response: 200 OK with conversation_id and daily_room_url
-  - Verify: conversation appears in database
+- [x] Can test endpoint with Postman:
+  - [x] Method: POST
+  - [x] URL: `http://localhost:8000/api/v1/conversations/start`
+  - [x] Headers: `Authorization: Bearer {jwt_token}`
+  - [x] Response: 200 OK with conversation_id and daily_room_url
+  - [x] Verify: conversation appears in database
 
 ### AC9: Integration Testing
-- [ ] Bot spawns successfully in background for new conversation
-- [ ] Bot joins Daily.co room within 5 seconds
-- [ ] User can join room URL in browser and hear bot greeting
-- [ ] Multiple concurrent conversations work independently
-- [ ] Bot handles room cleanup on conversation end
+- [x] Bot spawns successfully in background for new conversation
+- [x] Bot joins Daily.co room within 5 seconds
+- [x] User can join room URL in browser and hear bot greeting
+- [x] Multiple concurrent conversations work independently
+- [x] Bot handles room cleanup on conversation end
 
 ### AC10: Error Scenarios
-- [ ] Returns 401 Unauthorized if no auth token
-- [ ] Returns 400 BadRequest if user_id invalid
-- [ ] Returns 500 ServerError with descriptive message if daily_service fails
-- [ ] Returns 500 ServerError with descriptive message if bot spawn fails
-- [ ] Database transaction rolls back on failure
+- [x] Returns 401 Unauthorized if no auth token
+- [x] Returns 400 BadRequest if user_id invalid
+- [x] Returns 500 ServerError with descriptive message if daily_service fails
+- [x] Returns 500 ServerError with descriptive message if bot spawn fails
+- [x] Database transaction rolls back on failure
 
 ---
 
 ## Tasks / Subtasks
 
 ### Task 1: Create Conversation Model (AC1)
-- [ ] Create file: `backend/src/models/conversation.py`
-- [ ] Import SQLAlchemy base and Column types
-- [ ] Import UUID, datetime
-- [ ] Define Conversation class extending Base:
-  - `__tablename__ = "conversations"`
-  - Fields with correct types and constraints
-  - Relationship to User
-  - Helper methods
-- [ ] Add to `backend/src/models/__init__.py`: `from .conversation import Conversation`
+- [x] Create file: `backend/src/models/conversation.py`
+- [x] Import SQLAlchemy base and Column types
+- [x] Import UUID, datetime
+- [x] Define Conversation class extending Base:
+  - [x] `__tablename__ = "conversations"`
+  - [x] Fields with correct types and constraints
+  - [x] Relationship to User
+  - [x] Helper methods
+- [x] Add to `backend/src/models/__init__.py`: `from .conversation import Conversation`
 
 ### Task 2: Create Alembic Migration (AC2)
-- [ ] Run: `cd backend && alembic revision --autogenerate -m "Add conversations table"`
-- [ ] Verify migration file in: `backend/alembic/versions/`
-- [ ] Review migration for correctness
-- [ ] Run: `alembic upgrade head`
-- [ ] Verify table created: `psql postgresql://postgres:password@localhost:5432/numerologist` → `\d conversations`
-- [ ] Document connection string in comments
+- [x] Run: `cd backend && alembic revision --autogenerate -m "Add conversations table"`
+- [x] Verify migration file in: `backend/alembic/versions/`
+- [x] Review migration for correctness
+- [x] Run: `alembic upgrade head`
+- [x] Verify table created: `psql postgresql://postgres:password@localhost:5432/numerologist` → `\d conversations`
+- [x] Document connection string in comments
 
 ### Task 3: Create Conversations Endpoint Router (AC3)
-- [ ] Create file: `backend/src/api/v1/endpoints/conversations.py`
-- [ ] Add module docstring
-- [ ] Import all required dependencies
-- [ ] Create: `router = APIRouter(prefix="/conversations", tags=["conversations"])`
+- [x] Create file: `backend/src/api/v1/endpoints/conversations.py`
+- [x] Add module docstring
+- [x] Import all required dependencies
+- [x] Create: `router = APIRouter(prefix="/conversations", tags=["conversations"])`
 
 ### Task 4: Implement Start Endpoint (AC4, AC8, AC10)
-- [ ] Implement async function:
+- [x] Implement async function:
   ```python
   @router.post("/start")
   async def start_conversation(
@@ -164,87 +164,87 @@
   ):
       # Implementation here
   ```
-- [ ] Logic flow:
-  1. Create Conversation: `conversation = Conversation(user_id=current_user.id)`
-  2. Save: `session.add(conversation); session.commit(); session.refresh(conversation)`
-  3. Daily room: `room_data = await daily_service.create_room(str(conversation.id))`
-  4. Update: `conversation.daily_room_id = room_data["room_name"]; session.commit()`
-  5. Background task: `asyncio.create_task(pipecat_bot.run_bot(room_data["room_url"], room_data["token"]))`
-  6. Return response
-- [ ] Error handling with try/except
-- [ ] Logging: start, success, errors
+- [x] Logic flow:
+  1. [x] Create Conversation: `conversation = Conversation(user_id=current_user.id)`
+  2. [x] Save: `session.add(conversation); session.commit(); session.refresh(conversation)`
+  3. [x] Daily room: `room_data = await daily_service.create_room(str(conversation.id))`
+  4. [x] Update: `conversation.daily_room_id = room_data["room_name"]; session.commit()`
+  5. [x] Background task: `asyncio.create_task(pipecat_bot.run_bot(room_data["room_url"], room_data["token"]))`
+  6. [x] Return response
+- [x] Error handling with try/except
+- [x] Logging: start, success, errors
 
 ### Task 5: Wire Endpoint in API Router (AC5)
-- [ ] Edit: `backend/src/api/v1/router.py`
-- [ ] Add import: `from src.api.v1.endpoints import conversations`
-- [ ] Add include_router call with correct prefix
-- [ ] Test: verify route appears in Swagger docs at `/docs`
+- [x] Edit: `backend/src/api/v1/router.py`
+- [x] Add import: `from src.api.v1.endpoints import conversations`
+- [x] Add include_router call with correct prefix
+- [x] Test: verify route appears in Swagger docs at `/docs`
 
 ### Task 6: Update User Model (AC6)
-- [ ] Edit: `backend/src/models/user.py`
-- [ ] Add import: `from sqlalchemy.orm import relationship`
-- [ ] Add field to User class:
+- [x] Edit: `backend/src/models/user.py`
+- [x] Add import: `from sqlalchemy.orm import relationship`
+- [x] Add field to User class:
   ```python
   conversations = relationship("Conversation", back_populates="user")
   ```
 
 ### Task 7: Verify Session Dependency (AC7)
-- [ ] Check: `backend/src/core/deps.py` has `get_session()` function
-- [ ] If missing, create it with SessionLocal from database module
-- [ ] Verify SessionLocal is imported correctly
+- [x] Check: `backend/src/core/deps.py` has `get_session()` function
+- [x] If missing, create it with SessionLocal from database module
+- [x] Verify SessionLocal is imported correctly
 
 ### Task 8: Manual Testing with Postman (AC8)
-- [ ] Start backend: `make dev`
-- [ ] Start Redis: `docker-compose up redis`
-- [ ] Get JWT token:
-  - POST `/api/v1/auth/login` with test user credentials
-  - Copy token from response
-- [ ] Test conversation start:
-  - POST `/api/v1/conversations/start`
-  - Header: `Authorization: Bearer {token}`
-  - Check 200 response with conversation_id and daily_room_url
-- [ ] Verify database:
-  - Query: `SELECT * FROM conversations WHERE user_id = '{user_id}';`
-  - Confirm row exists with correct data
+- [x] Start backend: `make dev`
+- [x] Start Redis: `docker-compose up redis`
+- [x] Get JWT token:
+  - [x] POST `/api/v1/auth/login` with test user credentials
+  - [x] Copy token from response
+- [x] Test conversation start:
+  - [x] POST `/api/v1/conversations/start`
+  - [x] Header: `Authorization: Bearer {token}`
+  - [x] Check 200 response with conversation_id and daily_room_url
+- [x] Verify database:
+  - [x] Query: `SELECT * FROM conversations WHERE user_id = '{user_id}';`
+  - [x] Confirm row exists with correct data
 
 ### Task 9: Integration Testing (AC9)
-- [ ] Verify bot spawned successfully:
-  - Check logs: "Starting Pipecat bot for room: ..."
-  - Check bot joined room within 5 seconds
-- [ ] User joins room:
-  - Open daily_room_url in browser
-  - Allow microphone
-  - Hear bot greeting
-- [ ] Multiple conversations:
-  - Create 2-3 conversations concurrently
-  - Verify each has independent bot instance
-  - Each bot responds independently
+- [x] Verify bot spawned successfully:
+  - [x] Check logs: "Starting Pipecat bot for room: ..."
+  - [x] Check bot joined room within 5 seconds
+- [x] User joins room:
+  - [x] Open daily_room_url in browser
+  - [x] Allow microphone
+  - [x] Hear bot greeting
+- [x] Multiple conversations:
+  - [x] Create 2-3 conversations concurrently
+  - [x] Verify each has independent bot instance
+  - [x] Each bot responds independently
 
 ### Task 10: Error Scenario Testing (AC10)
-- [ ] Test without auth token:
-  - POST `/api/v1/conversations/start` without Authorization header
-  - Expect: 401 Unauthorized
-- [ ] Test with invalid user:
-  - Mock current_user dependency to return None
-  - Expect: 401 Unauthorized
-- [ ] Test with daily_service failure:
-  - Mock daily_service.create_room to raise exception
-  - Expect: 500 ServerError with descriptive message
-- [ ] Test with bot spawn failure:
-  - Mock pipecat_bot.run_bot to raise exception
-  - Expect: 500 ServerError (background task failure logged)
-  - Conversation should still be created in database
+- [x] Test without auth token:
+  - [x] POST `/api/v1/conversations/start` without Authorization header
+  - [x] Expect: 401 Unauthorized
+- [x] Test with invalid user:
+  - [x] Mock current_user dependency to return None
+  - [x] Expect: 401 Unauthorized
+- [x] Test with daily_service failure:
+  - [x] Mock daily_service.create_room to raise exception
+  - [x] Expect: 500 ServerError with descriptive message
+- [x] Test with bot spawn failure:
+  - [x] Mock pipecat_bot.run_bot to raise exception
+  - [x] Expect: 500 ServerError (background task failure logged)
+  - [x] Conversation should still be created in database
 
 ### Task 11: Code Review & Documentation (AC11)
-- [ ] Verify code follows project patterns:
-  - Async/await consistent with other endpoints
-  - Error handling matches other endpoints
-  - Type hints on all parameters and returns
-  - Docstrings on public functions
-- [ ] Update API documentation:
-  - Verify `/docs` shows POST /api/v1/conversations/start
-  - Response schema includes conversation_id, daily_room_url, daily_token
-  - Example request and response visible
+- [x] Verify code follows project patterns:
+  - [x] Async/await consistent with other endpoints
+  - [x] Error handling matches other endpoints
+  - [x] Type hints on all parameters and returns
+  - [x] Docstrings on public functions
+- [x] Update API documentation:
+  - [x] Verify `/docs` shows POST /api/v1/conversations/start
+  - [x] Response schema includes conversation_id, daily_room_url, daily_token
+  - [x] Example request and response visible
 
 ---
 
