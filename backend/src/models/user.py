@@ -75,3 +75,8 @@ class User(SQLModel, table=True):
         back_populates="user",
         cascade_delete=True,
     )
+    conversations: Optional[List["Conversation"]] = Relationship(
+        back_populates="user",
+        cascade_delete=True,
+        description="User's voice conversations with the AI bot"
+    )

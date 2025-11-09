@@ -75,7 +75,7 @@ development_status:
   3-1-add-voice-pipeline-dependencies: done
   3-2-daily-co-room-management-service: review
   3-3-basic-pipecat-bot-with-greeting: review
-  3-4-conversation-model-start-endpoint: ready-for-dev
+  3-4-conversation-model-start-endpoint: in-progress
   3-5-frontend-conversation-state-zustand: backlog
   3-6-microphone-permission-setup: backlog
   3-7-conversation-screen-ui: backlog
