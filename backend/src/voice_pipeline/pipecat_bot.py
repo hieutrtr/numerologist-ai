@@ -185,7 +185,7 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
 
         # Create and run pipeline task
         logger.info("Starting pipeline runner")
-        task = PipelineTask(pipeline, PipelineParams())
+        task = PipelineTask(pipeline, params=PipelineParams())
 
         # Run pipeline (this is a blocking async call that runs until stopped)
         await task.run()

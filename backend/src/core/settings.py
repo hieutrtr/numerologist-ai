@@ -135,11 +135,20 @@ class Settings(BaseSettings):
     - Never commit production secret to version control
     - Rotate periodically for security
 
-    Environment variable: JWT_SECRET
+    Environment variable: JWT_SECRET or SECRET_KEY
 
     Generate secure secret:
         python -c "import secrets; print(secrets.token_urlsafe(32))"
     """
+
+    secret_key: str = ""
+    """Alias for jwt_secret (legacy support for older .env files)."""
+
+    algorithm: str = "HS256"
+    """JWT algorithm for token signing. Standard: HS256."""
+
+    access_token_expire_minutes: int = 30
+    """JWT access token expiration time in minutes."""
 
     # =====================================================================
     # GOOGLE OAUTH
@@ -155,6 +164,9 @@ class Settings(BaseSettings):
 
     Environment variable: GOOGLE_WEB_CLIENT_ID
     """
+
+    google_client_id: str = ""
+    """Alias for google_web_client_id (legacy support for older .env files)."""
 
     google_android_client_id: str = ""
     """
