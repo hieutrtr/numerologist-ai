@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="story-3-5-frontend-conversation-state-zustand" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3-5-frontend-conversation-state-zustand</storyId>
+    <title>Frontend Conversation State (Zustand)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-09T00:00:00Z</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-5-frontend-conversation-state-zustand.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>frontend developer</asA>
+    <iWant>conversation state management using Zustand</iWant>
+    <soThat>the app can track active conversations and manage voice call lifecycle</soThat>
+    <tasks>
+      <task n="1">Create store file with ConversationState interface and Zustand setup</task>
+      <task n="2">Implement startConversation() action: API call, Daily.co room join, state update</task>
+      <task n="3">Implement endConversation() action: cleanup, backend notification, state reset</task>
+      <task n="4">Implement toggleMic() action: synchronous microphone control</task>
+      <task n="5">Wire store into app with apiClient integration</task>
+      <task n="6">Verify TypeScript types and exports</task>
+      <task n="7">Create test component for manual store behavior validation</task>
+      <task n="8">Verify Daily.co SDK integration and method signatures</task>
+      <task n="9">Prepare integration with Conversation Screen (Story 3.7)</task>
+      <task n="10">Handle edge cases: duplicate start, end when not connected, toggleMic without call</task>
+      <task n="11">Add comprehensive JSDoc comments and documentation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">
+      <title>Zustand Store Created</title>
+      <description>Create mobile/src/stores/useConversationStore.ts with create&lt;ConversationState&gt;() factory, exports useConversationStore hook, uses TypeScript</description>
+    </criterion>
+    <criterion id="AC2">
+      <title>Conversation State Interface</title>
+      <description>Define ConversationState interface with: conversationId (string|null), dailyCall (any|null), isConnected (boolean), isMicActive (boolean), isAISpeaking (boolean), error (string|null)</description>
+    </criterion>
+    <criterion id="AC3">
+      <title>Store Actions - startConversation()</title>
+      <description>Implement startConversation(): Promise&lt;void&gt; that calls backend API, creates Daily.co call object, joins room, updates state, handles errors</description>
+    </criterion>
+    <criterion id="AC4">
+      <title>Store Actions - endConversation()</title>
+      <description>Implement endConversation(): Promise&lt;void&gt; that cleans up Daily.co connection, notifies backend, resets state, handles errors gracefully</description>
+    </criterion>
+    <criterion id="AC5">
+      <title>Store Actions - toggleMic()</title>
+      <description>Implement toggleMic(): void (synchronous) that calls dailyCall.setLocalAudio() and toggles isMicActive state</description>
+    </criterion>
+    <criterion id="AC6">
+      <title>API Client Integration</title>
+      <description>Use existing apiClient from mobile/src/services/api.ts with automatic JWT auth in headers, absolute API paths /api/v1/conversations/...</description>
+    </criterion>
+    <criterion id="AC7">
+      <title>TypeScript Type Definitions</title>
+      <description>Export ConversationState interface, proper Promise&lt;void&gt; return types on actions, all types properly defined</description>
+    </criterion>
+    <criterion id="AC8">
+      <title>React Integration Testing</title>
+      <description>Store can be imported, hook destructuring works, state accessed in components, state persists across re-renders</description>
+    </criterion>
+    <criterion id="AC9">
+      <title>Manual Testing - Store Behavior</title>
+      <description>Create test component displaying store state, verify initial state, test all actions with observable state changes</description>
+    </criterion>
+    <criterion id="AC10">
+      <title>Daily.co Integration</title>
+      <description>Store correctly wraps Daily.co call object, accepts any type, calls correct methods: join({url,token}), setLocalAudio(bool), leave(), destroy()</description>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/3-4-conversation-model-start-endpoint.md</path>
+        <title>Story 3.4 - Conversation Model & Start Endpoint</title>
+        <section>Endpoint Implementation, Response Format, Error Handling</section>
+        <snippet>POST /api/v1/conversations/start returns {conversation_id, daily_room_url, daily_token}. Requires JWT auth. Story 3.4 provides backend API endpoint that this frontend store will call.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-6-frontend-auth-state-management-zustand.md</path>
+        <title>Story 2.6 - Frontend Auth State Management (Zustand)</title>
+        <section>Store Pattern, Platform-Aware Storage, API Integration</section>
+        <snippet>Zustand store pattern established for auth: useAuthStore with create(), state management, async actions, error handling. This story follows same patterns for conversation store.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/1-6-frontend-api-service-setup.md</path>
+        <title>Story 1.6 - Frontend API Service Setup</title>
+        <section>API Client Configuration, Request/Response Interceptors</section>
+        <snippet>apiClient is axios instance at mobile/src/services/api.ts with baseURL, auth interceptors that add JWT token, error handling for 401/timeouts/network errors.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-2-daily-co-room-management-service.md</path>
+        <title>Story 3.2 - Daily.co Room Management Service</title>
+        <section>Daily.co API Integration, Room Creation, Token Generation</section>
+        <snippet>Backend daily_service creates rooms and generates tokens. Frontend receives room_url and daily_token to join rooms. This store uses those credentials with DailyIframe.createCallObject().</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 3 - Voice Infrastructure &amp; Basic Conversation</title>
+        <section>Story 3.5 specification, dependencies, integration notes</section>
+        <snippet>Story 3.5 creates Zustand store for conversation state. Requires Story 3.4 backend endpoint. Prerequisite for Story 3.7 conversation screen UI.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient</symbol>
+        <lines>1-92</lines>
+        <reason>Existing axios client configured with JWT interceptors. This store will use apiClient.post() for API calls to /api/v1/conversations/start and /api/v1/conversations/{id}/end endpoints.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/stores/useAuthStore.ts</path>
+        <kind>store</kind>
+        <symbol>useAuthStore</symbol>
+        <lines>91-282</lines>
+        <reason>Existing Zustand store pattern showing best practices for this project: async actions, state management with set/get, error handling, platform-aware storage. Follow same patterns for useConversationStore.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>controller</kind>
+        <symbol>start_conversation</symbol>
+        <lines>305-337</lines>
+        <reason>Backend endpoint that this store will call. Returns {conversation_id, daily_room_url, daily_token}. Response format drives store state updates.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/models/conversation.py</path>
+        <kind>model</kind>
+        <symbol>Conversation</symbol>
+        <lines>264-284</lines>
+        <reason>Backend data model for conversations. Frontend store receives conversation_id from this model. Understand schema for proper typing/state management.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/types/user.types.ts</path>
+        <kind>types</kind>
+        <symbol>AuthState, AuthResponse</symbol>
+        <lines>all</lines>
+        <reason>TypeScript type patterns used in auth store. Follow similar patterns for ConversationState interface definition and response types.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <package ecosystem="npm" name="zustand" version="^5.0.8">Zustand state management library for creating useConversationStore hook</package>
+      <package ecosystem="npm" name="axios" version="^1.13.1">HTTP client already configured with JWT interceptors, will use for API calls</package>
+      <package ecosystem="npm" name="react" version="19.1.0">React hooks integration for Zustand store</package>
+      <package ecosystem="npm" name="react-native" version="0.81.5">React Native platform utilities for cross-platform compatibility</package>
+      <package ecosystem="npm" name="@daily-co/daily-js" version="not-yet-installed">Daily.co SDK for call object management - needs to be installed for this story</package>
+      <package ecosystem="npm" name="typescript" version="~5.9.2">TypeScript compiler for type checking</package>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint priority="critical">
+      <title>Async/Await Pattern Consistency</title>
+      <description>All async actions must use async/await pattern. startConversation() and endConversation() must be async. Follow project's async patterns from existing endpoints and stores.</description>
+    </constraint>
+    <constraint priority="critical">
+      <title>Daily.co Call Object Lifecycle</title>
+      <description>Daily.co call object must be properly created with createCallObject(), joined with join({url, token}), left with leave(), and destroyed with destroy(). Memory leak if not destroyed.</description>
+    </constraint>
+    <constraint priority="critical">
+      <title>Error Handling and State Consistency</title>
+      <description>Errors must be caught, stored in error state, and user/component notified. State should never be left in inconsistent state. All throws should be caught and converted to error state entries.</description>
+    </constraint>
+    <constraint priority="high">
+      <title>JWT Authentication Requirement</title>
+      <description>All API calls require valid JWT token. apiClient automatically adds Authorization header. If 401 returned, apiClient interceptor triggers auto-logout. Handle auth errors gracefully in store.</description>
+    </constraint>
+    <constraint priority="high">
+      <title>Non-Blocking State Updates</title>
+      <description>Use Zustand's set() and get() for state management. set() for updates, get() to read current state in actions. Avoid direct state mutation.</description>
+    </constraint>
+    <constraint priority="high">
+      <title>TypeScript Type Safety</title>
+      <description>All variables, parameters, and return types must have TypeScript type annotations. No implicit any types except where necessary (Daily.co call object can be 'any').</description>
+    </constraint>
+    <constraint priority="medium">
+      <title>API Response Handling</title>
+      <description>Backend returns response.data with conversation details. Extract conversation_id, daily_room_url, daily_token. Wrap in try/catch for network/server errors.</description>
+    </constraint>
+    <constraint priority="medium">
+      <title>Platform Compatibility</title>
+      <description>Store must work on web and mobile. Zustand is cross-platform. Daily.co SDK may differ: @daily-co/daily-js for web, @daily-co/react-native-daily-js for native - may affect imports.</description>
+    </constraint>
+    <constraint priority="medium">
+      <title>Documentation Requirements</title>
+      <description>JSDoc comments on all exported functions and interfaces. Document state fields, action parameters, return types, and error scenarios.</description>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>POST /api/v1/conversations/start</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/v1/conversations/start</signature>
+      <description>Backend endpoint to start a new conversation. Requires valid JWT in Authorization header. Returns conversation_id, daily_room_url, and daily_token.</description>
+      <request>
+        <method>POST</method>
+        <path>/api/v1/conversations/start</path>
+        <headers>Authorization: Bearer {jwt_token}</headers>
+        <body>Empty</body>
+      </request>
+      <response status="200">
+        {
+          "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+          "daily_room_url": "https://domain.daily.co/room-abc123",
+          "daily_token": "eyJhbGciOiJIUzI1NiIs..."
+        }
+      </response>
+      <errors>
+        <error status="401">Unauthorized - missing or invalid JWT token</error>
+        <error status="500">Internal server error - Daily.co API failure or bot spawn failure</error>
+      </errors>
+      <path>backend/src/api/v1/endpoints/conversations.py:304-337</path>
+    </interface>
+    <interface>
+      <name>POST /api/v1/conversations/{conversation_id}/end</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/v1/conversations/{conversation_id}/end</signature>
+      <description>Backend endpoint to end a conversation. Cleans up Daily.co room, stops bot, saves conversation. Requires valid JWT.</description>
+      <request>
+        <method>POST</method>
+        <path>/api/v1/conversations/{conversation_id}/end</path>
+        <headers>Authorization: Bearer {jwt_token}</headers>
+        <pathParams>conversation_id: UUID string</pathParams>
+        <body>Empty</body>
+      </request>
+      <response status="200">
+        {
+          "message": "Conversation ended",
+          "duration_seconds": 145
+        }
+      </response>
+      <errors>
+        <error status="401">Unauthorized - missing or invalid JWT token</error>
+        <error status="404">Not found - conversation_id doesn't exist</error>
+        <error status="500">Internal server error - cleanup failure</error>
+      </errors>
+      <path>backend/src/api/v1/endpoints/conversations.py (Story 3.9)</path>
+    </interface>
+    <interface>
+      <name>ConversationState</name>
+      <kind>TypeScript interface</kind>
+      <signature>interface ConversationState { conversationId, dailyCall, isConnected, isMicActive, isAISpeaking, error, startConversation(), endConversation(), toggleMic() }</signature>
+      <description>Zustand store state and action definitions for conversation management</description>
+      <location>mobile/src/stores/useConversationStore.ts (to be created)</location>
+    </interface>
+    <interface>
+      <name>DailyIframe.createCallObject()</name>
+      <kind>SDK method</kind>
+      <signature>createCallObject(): any</signature>
+      <description>Daily.co SDK method to create a call object for joining rooms</description>
+      <usage>const callFrame = DailyIframe.createCallObject();</usage>
+    </interface>
+    <interface>
+      <name>callFrame.join(options)</name>
+      <kind>SDK method</kind>
+      <signature>join(options: {url: string, token: string}): Promise&lt;void&gt;</signature>
+      <description>Daily.co call object method to join a room with room URL and auth token</description>
+      <usage>await callFrame.join({ url: daily_room_url, token: daily_token });</usage>
+    </interface>
+    <interface>
+      <name>callFrame.setLocalAudio(enabled)</name>
+      <kind>SDK method</kind>
+      <signature>setLocalAudio(enabled: boolean): void</signature>
+      <description>Daily.co call object method to toggle local microphone on/off</description>
+      <usage>callFrame.setLocalAudio(true); // enable mic</usage>
+    </interface>
+    <interface>
+      <name>callFrame.leave()</name>
+      <kind>SDK method</kind>
+      <signature>leave(): Promise&lt;void&gt;</signature>
+      <description>Daily.co call object method to leave the room</description>
+      <usage>await callFrame.leave();</usage>
+    </interface>
+    <interface>
+      <name>callFrame.destroy()</name>
+      <kind>SDK method</kind>
+      <signature>destroy(): void</signature>
+      <description>Daily.co call object method to clean up resources</description>
+      <usage>callFrame.destroy();</usage>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      This project uses Jest or Vitest for TypeScript/React testing. Tests should be colocated or in tests/ directory following project structure. Use mocking for apiClient calls to avoid requiring backend during testing. Zustand stores are tested by calling actions and verifying state updates. Follow patterns from existing useAuthStore tests if available.
+    </standards>
+    <locations>
+      mobile/__tests__/stores/ (preferred)
+      mobile/src/stores/__tests__/ (alternative)
+      Pattern: {storyFileName}.test.ts or {storyFileName}.spec.ts
+    </locations>
+    <ideas>
+      <testIdea acId="AC1">
+        Test: useConversationStore can be imported and hook destructuring works
+        Verify: Can import store, destructure actions and state, initial state is correct
+      </testIdea>
+      <testIdea acId="AC2">
+        Test: Initial state has correct types and values
+        Verify: conversationId=null, dailyCall=null, isConnected=false, isMicActive=false, error=null
+      </testIdea>
+      <testIdea acId="AC3">
+        Test: startConversation() calls API endpoint with correct path
+        Mock apiClient.post, verify called with '/api/v1/conversations/start'
+      </testIdea>
+      <testIdea acId="AC3">
+        Test: startConversation() updates state on success
+        Mock apiClient to return {conversation_id, daily_room_url, daily_token}, mock Daily.co SDK, verify state updated
+      </testIdea>
+      <testIdea acId="AC3">
+        Test: startConversation() stores error and re-throws on failure
+        Mock apiClient to throw error, verify error state set, verify exception re-thrown
+      </testIdea>
+      <testIdea acId="AC4">
+        Test: endConversation() cleans up Daily.co call
+        Mock dailyCall with leave() and destroy(), call endConversation(), verify both called
+      </testIdea>
+      <testIdea acId="AC4">
+        Test: endConversation() calls backend endpoint
+        Mock apiClient, mock dailyCall, call endConversation(), verify POST to /api/v1/conversations/{id}/end
+      </testIdea>
+      <testIdea acId="AC4">
+        Test: endConversation() resets state after cleanup
+        Call endConversation(), verify all state reset to initial values
+      </testIdea>
+      <testIdea acId="AC5">
+        Test: toggleMic() calls dailyCall.setLocalAudio() with inverted value
+        Mock dailyCall, mock isMicActive=true, call toggleMic(), verify setLocalAudio(false) called
+      </testIdea>
+      <testIdea acId="AC5">
+        Test: toggleMic() updates isMicActive state
+        Mock dailyCall, call toggleMic(), verify state toggled
+      </testIdea>
+      <testIdea acId="AC5">
+        Test: toggleMic() is no-op when not connected
+        Verify dailyCall is null, call toggleMic(), verify no errors thrown
+      </testIdea>
+      <testIdea acId="AC8">
+        Test: Store state persists across component re-renders
+        Create test component using store hook, update state, verify state retained after re-render
+      </testIdea>
+      <testIdea acId="AC10">
+        Test: Daily.co call object methods called with correct signatures
+        Mock Daily.co SDK, verify createCallObject(), join({url, token}), setLocalAudio(bool), leave(), destroy() called correctly
+      </testIdea>
+    </ideas>
+  </tests>
+</story-context>

@@ -76,7 +76,7 @@ development_status:
   3-2-daily-co-room-management-service: review
   3-3-basic-pipecat-bot-with-greeting: review
   3-4-conversation-model-start-endpoint: done
-  3-5-frontend-conversation-state-zustand: drafted
+  3-5-frontend-conversation-state-zustand: ready-for-dev
   3-6-microphone-permission-setup: backlog
   3-7-conversation-screen-ui: backlog
   3-8-daily-co-react-native-integration: backlog
