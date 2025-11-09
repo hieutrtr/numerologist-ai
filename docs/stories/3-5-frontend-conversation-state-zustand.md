@@ -2,7 +2,7 @@
 
 **Epic:** Epic 3 - Voice Infrastructure & Basic Conversation
 **Story ID:** 3-5-frontend-conversation-state-zustand
-**Status:** review
+**Status:** done
 **Created:** 2025-11-09
 **Context Reference:** docs/stories/3-5-frontend-conversation-state-zustand.context.xml
 
@@ -19,83 +19,83 @@
 ## Acceptance Criteria
 
 ### AC1: Zustand Store Created
-- [ ] Create `mobile/src/stores/useConversationStore.ts` module
-- [ ] Store created with `create<ConversationState>()` factory
-- [ ] Module exports `useConversationStore` hook
-- [ ] Uses TypeScript for type safety
+- [x] Create `mobile/src/stores/useConversationStore.ts` module
+- [x] Store created with `create<ConversationState>()` factory
+- [x] Module exports `useConversationStore` hook
+- [x] Uses TypeScript for type safety
 
 ### AC2: Conversation State Interface
-- [ ] Define `ConversationState` TypeScript interface with fields:
-  - [ ] `conversationId` (string | null) - UUID from backend
-  - [ ] `dailyCall` (any | null) - Daily.co call object reference
-  - [ ] `isConnected` (boolean) - Whether user is in active conversation
-  - [ ] `isMicActive` (boolean) - Whether microphone is on/muted
-  - [ ] `isAISpeaking` (boolean) - Whether AI is currently speaking
-  - [ ] `error` (string | null) - Latest error message, if any
+- [x] Define `ConversationState` TypeScript interface with fields:
+  - [x] `conversationId` (string | null) - UUID from backend
+  - [x] `dailyCall` (any | null) - Daily.co call object reference
+  - [x] `isConnected` (boolean) - Whether user is in active conversation
+  - [x] `isMicActive` (boolean) - Whether microphone is on/muted
+  - [x] `isAISpeaking` (boolean) - Whether AI is currently speaking
+  - [x] `error` (string | null) - Latest error message, if any
 
 ### AC3: Store Actions - startConversation()
-- [ ] Implement `startConversation(): Promise<void>` action:
-  - [ ] Calls backend `POST /api/v1/conversations/start` endpoint
-  - [ ] Requires valid JWT authentication (handled by apiClient)
-  - [ ] Extracts: `conversation_id`, `daily_room_url`, `daily_token` from response
-  - [ ] Creates Daily.co call object: `DailyIframe.createCallObject()`
-  - [ ] Joins room: `callFrame.join({ url: daily_room_url, token: daily_token })`
-  - [ ] Updates state: sets `conversationId`, `dailyCall`, `isConnected=true`, `isMicActive=true`
-  - [ ] On error: catches exception, sets error state, re-throws for caller handling
+- [x] Implement `startConversation(): Promise<void>` action:
+  - [x] Calls backend `POST /api/v1/conversations/start` endpoint
+  - [x] Requires valid JWT authentication (handled by apiClient)
+  - [x] Extracts: `conversation_id`, `daily_room_url`, `daily_token` from response
+  - [x] Creates Daily.co call object: `DailyIframe.createCallObject()`
+  - [x] Joins room: `callFrame.join({ url: daily_room_url, token: daily_token })`
+  - [x] Updates state: sets `conversationId`, `dailyCall`, `isConnected=true`, `isMicActive=true`
+  - [x] On error: catches exception, sets error state, re-throws for caller handling
 
 ### AC4: Store Actions - endConversation()
-- [ ] Implement `endConversation(): Promise<void>` action:
-  - [ ] Gets `dailyCall` from current state
-  - [ ] If dailyCall exists:
-    - [ ] Calls `dailyCall.leave()` - disconnect from room
-    - [ ] Calls `dailyCall.destroy()` - clean up call object
-  - [ ] If conversationId exists:
-    - [ ] Calls backend `POST /api/v1/conversations/{conversationId}/end` endpoint
-  - [ ] Resets state: `conversationId=null`, `dailyCall=null`, `isConnected=false`, `isMicActive=false`, `error=null`
-  - [ ] On error: catches exception, sets error state, still attempts cleanup
+- [x] Implement `endConversation(): Promise<void>` action:
+  - [x] Gets `dailyCall` from current state
+  - [x] If dailyCall exists:
+    - [x] Calls `dailyCall.leave()` - disconnect from room
+    - [x] Calls `dailyCall.destroy()` - clean up call object
+  - [x] If conversationId exists:
+    - [x] Calls backend `POST /api/v1/conversations/{conversationId}/end` endpoint
+  - [x] Resets state: `conversationId=null`, `dailyCall=null`, `isConnected=false`, `isMicActive=false`, `error=null`
+  - [x] On error: catches exception, sets error state, still attempts cleanup
 
 ### AC5: Store Actions - toggleMic()
-- [ ] Implement `toggleMic(): void` action (synchronous):
-  - [ ] Gets current `dailyCall` from state
-  - [ ] Gets current `isMicActive` from state
-  - [ ] If dailyCall exists:
-    - [ ] Calls `dailyCall.setLocalAudio(!isMicActive)` - toggle audio input
-    - [ ] Updates state: `isMicActive = !isMicActive`
-  - [ ] If no dailyCall, action is no-op
+- [x] Implement `toggleMic(): void` action (synchronous):
+  - [x] Gets current `dailyCall` from state
+  - [x] Gets current `isMicActive` from state
+  - [x] If dailyCall exists:
+    - [x] Calls `dailyCall.setLocalAudio(!isMicActive)` - toggle audio input
+    - [x] Updates state: `isMicActive = !isMicActive`
+  - [x] If no dailyCall, action is no-op
 
 ### AC6: API Client Integration
-- [ ] Uses existing `apiClient` from `mobile/src/services/api.ts`
-- [ ] apiClient has `post()` method that handles JWT headers automatically
-- [ ] All API calls use absolute paths: `/api/v1/conversations/...`
-- [ ] Error responses from API are caught and stored in `error` state
+- [x] Uses existing `apiClient` from `mobile/src/services/api.ts`
+- [x] apiClient has `post()` method that handles JWT headers automatically
+- [x] All API calls use absolute paths: `/api/v1/conversations/...`
+- [x] Error responses from API are caught and stored in `error` state
 
 ### AC7: TypeScript Type Definitions
-- [ ] Export `ConversationState` interface for type checking in components
-- [ ] Optional: Export type for `DailyCall` interface (or use `any` if not available)
-- [ ] Actions have proper `Promise<void>` return types
-- [ ] State update callbacks use proper Zustand typing
+- [x] Export `ConversationState` interface for type checking in components
+- [x] Optional: Export type for `DailyCall` interface (or use `any` if not available)
+- [x] Actions have proper `Promise<void>` return types
+- [x] State update callbacks use proper Zustand typing
 
 ### AC8: React Integration Testing
-- [ ] Store can be imported: `import { useConversationStore } from '@/stores/useConversationStore'`
-- [ ] Hook destructuring works: `const { startConversation, endConversation } = useConversationStore()`
-- [ ] State accessed in component: `const { isConnected } = useConversationStore()`
-- [ ] Store persists state correctly across component re-renders
+- [x] Store can be imported: `import { useConversationStore } from '@/stores/useConversationStore'`
+- [x] Hook destructuring works: `const { startConversation, endConversation } = useConversationStore()`
+- [x] State accessed in component: `const { isConnected } = useConversationStore()`
+- [x] Store persists state correctly across component re-renders
 
 ### AC9: Manual Testing - Store Behavior
-- [ ] Create test component that displays store state
-- [ ] Verify initial state: `isConnected=false`, `conversationId=null`, `error=null`
-- [ ] Call `startConversation()` - observe state changes (would need mock backend)
-- [ ] Call `toggleMic()` - observe `isMicActive` toggling
-- [ ] Call `endConversation()` - observe state reset
+- [x] Create test component that displays store state
+- [x] Verify initial state: `isConnected=false`, `conversationId=null`, `error=null`
+- [x] Call `startConversation()` - observe state changes (would need mock backend)
+- [x] Call `toggleMic()` - observe `isMicActive` toggling
+- [x] Call `endConversation()` - observe state reset
 
 ### AC10: Daily.co Integration
-- [ ] Store correctly wraps Daily.co call object
-- [ ] Store does NOT require full Daily.co SDK dependency (accepts `any` type)
-- [ ] Daily.co methods called with correct parameters:
-  - [ ] `join({ url, token })` - matches backend room URL and token
-  - [ ] `setLocalAudio(enabled)` - boolean parameter
-  - [ ] `leave()` - disconnect from room
-  - [ ] `destroy()` - clean up call object
+- [x] Store correctly wraps Daily.co call object
+- [x] Store does NOT require full Daily.co SDK dependency (accepts `any` type)
+- [x] Daily.co methods called with correct parameters:
+  - [x] `join({ url, token })` - matches backend room URL and token
+  - [x] `setLocalAudio(enabled)` - boolean parameter
+  - [x] `leave()` - disconnect from room
+  - [x] `destroy()` - clean up call object
 
 ---
 
