@@ -298,60 +298,76 @@ export default function ConversationScreen() {
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-// Responsive sizing
-const buttonSize = Math.min(screenWidth * 0.35, 100);
-const minTouchTarget = 48; // Material Design minimum
-const actualButtonSize = Math.max(buttonSize, minTouchTarget);
+// Design Tokens from ux-design-specification.md - Celestial Gold Theme
+const colors = {
+  primary: '#d4af37',           // Gold - primary actions
+  primaryDark: '#a8960b',       // Darker gold - secondary text
+  secondary: '#8b5cf6',         // Purple - accents
+  accent: '#5eead4',            // Teal - success/positive
+  backgroundDark: '#0d0d1a',    // Deep dark - main background
+  backgroundLight: '#1a1a33',   // Light dark - card surfaces
+  textPrimary: '#fef3c7',       // Pale gold - main text
+  textSecondary: '#a8960b',     // Darker gold - metadata
+  textMuted: '#6b7280',         // Muted gray - hints
+};
+
+// Responsive sizing for touch targets
+const buttonSize = Math.max(Math.min(screenWidth * 0.3, 120), 80);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.backgroundDark,
     paddingHorizontal: 20,
   },
 
   status: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#666',
+    color: colors.textPrimary,
     marginBottom: 48,
     textAlign: 'center',
     minHeight: 24,
   },
 
   button: {
-    width: actualButtonSize,
-    height: actualButtonSize,
-    borderRadius: actualButtonSize / 2,
+    width: buttonSize,
+    height: buttonSize,
+    borderRadius: buttonSize / 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 32,
-    elevation: 4, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
+    elevation: 8, // Android shadow - enhanced for luxury feel
+    shadowColor: colors.primary, // Gold shadow
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
 
   buttonDefault: {
-    backgroundColor: '#e0e0e0',
+    // Neutral state - subtle background with gold border
+    backgroundColor: colors.backgroundLight,
+    borderWidth: 2,
+    borderColor: colors.primaryDark,
   },
 
   buttonActive: {
-    backgroundColor: '#4CAF50',
+    // Connected state - vibrant gold (primary CTA color)
+    backgroundColor: colors.primary,
   },
 
   buttonAISpeaking: {
-    backgroundColor: '#FF9800',
+    // AI speaking state - teal accent
+    backgroundColor: colors.accent,
   },
 
   buttonLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
-    marginTop: 8,
+    color: colors.textPrimary,
+    marginTop: 12,
     textAlign: 'center',
   },
 
@@ -366,15 +382,15 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#FFF3E0',
+    backgroundColor: colors.backgroundLight,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#FFE0B2',
+    borderColor: colors.accent,
   },
 
   speakingText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#FF9800',
+    color: colors.accent,
   },
 });
