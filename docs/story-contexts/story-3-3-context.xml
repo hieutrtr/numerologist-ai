@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>3-3-basic-pipecat-bot-with-greeting</story-id>
+    <epic-id>epic-3</epic-id>
+    <epic-name>Voice Infrastructure &amp; Basic Conversation</epic-name>
+    <story-title>Basic Pipecat Bot with Greeting</story-title>
+    <status>drafted</status>
+    <generated-date>2025-01-08</generated-date>
+    <context-version>1.0</context-version>
+  </metadata>
+
+  <user-story>
+    <as-a>backend developer</as-a>
+    <i-want>a basic Pipecat bot that can greet users via voice</i-want>
+    <so-that>I can validate the voice pipeline works end-to-end</so-that>
+    <business-value>
+      Establishes the foundation for real-time voice conversations with AI,
+      enabling the core product differentiator of voice-first numerology consultations.
+    </business-value>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC1" priority="high">
+      <title>Pipecat Bot Module Created</title>
+      <description>
+        Create voice_pipeline package with pipecat_bot.py module containing all required
+        Pipecat imports (Pipeline, PipelineRunner, DailyTransport, service integrations).
+        Follow async/await patterns consistent with FastAPI.
+      </description>
+      <verification>
+        - Module exists at backend/src/voice_pipeline/pipecat_bot.py
+        - All Pipecat dependencies imported correctly
+        - Module follows async/await conventions
+      </verification>
+    </criterion>
+
+    <criterion id="AC2" priority="high">
+      <title>Daily.co Transport Integration</title>
+      <description>
+        Bot connects to Daily.co room using DailyTransport with proper configuration:
+        DailyParams with audio in/out enabled, VAD with SileroVADAnalyzer, bot name
+        "Numerology AI Bot". Accept room_url and token as parameters.
+      </description>
+      <verification>
+        - DailyTransport configured with room_url and token parameters
+        - Audio input/output enabled in DailyParams
+        - VAD enabled with SileroVADAnalyzer
+        - Bot name set to "Numerology AI Bot"
+      </verification>
+    </criterion>
+
+    <criterion id="AC3" priority="high">
+      <title>Deepgram STT Integration</title>
+      <description>
+        Integrate Deepgram STT service for real-time speech-to-text transcription.
+        Load DEEPGRAM_API_KEY from settings. Pipeline processes: Audio input → Deepgram STT → Text
+      </description>
+      <verification>
+        - DeepgramSTTService initialized with settings.deepgram_api_key
+        - STT service properly integrated in pipeline
+        - Audio input transcribed to text correctly
+      </verification>
+    </criterion>
+
+    <criterion id="AC4" priority="high">
+      <title>Azure OpenAI LLM Integration</title>
+      <description>
+        Integrate Azure OpenAI GPT-5-mini service with credentials from settings.
+        System prompt: "You are a friendly AI assistant. Greet the user warmly and ask
+        how you can help them today." Pipeline processes: Text → GPT-5-mini → Response text
+      </description>
+      <verification>
+        - AzureOpenAILLMService initialized with settings credentials
+        - Simple greeting system prompt configured
+        - LLM generates appropriate responses to user speech
+      </verification>
+    </criterion>
+
+    <criterion id="AC5" priority="high">
+      <title>ElevenLabs TTS Integration</title>
+      <description>
+        Integrate ElevenLabs TTS service with ELEVENLABS_API_KEY from settings.
+        Use default voice ID (Rachel: 21m00Tcm4TlvDq8ikWAM).
+        Pipeline processes: Response text → ElevenLabs TTS → Audio output
+      </description>
+      <verification>
+        - ElevenLabsTTSService initialized with settings.elevenlabs_api_key
+        - Voice ID configured from settings (default: Rachel)
+        - Text responses converted to audio output
+      </verification>
+    </criterion>
+
+    <criterion id="AC6" priority="critical">
+      <title>Complete Voice Pipeline</title>
+      <description>
+        Build complete Pipecat pipeline with all components in proper order:
+        Audio → Deepgram → LLMUserResponseAggregator → GPT → ElevenLabs → Audio → LLMAssistantResponseAggregator
+        Initialize messages list with system prompt.
+      </description>
+      <verification>
+        - Pipeline components in correct order
+        - LLMUserResponseAggregator and LLMAssistantResponseAggregator properly configured
+        - Messages list initialized with system prompt
+        - End-to-end audio flow working
+      </verification>
+    </criterion>
+
+    <criterion id="AC7" priority="high">
+      <title>Bot Execution</title>
+      <description>
+        Implement async def run_bot(room_url: str, token: str) function.
+        Bot runs in separate async task using PipelineRunner.
+        Handle bot lifecycle (start/stop).
+      </description>
+      <verification>
+        - run_bot function accepts room_url and token parameters
+        - PipelineRunner executes pipeline asynchronously
+        - Bot can be started and stopped cleanly
+      </verification>
+    </criterion>
+
+    <criterion id="AC8" priority="medium">
+      <title>Error Handling &amp; Logging</title>
+      <description>
+        Handle connection errors, service initialization failures gracefully.
+        Log bot startup, connection, and errors with descriptive messages.
+        Raise descriptive exceptions for configuration issues.
+      </description>
+      <verification>
+        - Connection errors handled gracefully
+        - Service initialization failures caught and logged
+        - Descriptive error messages for configuration issues
+        - Logging for bot startup, connection, errors
+      </verification>
+    </criterion>
+
+    <criterion id="AC9" priority="medium">
+      <title>Manual Testing Support</title>
+      <description>
+        Support manual testing by creating room with daily_service and running bot.
+        User can join room URL in browser to test voice interaction.
+        Bot responds with greeting when user speaks.
+      </description>
+      <verification>
+        - Can create room using daily_service.create_room()
+        - Bot spawned with room URL and token
+        - Room URL accessible in browser for manual testing
+        - Bot greets user when user speaks into microphone
+      </verification>
+    </criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="T1">
+      <title>Create Voice Pipeline Module Structure (AC1)</title>
+      <subtasks>
+        <subtask>Create directory: backend/src/voice_pipeline/</subtask>
+        <subtask>Create file: backend/src/voice_pipeline/__init__.py</subtask>
+        <subtask>Create file: backend/src/voice_pipeline/pipecat_bot.py</subtask>
+        <subtask>Add module docstring with purpose and usage</subtask>
+        <subtask>Import Pipecat dependencies (Pipeline, PipelineRunner, DailyTransport, VAD, services)</subtask>
+        <subtask>Import settings and logging</subtask>
+      </subtasks>
+    </task>
+
+    <task id="T2">
+      <title>Implement Daily.co Transport Configuration (AC2)</title>
+      <subtasks>
+        <subtask>Define run_bot(room_url: str, token: str) async function</subtask>
+        <subtask>Create DailyTransport with room_url, token, bot_name parameters</subtask>
+        <subtask>Configure DailyParams with audio_in_enabled, audio_out_enabled, vad_enabled</subtask>
+        <subtask>Configure VAD with SileroVADAnalyzer()</subtask>
+        <subtask>Validate room_url and token parameters</subtask>
+      </subtasks>
+    </task>
+
+    <task id="T3">
+      <title>Integrate Speech Services (AC3, AC4, AC5)</title>
+      <subtasks>
+        <subtask>Initialize Deepgram STT with settings.deepgram_api_key</subtask>
+        <subtask>Initialize Azure OpenAI LLM with settings credentials (api_key, endpoint, model)</subtask>
+        <subtask>Initialize ElevenLabs TTS with settings.elevenlabs_api_key and voice_id</subtask>
+        <subtask>Validate all API keys are configured</subtask>
+      </subtasks>
+    </task>
+
+    <task id="T4">
+      <title>Build Complete Pipeline (AC6)</title>
+      <subtasks>
+        <subtask>Define system message with greeting prompt</subtask>
+        <subtask>Create Pipeline with ordered components (transport.input, stt, aggregators, llm, tts, transport.output)</subtask>
+        <subtask>Configure LLMUserResponseAggregator and LLMAssistantResponseAggregator with messages list</subtask>
+        <subtask>Verify pipeline component order matches Pipecat best practices</subtask>
+      </subtasks>
+    </task>
+
+    <task id="T5">
+      <title>Implement Bot Runner (AC7)</title>
+      <subtasks>
+        <subtask>Create PipelineRunner instance</subtask>
+        <subtask>Execute pipeline with await runner.run(pipeline)</subtask>
+        <subtask>Handle pipeline lifecycle</subtask>
+        <subtask>Return pipeline runner for potential cleanup</subtask>
+      </subtasks>
+    </task>
+
+    <task id="T6">
+      <title>Error Handling &amp; Validation (AC8)</title>
+      <subtasks>
+        <subtask>Wrap service initialization in try/except blocks</subtask>
+        <subtask>Validate all API keys before creating services</subtask>
+        <subtask>Raise ValueError if required credentials missing</subtask>
+        <subtask>Add logging for bot startup, connection, errors</subtask>
+        <subtask>Handle transport connection failures</subtask>
+        <subtask>Handle service initialization failures</subtask>
+      </subtasks>
+    </task>
+
+    <task id="T7">
+      <title>Integration &amp; Manual Testing (AC9)</title>
+      <subtasks>
+        <subtask>Create manual test script: backend/scripts/test_pipecat_bot.py</subtask>
+        <subtask>Test script: Create room using daily_service.create_room()</subtask>
+        <subtask>Test script: Spawn bot using run_bot(room_url, token)</subtask>
+        <subtask>Test script: Print room URL for manual browser testing</subtask>
+        <subtask>Verify bot greets user when user speaks</subtask>
+        <subtask>Test pipeline latency and response quality</subtask>
+        <subtask>Document manual testing process</subtask>
+      </subtasks>
+    </task>
+  </tasks>
+
+  <existing-code>
+    <module>
+      <path>backend/src/services/daily_service.py</path>
+      <purpose>
+        Daily.co room management service for creating/deleting WebRTC rooms.
+        Provides room URLs and meeting tokens for voice conversations.
+      </purpose>
+      <key-functions>
+        <function>
+          <signature>async def create_room(conversation_id: str) -> Dict[str, str]</signature>
+          <description>
+            Creates Daily.co room with name "numerologist-{conversation_id}".
+            Returns room_url, room_name, and meeting_token.
+            Room expires in 2 hours.
+          </description>
+          <usage>
+            Use this function to create room before spawning bot.
+            Pass returned room_url and meeting_token to bot's run_bot() function.
+          </usage>
+        </function>
+
+        <function>
+          <signature>async def delete_room(room_name: str) -> bool</signature>
+          <description>
+            Deletes Daily.co room for cleanup.
+            Handles 404 gracefully (room already deleted/expired).
+          </description>
+        </function>
+
+        <function>
+          <signature>async def create_meeting_token(room_name: str) -> str</signature>
+          <description>
+            Generates JWT meeting token for secure room access.
+            Called internally by create_room().
+          </description>
+        </function>
+      </key-functions>
+
+      <configuration>
+        <setting>DAILY_API_KEY from settings.daily_api_key</setting>
+        <setting>DAILY_API_URL = "https://api.daily.co/v1"</setting>
+        <setting>ROOM_EXPIRY_HOURS = 2</setting>
+      </configuration>
+
+      <error-handling>
+        Raises DailyRoomCreationError for API/network failures.
+        Validates DAILY_API_KEY at function call time (lazy validation).
+      </error-handling>
+    </module>
+
+    <module>
+      <path>backend/src/core/settings.py</path>
+      <purpose>
+        Centralized configuration management using Pydantic Settings.
+        All voice pipeline API keys loaded from environment variables.
+      </purpose>
+      <voice-pipeline-settings>
+        <setting name="daily_api_key" type="str" default="">Daily.co API key for WebRTC</setting>
+        <setting name="deepgram_api_key" type="str" default="">Deepgram API key for STT</setting>
+        <setting name="azure_openai_api_key" type="str" default="">Azure OpenAI API key for LLM</setting>
+        <setting name="azure_openai_endpoint" type="str" default="">Azure OpenAI endpoint URL</setting>
+        <setting name="azure_openai_model_deployment_name" type="str" default="gpt-5-mini-deployment">Azure deployment name</setting>
+        <setting name="azure_openai_model_name" type="str" default="gpt-5-mini">Azure model name</setting>
+        <setting name="elevenlabs_api_key" type="str" default="">ElevenLabs API key for TTS</setting>
+        <setting name="elevenlabs_voice_id" type="str" default="21m00Tcm4TlvDq8ikWAM">Voice ID (default: Rachel)</setting>
+      </voice-pipeline-settings>
+
+      <usage>
+        from src.core.settings import settings
+
+        # Access configuration
+        api_key = settings.deepgram_api_key
+        endpoint = settings.azure_openai_endpoint
+      </usage>
+
+      <validation-pattern>
+        Settings loaded at import time from environment variables.
+        Services validate keys at function call time (lazy validation).
+        This pattern allows test mocking without import-time failures.
+      </validation-pattern>
+    </module>
+  </existing-code>
+
+  <dependencies>
+    <dependency>
+      <name>pipecat-ai</name>
+      <version>&gt;=0.0.31</version>
+      <extras>[daily,deepgram,azure]</extras>
+      <purpose>Voice AI pipeline orchestration framework</purpose>
+      <key-imports>
+        - pipecat.pipeline.pipeline.Pipeline
+        - pipecat.pipeline.runner.PipelineRunner
+        - pipecat.transports.services.daily.DailyTransport, DailyParams
+        - pipecat.vad.silero.SileroVADAnalyzer
+        - pipecat.services.deepgram.DeepgramSTTService
+        - pipecat.services.azure.AzureOpenAILLMService
+        - pipecat.processors.aggregators.llm_response.LLMAssistantResponseAggregator, LLMUserResponseAggregator
+      </key-imports>
+    </dependency>
+
+    <dependency>
+      <name>elevenlabs</name>
+      <version>&gt;=2.17.0</version>
+      <purpose>Text-to-speech synthesis</purpose>
+      <integration>Used via pipecat.services.elevenlabs.ElevenLabsTTSService</integration>
+    </dependency>
+
+    <dependency>
+      <name>openai</name>
+      <version>&gt;=2.7.1</version>
+      <purpose>Azure OpenAI client library</purpose>
+      <integration>Used via pipecat Azure OpenAI service wrapper</integration>
+    </dependency>
+
+    <dependency>
+      <name>httpx</name>
+      <version>&gt;=0.27.0</version>
+      <purpose>Async HTTP client (used by daily_service)</purpose>
+      <note>Already available, used in Daily.co room management</note>
+    </dependency>
+  </dependencies>
+
+  <architecture>
+    <voice-pipeline-flow>
+      <description>
+        Complete voice conversation pipeline using Pipecat framework:
+      </description>
+      <flow>
+        User Audio (microphone)
+          ↓
+        Daily.co Transport Input (WebRTC)
+          ↓
+        Deepgram STT Service (Speech-to-Text)
+          ↓
+        LLMUserResponseAggregator (Collect user message)
+          ↓
+        Azure OpenAI GPT-5-mini (Generate response)
+          ↓
+        ElevenLabs TTS Service (Text-to-Speech)
+          ↓
+        Daily.co Transport Output (WebRTC)
+          ↓
+        User Audio (speakers)
+          ↓
+        LLMAssistantResponseAggregator (Store assistant message)
+      </flow>
+      <latency-target>&lt;1 second end-to-end voice response time</latency-target>
+    </voice-pipeline-flow>
+
+    <integration-pattern>
+      <description>Bot lifecycle management pattern</description>
+      <pattern>
+        1. API endpoint calls daily_service.create_room(conversation_id)
+        2. Returns room_url and meeting_token
+        3. Spawn bot: asyncio.create_task(run_bot(room_url, token))
+        4. Bot runs in background, independent from API request lifecycle
+        5. Frontend joins room_url using Daily.co JavaScript SDK
+        6. Voice conversation occurs in real-time through WebRTC
+        7. Cleanup: daily_service.delete_room(room_name) when done
+      </pattern>
+    </integration-pattern>
+
+    <system-prompt-strategy>
+      <current-story>
+        Simple greeting prompt: "You are a friendly AI assistant. Greet the user
+        warmly and ask how you can help them today."
+      </current-story>
+      <future-epics>
+        Epic 4 will replace greeting with numerology-specific system prompt and
+        function calling for numerology calculations.
+      </future-epics>
+    </system-prompt-strategy>
+
+    <configuration-validation>
+      <pattern>Lazy validation</pattern>
+      <description>
+        Settings loaded at import time, but validation occurs at function call time.
+        This allows tests to mock settings without import-time failures.
+      </description>
+      <example>
+        # In pipecat_bot.py
+        from src.core.settings import settings
+
+        async def run_bot(room_url: str, token: str):
+            # Validate at function call time, not import time
+            if not settings.deepgram_api_key:
+                raise ValueError("DEEPGRAM_API_KEY not configured")
+      </example>
+    </configuration-validation>
+  </architecture>
+
+  <testing-standards>
+    <framework>pytest with pytest-asyncio</framework>
+    <patterns>
+      <pattern>
+        <name>Async test decorator</name>
+        <usage>@pytest.mark.asyncio for async def test functions</usage>
+      </pattern>
+      <pattern>
+        <name>Autouse fixtures</name>
+        <usage>@pytest.fixture(autouse=True) for global mocks applied to all tests</usage>
+        <example>
+          @pytest.fixture(autouse=True)
+          def mock_api_key():
+              with patch("src.services.module.API_KEY", "test-key"):
+                  yield
+        </example>
+      </pattern>
+      <pattern>
+        <name>AsyncMock vs MagicMock</name>
+        <rule>Use AsyncMock for async methods, MagicMock for synchronous methods</rule>
+        <example>
+          # Correct: async method
+          mock_client.post = AsyncMock(return_value=response)
+
+          # Correct: synchronous method
+          response.json = MagicMock(return_value={"key": "value"})
+        </example>
+      </pattern>
+    </patterns>
+
+    <coverage-target>100% for new modules</coverage-target>
+    <regression-requirement>All existing tests must pass (84/84 currently passing)</regression-requirement>
+
+    <test-structure>
+      <location>backend/src/tests/voice_pipeline/test_pipecat_bot.py</location>
+      <recommended-tests>
+        - test_run_bot_with_valid_credentials
+        - test_run_bot_missing_deepgram_key
+        - test_run_bot_missing_azure_key
+        - test_run_bot_missing_elevenlabs_key
+        - test_daily_transport_configuration
+        - test_pipeline_component_order
+        - test_system_prompt_initialization
+        - test_vad_configuration
+        - test_error_handling_connection_failure
+        - test_error_handling_service_initialization
+      </recommended-tests>
+    </test-structure>
+  </testing-standards>
+
+  <learnings-from-previous-stories>
+    <learning source="Story 3.2">
+      <title>Daily.co Room Management Service Available</title>
+      <description>
+        Story 3.2 created daily_service module with create_room() and delete_room() functions.
+        Use daily_service.create_room(conversation_id) to get room_url and meeting_token.
+        Room naming convention: "numerologist-{conversation_id}"
+        Room expiry: 2 hours automatic cleanup
+      </description>
+      <impact>
+        No need to implement Daily.co room creation in this story.
+        Use existing daily_service for room management.
+      </impact>
+    </learning>
+
+    <learning source="Story 3.2">
+      <title>Voice Pipeline Settings Centralized</title>
+      <description>
+        All voice service API keys added to settings.py in Story 3.2 refactoring.
+        Settings include: daily_api_key, deepgram_api_key, azure_openai_* (4 fields),
+        elevenlabs_api_key, elevenlabs_voice_id.
+      </description>
+      <impact>
+        Import settings and access keys via settings.* attributes.
+        No need to manually load environment variables.
+      </impact>
+    </learning>
+
+    <learning source="Story 3.2">
+      <title>Lazy Validation Pattern for Testability</title>
+      <description>
+        Configuration validated at function call time, not import time.
+        This allows tests to mock settings without triggering import-time failures.
+      </description>
+      <impact>
+        Follow same pattern in pipecat_bot.py:
+        - Load settings at module level
+        - Validate API keys inside run_bot() function
+        - Raise descriptive errors if keys missing
+      </impact>
+    </learning>
+
+    <learning source="Story 3.2">
+      <title>Test Infrastructure with Autouse Fixtures</title>
+      <description>
+        Use @pytest.fixture(autouse=True) for mocking global state (API keys, settings).
+        Ensures all tests have consistent mocked environment without explicit fixture calls.
+      </description>
+      <impact>
+        Create autouse fixtures in test_pipecat_bot.py to mock:
+        - settings.deepgram_api_key
+        - settings.azure_openai_api_key
+        - settings.azure_openai_endpoint
+        - settings.elevenlabs_api_key
+      </impact>
+    </learning>
+
+    <learning source="Story 3.2">
+      <title>AsyncMock for Async Methods Only</title>
+      <description>
+        Test failures occurred when AsyncMock used for synchronous methods.
+        Use AsyncMock only for async methods, MagicMock for sync methods.
+      </description>
+      <impact>
+        When mocking Pipecat services:
+        - AsyncMock: run_bot(), pipeline.run()
+        - MagicMock: configuration methods, property setters
+      </impact>
+    </learning>
+
+    <learning source="Story 3.2">
+      <title>Full Regression Testing Required</title>
+      <description>
+        Always run full test suite to catch integration issues.
+        Story 3.2 maintained 84/84 tests passing throughout refactoring.
+      </description>
+      <impact>
+        After implementing pipecat_bot, run: pytest
+        Ensure all 84 existing tests + new voice_pipeline tests pass.
+      </impact>
+    </learning>
+  </learnings-from-previous-stories>
+
+  <constraints>
+    <constraint type="technical">
+      <title>All Voice Service API Keys Required</title>
+      <description>
+        Bot requires three external API keys configured:
+        - DEEPGRAM_API_KEY (speech-to-text)
+        - AZURE_OPENAI_API_KEY + AZURE_OPENAI_ENDPOINT (language model)
+        - ELEVENLABS_API_KEY (text-to-speech)
+      </description>
+      <validation>
+        Validate all keys present before initializing services.
+        Raise clear error messages if any key missing.
+      </validation>
+    </constraint>
+
+    <constraint type="architectural">
+      <title>Async Execution Pattern</title>
+      <description>
+        Bot must run in background async task, independent from API request lifecycle.
+        Use asyncio.create_task() to spawn bot without blocking API response.
+      </description>
+    </constraint>
+
+    <constraint type="performance">
+      <title>Voice Response Latency Target</title>
+      <description>
+        Target &lt;1 second end-to-end voice response time for natural conversation flow.
+      </description>
+      <factors>
+        - Deepgram STT latency
+        - Azure OpenAI inference time
+        - ElevenLabs TTS synthesis
+        - Network round-trip time
+      </factors>
+    </constraint>
+
+    <constraint type="scope">
+      <title>Simple Greeting Only (No Numerology Yet)</title>
+      <description>
+        This story focuses on voice pipeline infrastructure.
+        System prompt is simple greeting: "You are a friendly AI assistant..."
+        Numerology integration deferred to Epic 4.
+      </description>
+    </constraint>
+
+    <constraint type="testing">
+      <title>Manual Testing Required</title>
+      <description>
+        Automated tests can verify configuration and initialization.
+        Full voice interaction testing requires manual browser testing:
+        1. Create room with daily_service
+        2. Spawn bot
+        3. Join room URL in browser
+        4. Speak into microphone
+        5. Verify bot audio response
+      </description>
+    </constraint>
+  </constraints>
+
+  <edge-cases>
+    <edge-case>
+      <scenario>Missing API Key</scenario>
+      <handling>
+        Validate all API keys before initializing services.
+        Raise ValueError with clear message indicating which key is missing.
+        Do not attempt to create services with empty keys.
+      </handling>
+    </edge-case>
+
+    <edge-case>
+      <scenario>Daily.co Connection Failure</scenario>
+      <handling>
+        Catch connection errors from DailyTransport.
+        Log error with room URL and token (partial, for debugging).
+        Raise descriptive exception to caller.
+      </handling>
+    </edge-case>
+
+    <edge-case>
+      <scenario>Service Initialization Failure</scenario>
+      <handling>
+        Wrap each service initialization (Deepgram, Azure, ElevenLabs) in try/except.
+        Log specific service that failed and error details.
+        Raise descriptive exception indicating which service failed.
+      </handling>
+    </edge-case>
+
+    <edge-case>
+      <scenario>Bot Already Running in Room</scenario>
+      <handling>
+        Daily.co allows multiple participants in same room.
+        If bot spawned twice for same room, both bots will respond.
+        Future story should track bot lifecycle per conversation_id to prevent duplicates.
+      </handling>
+    </edge-case>
+
+    <edge-case>
+      <scenario>Room Expired Before Bot Joins</scenario>
+      <handling>
+        Room expires 2 hours after creation.
+        If bot attempts to join expired room, DailyTransport will raise error.
+        Catch and log error with room_name for debugging.
+      </handling>
+    </edge-case>
+
+    <edge-case>
+      <scenario>User Speaks Too Quickly</scenario>
+      <handling>
+        VAD (SileroVADAnalyzer) detects voice activity and buffers audio.
+        LLMUserResponseAggregator collects complete user utterance before sending to LLM.
+        Pipeline handles rapid speech naturally.
+      </handling>
+    </edge-case>
+
+    <edge-case>
+      <scenario>LLM Response Too Long</scenario>
+      <handling>
+        ElevenLabs TTS streams audio as text is generated.
+        Long responses will take longer to speak but won't block pipeline.
+        Consider max_tokens limit in future stories for response length control.
+      </handling>
+    </edge-case>
+  </edge-cases>
+
+  <references>
+    <documentation>
+      <doc>
+        <title>Pipecat Documentation</title>
+        <url>https://docs.pipecat.ai/</url>
+        <relevance>Core framework documentation for pipeline architecture</relevance>
+      </doc>
+      <doc>
+        <title>Daily.co Python SDK</title>
+        <url>https://docs.daily.co/reference/daily-python</url>
+        <relevance>DailyTransport configuration and usage</relevance>
+      </doc>
+      <doc>
+        <title>Deepgram API</title>
+        <url>https://developers.deepgram.com/</url>
+        <relevance>Speech-to-text service integration</relevance>
+      </doc>
+      <doc>
+        <title>Azure OpenAI Service</title>
+        <url>https://learn.microsoft.com/en-us/azure/ai-services/openai/</url>
+        <relevance>LLM service configuration and usage</relevance>
+      </doc>
+      <doc>
+        <title>ElevenLabs API</title>
+        <url>https://docs.elevenlabs.io/</url>
+        <relevance>Text-to-speech service integration</relevance>
+      </doc>
+    </documentation>
+
+    <related-stories>
+      <story>
+        <id>3-1-add-voice-pipeline-dependencies</id>
+        <status>done</status>
+        <relevance>Added pipecat-ai and voice service dependencies to pyproject.toml</relevance>
+      </story>
+      <story>
+        <id>3-2-daily-co-room-management-service</id>
+        <status>review</status>
+        <relevance>
+          Created daily_service module for room creation/deletion.
+          Provides room_url and meeting_token for bot connection.
+        </relevance>
+      </story>
+      <story>
+        <id>3-4-conversation-model-start-endpoint</id>
+        <status>backlog</status>
+        <relevance>
+          Next story will create API endpoint that calls create_room() and spawns bot.
+        </relevance>
+      </story>
+    </related-stories>
+  </references>
+
+  <implementation-notes>
+    <note>
+      <title>Pipeline Component Order</title>
+      <description>
+        Pipecat pipeline component order is critical for proper flow.
+        Follow documented order exactly:
+        1. transport.input() - Audio from user
+        2. stt - Deepgram
+        3. LLMUserResponseAggregator - Collect user message
+        4. llm - Azure OpenAI
+        5. tts - ElevenLabs
+        6. transport.output() - Audio to user
+        7. LLMAssistantResponseAggregator - Store assistant message
+      </description>
+    </note>
+
+    <note>
+      <title>Message Aggregators</title>
+      <description>
+        LLMUserResponseAggregator and LLMAssistantResponseAggregator manage conversation history.
+        Initialize with shared messages list containing system prompt.
+        Aggregators automatically append user/assistant messages to list.
+      </description>
+    </note>
+
+    <note>
+      <title>VAD Configuration</title>
+      <description>
+        SileroVADAnalyzer detects when user starts/stops speaking.
+        Required for natural conversation flow (avoids "always-on" microphone).
+        Enable via DailyParams: vad_enabled=True, vad_analyzer=SileroVADAnalyzer()
+      </description>
+    </note>
+
+    <note>
+      <title>Bot Lifecycle</title>
+      <description>
+        Bot runs indefinitely until pipeline stopped or room closed.
+        PipelineRunner.run() is blocking async call.
+        To stop bot: call runner.stop() or close transport.
+        Future stories should implement proper cleanup on conversation end.
+      </description>
+    </note>
+
+    <note>
+      <title>Manual Testing Process</title>
+      <description>
+        1. Ensure .env file has all API keys configured
+        2. Run test script: python backend/scripts/test_pipecat_bot.py
+        3. Script prints room URL
+        4. Open room URL in Chrome/Firefox (requires microphone permission)
+        5. Speak: "Hello"
+        6. Bot should respond with greeting
+        7. Verify audio quality and latency
+      </description>
+    </note>
+  </implementation-notes>
+</story-context>

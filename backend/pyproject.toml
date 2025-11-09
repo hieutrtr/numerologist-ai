@@ -20,7 +20,7 @@ dependencies = [
     "requests>=2.31.0",
     # Voice pipeline dependencies (Epic 3)
     # Using pipecat-ai with voice service extras for orchestration
-    "pipecat-ai[daily,deepgram,azure]>=0.0.31",
+    "pipecat-ai[daily,deepgram,azure,silero]>=0.0.92",
     # Explicit voice service SDKs
     "elevenlabs>=2.17.0",
     "openai>=2.7.1",
