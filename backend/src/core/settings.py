@@ -240,6 +240,28 @@ class Settings(BaseSettings):
     """Enable ReDoc documentation (/redoc endpoint)."""
 
     # =====================================================================
+    # VOICE PIPELINE LANGUAGE CONFIGURATION
+    # =====================================================================
+    voice_language: str = "en"
+    """
+    Language code for voice conversation pipeline.
+
+    Supported languages:
+    - "en": English
+    - "vi": Vietnamese
+    - "es": Spanish
+    - "fr": French
+    - "de": German
+    - "ja": Japanese
+    - "zh": Chinese
+    - "pt": Portuguese
+    - See Deepgram docs for full list: https://developers.deepgram.com/docs/language
+
+    Environment variable: VOICE_LANGUAGE
+    Default: "en" (English)
+    """
+
+    # =====================================================================
     # VOICE PIPELINE SERVICES (Epic 3)
     # =====================================================================
     daily_api_key: str = ""

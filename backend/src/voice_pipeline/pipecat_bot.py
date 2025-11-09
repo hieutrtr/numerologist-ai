@@ -141,10 +141,14 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
         )
 
         # Initialize speech services
-        logger.info("Initializing speech services (Deepgram, Azure OpenAI, ElevenLabs)")
+        logger.info(f"Initializing speech services (language: {settings.voice_language})")
 
-        # Deepgram: Speech-to-Text
-        stt = DeepgramSTTService(api_key=settings.deepgram_api_key)
+        # Deepgram: Speech-to-Text with language configuration
+        logger.info(f"Configuring Deepgram for language: {settings.voice_language}")
+        stt = DeepgramSTTService(
+            api_key=settings.deepgram_api_key,
+            language=settings.voice_language,
+        )
 
         # Azure OpenAI: Language Model
         llm = AzureLLMService(
@@ -160,11 +164,27 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
             voice_id=settings.elevenlabs_voice_id,
         )
 
-        # Initialize conversation with system prompt
+        # Initialize conversation with language-aware system prompt
+        system_prompts = {
+            "en": "You are a friendly AI assistant. Greet the user warmly and ask how you can help them today.",
+            "vi": "Bạn là một trợ lý AI thân thiện. Chào người dùng một cách ấm áp và hỏi bạn có thể giúp gì cho họ hôm nay.",
+            "es": "Eres un asistente de IA amable. Saluda al usuario calurosamente y pregunta cómo puedes ayudarlo hoy.",
+            "fr": "Vous êtes un assistant IA amical. Accueillez chaleureusement l'utilisateur et demandez comment vous pouvez l'aider aujourd'hui.",
+            "de": "Du bist ein freundlicher KI-Assistent. Grüße den Benutzer warm und frage, wie du ihm heute helfen kannst.",
+            "ja": "あなたはフレンドリーなAIアシスタントです。ユーザーに温かく挨拶し、今日どのように手伝えるか尋ねます。",
+            "zh": "您是一个友好的AI助手。热情地问候用户，并询问您今天如何能帮助他们。",
+            "pt": "Você é um assistente de IA amigável. Cumprimente o usuário calurosamente e pergunte como você pode ajudá-lo hoje.",
+        }
+
+        system_prompt = system_prompts.get(
+            settings.voice_language,
+            system_prompts["en"]  # Fallback to English
+        )
+
         messages = [
             {
                 "role": "system",
-                "content": "You are a friendly AI assistant. Greet the user warmly and ask how you can help them today."
+                "content": system_prompt
             }
         ]
 
