@@ -262,6 +262,26 @@ class Settings(BaseSettings):
     """
 
     # =====================================================================
+    # VOICE PIPELINE VAD (Voice Activity Detection) CONFIGURATION
+    # =====================================================================
+    vad_silence_timeout_ms: int = 1000
+    """
+    Silence timeout in milliseconds for ending user speech.
+
+    When the VAD detects silence longer than this duration, it signals the end of user speech.
+    Lower values = faster response but more false positives (bot interrupts)
+    Higher values = more natural but slower response
+
+    Recommended values:
+    - 500-700ms: Very responsive (aggressive)
+    - 800-1200ms: Balanced (recommended for conversations)
+    - 1500-2000ms: Conservative (waits longer for pauses within speech)
+
+    Environment variable: VAD_SILENCE_TIMEOUT_MS
+    Default: 1000ms
+    """
+
+    # =====================================================================
     # VOICE PIPELINE SERVICES (Epic 3)
     # =====================================================================
     daily_api_key: str = ""

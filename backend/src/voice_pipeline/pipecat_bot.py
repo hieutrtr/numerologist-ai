@@ -163,7 +163,15 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
 
         stt = DeepgramSTTService(
             api_key=settings.deepgram_api_key,
-            live_options=LiveOptions(language=language_enum),
+            live_options=LiveOptions(
+                language=language_enum,
+                model="nova-3-general",
+                vad_events=True,  # Enable VAD event detection for silence detection
+                endpointing=True,  # Automatic endpoint detection (stops recording when speech ends)
+                interim_results=True,  # Show real-time transcription
+                punctuate=True,  # Add punctuation
+                smart_format=True,  # Format numbers, URLs, etc.
+            ),
         )
 
         # Azure OpenAI: Language Model
