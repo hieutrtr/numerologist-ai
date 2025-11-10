@@ -1,0 +1,264 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4</storyId>
+    <title>Function Call Handler Implementation</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-4-function-call-handler-implementation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>handlers that execute when GPT calls numerology functions</iWant>
+    <soThat>calculations happen and results return to the AI</soThat>
+    <tasks>
+      - Create function_handlers.py module with comprehensive documentation
+      - Implement handle_calculate_life_path (string to date conversion, call service)
+      - Implement handle_calculate_expression (name validation, call service)
+      - Implement handle_calculate_soul_urge (name validation, call service)
+      - Implement handle_get_interpretation (database query with optional category filter)
+      - Implement handle_numerology_function router (dispatch based on function name)
+      - Add comprehensive error handling (graceful degradation, no crashes)
+      - Add execution logging (INFO for success, ERROR for failures)
+      - Wire function calling into pipecat_bot.py (import tools, set_tools, register event handler)
+      - Test all handlers with valid/invalid inputs and verify dict returns
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">
+      <title>Handler File Created</title>
+      <description>File at backend/src/voice_pipeline/function_handlers.py with module exports, comprehensive docstring, type hints for all functions</description>
+    </criterion>
+    <criterion id="AC2">
+      <title>Life Path Handler Function</title>
+      <description>handle_calculate_life_path(birth_date: str) -> dict converts string to date, calls numerology_service, returns {"life_path_number": int}, handles invalid dates</description>
+    </criterion>
+    <criterion id="AC3">
+      <title>Expression Number Handler Function</title>
+      <description>handle_calculate_expression(full_name: str) -> dict validates non-empty, calls numerology_service, returns {"expression_number": int}, handles invalid names</description>
+    </criterion>
+    <criterion id="AC4">
+      <title>Soul Urge Number Handler Function</title>
+      <description>handle_calculate_soul_urge(full_name: str) -> dict validates non-empty, calls numerology_service, returns {"soul_urge_number": int}, handles invalid names</description>
+    </criterion>
+    <criterion id="AC5">
+      <title>Interpretation Retrieval Handler Function</title>
+      <description>handle_get_interpretation(number_type: str, number_value: int, category: str = None) -> dict queries database, filters by type/value/category, returns {"interpretations": list}, handles missing data</description>
+    </criterion>
+    <criterion id="AC6">
+      <title>Main Router Function</title>
+      <description>handle_numerology_function(function_name: str, arguments: dict) -> dict routes to appropriate handler, maps 4 function names, returns handler result</description>
+    </criterion>
+    <criterion id="AC7">
+      <title>Error Handling</title>
+      <description>All handlers catch exceptions, return error dicts {"error": str, "message": str}, specific messages for each error type, logged but don't crash</description>
+    </criterion>
+    <criterion id="AC8">
+      <title>Execution Logging</title>
+      <description>All handlers log with function name and arguments, INFO on success, ERROR on failure, use Python logging module with timestamps</description>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Voice Pipeline Patterns - Pipecat Event Handlers</section>
+        <snippet>Pipecat event handler pattern: @llm.event_handler("on_function_call") registers handler for GPT function calls. Handler receives function_name and arguments dict, returns result dict that becomes part of conversation context.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics Document</title>
+        <section>Epic 4 - Story 4.4</section>
+        <snippet>Story creates handlers that execute when GPT calls numerology functions. Handlers convert GPT string arguments to Python types, call services, return dicts. Integration with pipecat_bot.py will happen in Story 4.6.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-3-gpt-function-calling-definitions.md</path>
+        <title>Previous Story 4.3</title>
+        <section>Completion Notes</section>
+        <snippet>Created NUMEROLOGY_TOOLS with 4 function definitions: calculate_life_path (birth_date string), calculate_expression_number (full_name string), calculate_soul_urge_number (full_name string), get_numerology_interpretation (number_type, number_value, optional category). All follow OpenAI format with JSON Schema parameters.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-1-numerology-calculation-functions.md</path>
+        <title>Story 4.1</title>
+        <section>Completion Notes</section>
+        <snippet>Created numerology_service.py with pure calculation functions. Signatures: calculate_life_path(birth_date: date), calculate_expression_number(full_name: str), calculate_soul_urge_number(full_name: str). All return int (1-9, 11, 22, 33). MASTER_NUMBERS constant: {11, 22, 33}.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-2-numerology-knowledge-base-schema-seeding.md</path>
+        <title>Story 4.2</title>
+        <section>Completion Notes</section>
+        <snippet>Created NumerologyInterpretation model with 156 seeded interpretations. Query pattern: filter by (number_type, number_value) with optional category. Use synchronous Session(engine) pattern. Fields: number_type (enum), number_value (int), category (enum), content (text).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/voice_pipeline/numerology_functions.py</path>
+        <kind>tool_definitions</kind>
+        <symbol>NUMEROLOGY_TOOLS</symbol>
+        <lines>all</lines>
+        <reason>Contains OpenAI function definitions that handlers must match. Handler parameter names and return formats must align with tool definitions. 4 tools defined: calculate_life_path, calculate_expression_number, calculate_soul_urge_number, get_numerology_interpretation.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/services/numerology_service.py</path>
+        <kind>service</kind>
+        <symbol>calculate_life_path, calculate_expression_number, calculate_soul_urge_number</symbol>
+        <lines>all</lines>
+        <reason>Service functions that handlers will call after type conversion. Handlers bridge GPT string arguments to service typed arguments. Functions are pure and return int.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/models/numerology_interpretation.py</path>
+        <kind>model</kind>
+        <symbol>NumerologyInterpretation</symbol>
+        <lines>all</lines>
+        <reason>Database model for interpretation retrieval handler. handle_get_interpretation queries this model filtering by number_type, number_value, and optional category.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/database.py</path>
+        <kind>database</kind>
+        <symbol>engine</symbol>
+        <lines>20-27</lines>
+        <reason>Database engine for creating sessions. Use Session(engine) pattern for synchronous database operations in handle_get_interpretation.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+        <kind>voice_pipeline</kind>
+        <symbol>run_bot</symbol>
+        <lines>90-256</lines>
+        <reason>Pipecat bot implementation. Story 4.6 will integrate function handlers here using @llm.event_handler("on_function_call") pattern. Currently has no function calling setup.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/tests/services/test_numerology_service.py</path>
+        <kind>test</kind>
+        <symbol>test_calculate_*</symbol>
+        <lines>all</lines>
+        <reason>Test patterns for numerology service functions. Use similar patterns for testing handlers: parametrize decorator, test valid inputs, test error cases, verify return types.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="pipecat-ai" version=">=0.0.92">Voice pipeline framework, provides event handler pattern for function calls</package>
+        <package name="sqlmodel" version=">=0.0.14">ORM for database queries in interpretation handler</package>
+        <package name="python" version=">=3.11">datetime module for date parsing, logging module for execution logging, typing for type hints</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <title>Handler Return Format</title>
+      <description>All handlers must return dicts (never raise exceptions). Success format: {"result_key": value}. Error format: {"error": str, "message": str}. GPT expects JSON-serializable objects.</description>
+    </constraint>
+    <constraint>
+      <title>Parameter Name Matching</title>
+      <description>Handler parameter names must exactly match tool definition parameter names from Story 4.3. birth_date, full_name, number_type, number_value, category must be used consistently.</description>
+    </constraint>
+    <constraint>
+      <title>Type Conversion Bridge</title>
+      <description>Handlers convert GPT string arguments to Python types. birth_date string (YYYY-MM-DD) → date object. Use datetime.strptime(birth_date, "%Y-%m-%d").date() for conversion.</description>
+    </constraint>
+    <constraint>
+      <title>Graceful Error Handling</title>
+      <description>Handlers never crash the bot. All exceptions caught and returned as error dicts. Error messages user-friendly, don't expose internal implementation details. Log full exception with exc_info=True for debugging.</description>
+    </constraint>
+    <constraint>
+      <title>Database Session Pattern</title>
+      <description>Use synchronous Session(engine) pattern from Story 4.2. with Session(engine) as session: for context management. Query using select() with where() filters. No async database operations.</description>
+    </constraint>
+    <constraint>
+      <title>Service Function Signatures</title>
+      <description>Service functions from Story 4.1 expect proper types: calculate_life_path(birth_date: date), calculate_expression_number(full_name: str), calculate_soul_urge_number(full_name: str). Handlers must convert before calling.</description>
+    </constraint>
+    <constraint>
+      <title>Logging Standards</title>
+      <description>Use Python logging module with logger = logging.getLogger(__name__). INFO level for successful operations, ERROR level for failures with exc_info=True. Include function name and sanitized inputs in logs.</description>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>handle_calculate_life_path</name>
+      <kind>handler function</kind>
+      <signature>def handle_calculate_life_path(birth_date: str) -> dict:</signature>
+      <path>backend/src/voice_pipeline/function_handlers.py</path>
+      <description>Converts string date to date object, calls calculate_life_path service, returns {"life_path_number": int} or error dict</description>
+    </interface>
+    <interface>
+      <name>handle_calculate_expression</name>
+      <kind>handler function</kind>
+      <signature>def handle_calculate_expression(full_name: str) -> dict:</signature>
+      <path>backend/src/voice_pipeline/function_handlers.py</path>
+      <description>Validates non-empty name, calls calculate_expression_number service, returns {"expression_number": int} or error dict</description>
+    </interface>
+    <interface>
+      <name>handle_calculate_soul_urge</name>
+      <kind>handler function</kind>
+      <signature>def handle_calculate_soul_urge(full_name: str) -> dict:</signature>
+      <path>backend/src/voice_pipeline/function_handlers.py</path>
+      <description>Validates non-empty name, calls calculate_soul_urge_number service, returns {"soul_urge_number": int} or error dict</description>
+    </interface>
+    <interface>
+      <name>handle_get_interpretation</name>
+      <kind>handler function</kind>
+      <signature>def handle_get_interpretation(number_type: str, number_value: int, category: Optional[str] = None) -> dict:</signature>
+      <path>backend/src/voice_pipeline/function_handlers.py</path>
+      <description>Queries NumerologyInterpretation model, filters by type/value/category, returns {"interpretations": [{"category": str, "content": str}]} or error dict</description>
+    </interface>
+    <interface>
+      <name>handle_numerology_function</name>
+      <kind>router function</kind>
+      <signature>def handle_numerology_function(function_name: str, arguments: dict) -> dict:</signature>
+      <path>backend/src/voice_pipeline/function_handlers.py</path>
+      <description>Main router that dispatches to appropriate handler based on function_name. Extracts arguments from dict and passes to handlers.</description>
+    </interface>
+    <interface>
+      <name>calculate_life_path</name>
+      <kind>service function</kind>
+      <signature>calculate_life_path(birth_date: date) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Service function that handlers call. Expects date object, returns 1-9 or master numbers.</description>
+    </interface>
+    <interface>
+      <name>NumerologyInterpretation</name>
+      <kind>database model</kind>
+      <signature>class NumerologyInterpretation(SQLModel, table=True)</signature>
+      <path>backend/src/models/numerology_interpretation.py</path>
+      <description>Database model with fields: number_type, number_value, category, content. Query with select().where() filters.</description>
+    </interface>
+    <interface>
+      <name>NUMEROLOGY_TOOLS</name>
+      <kind>tool definitions</kind>
+      <signature>NUMEROLOGY_TOOLS: list[dict]</signature>
+      <path>backend/src/voice_pipeline/numerology_functions.py</path>
+      <description>OpenAI function definitions that specify expected parameters. Handler signatures must match tool parameter names.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for all testing. Follow patterns from test_numerology_service.py: parametrize decorator for multiple test cases, clear test function names (test_handler_name_scenario), test both success and error paths. Test handlers return dicts (not raise exceptions). Verify error dict format. Test type conversion (string to date). Test database queries return expected format.
+    </standards>
+    <locations>
+      - backend/tests/voice_pipeline/ (create for handler tests)
+      - backend/tests/services/ (existing service tests for reference)
+    </locations>
+    <ideas>
+      <idea ac="AC2">Test handle_calculate_life_path with valid date "1990-05-15", verify returns {"life_path_number": int}</idea>
+      <idea ac="AC2">Test handle_calculate_life_path with invalid date "invalid", verify returns error dict with "InvalidDate"</idea>
+      <idea ac="AC3">Test handle_calculate_expression with valid name "John Smith", verify returns {"expression_number": int}</idea>
+      <idea ac="AC3">Test handle_calculate_expression with empty name "", verify returns error dict</idea>
+      <idea ac="AC4">Test handle_calculate_soul_urge with valid name, verify calculation works</idea>
+      <idea ac="AC5">Test handle_get_interpretation with number_type="life_path", number_value=1, verify returns list of interpretations</idea>
+      <idea ac="AC5">Test handle_get_interpretation with category filter, verify only matching category returned</idea>
+      <idea ac="AC5">Test handle_get_interpretation with non-existent number, verify returns empty list (not error)</idea>
+      <idea ac="AC6">Test handle_numerology_function router with each function name, verify dispatches correctly</idea>
+      <idea ac="AC6">Test handle_numerology_function with unknown function name, verify returns error dict</idea>
+      <idea ac="AC7">Test all error paths: missing arguments (KeyError), invalid dates (ValueError), database errors</idea>
+      <idea ac="AC8">Verify logging: capture logs during tests, verify INFO on success and ERROR on failure</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -182,6 +182,33 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
             api_version=settings.azure_openai_api_version,
         )
 
+        # Import numerology function calling (deferred to avoid circular imports)
+        from src.voice_pipeline.function_handlers import handle_numerology_function
+
+        # Register function call handler for numerology calculations
+        @llm.event_handler("on_function_call")
+        async def on_function_call(function_name: str, arguments: dict):
+            """
+            Handle GPT function calls for numerology calculations.
+
+            This handler is invoked when GPT calls one of the numerology tools
+            during the conversation. It routes the call to the appropriate handler
+            and returns the result back to GPT.
+
+            Args:
+                function_name: Name of function GPT wants to call
+                arguments: Dict of arguments GPT provided
+
+            Returns:
+                dict: Result from handler (success or error dict)
+            """
+            logger.info(f"Function call received: {function_name}")
+            result = handle_numerology_function(function_name, arguments)
+            logger.info(f"Function call result: {result}")
+            return result
+
+        logger.info("Registered function call event handler for numerology tools")
+
         # ElevenLabs: Text-to-Speech
         tts = ElevenLabsTTSService(
             api_key=settings.elevenlabs_api_key,
@@ -214,6 +241,11 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
 
         # Create LLM context for managing conversation history
         llm_context = OpenAILLMContext(messages=messages)
+
+        # Import and register numerology function calling tools
+        from src.voice_pipeline.numerology_functions import NUMEROLOGY_TOOLS
+        llm_context.set_tools(NUMEROLOGY_TOOLS)
+        logger.info(f"Registered {len(NUMEROLOGY_TOOLS)} numerology tools with LLM context")
 
         # Create message aggregators for conversation history
         user_aggregator = LLMUserContextAggregator(llm_context)
