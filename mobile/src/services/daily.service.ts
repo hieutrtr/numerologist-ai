@@ -127,8 +127,6 @@ export async function initializeCall(): Promise<DailyCallObject> {
         },
       },
     });
-    console.log('DailyIframe:', DailyIframe);
-    console.log('Daily call object:', call);
 
     if (!call) {
       throw new Error('Failed to create Daily call object');
@@ -350,9 +348,6 @@ export function setupCallListeners(
     if (callbacks.onParticipantJoined) {
       const handler = (event: any) => {
         const participant = event.participant;
-        if (__DEV__) {
-          console.log('[Daily] Participant joined:', participant?.id);
-        }
         if (participant) {
           callbacks.onParticipantJoined?.({
             id: participant.session_id || participant.id,
@@ -368,7 +363,7 @@ export function setupCallListeners(
             },
           });
 
-          // CRITICAL: Create audio element for remote participant (web only)
+          // Create audio element for remote participant (web only)
           if (!participant.local && participant.audioTrack && Platform.OS === 'web') {
             const participantId = participant.session_id || participant.id;
             manageAudioElement(participantId, participant.audioTrack, 'create');
@@ -382,9 +377,6 @@ export function setupCallListeners(
     if (callbacks.onParticipantLeft) {
       const handler = (event: any) => {
         const participantId = event.participant?.session_id || event.participant?.id;
-        if (__DEV__) {
-          console.log('[Daily] Participant left:', participantId);
-        }
         if (participantId) {
           callbacks.onParticipantLeft?.(participantId);
 
@@ -398,7 +390,7 @@ export function setupCallListeners(
       listeners.push({ event: 'participant-left', handler });
     }
 
-    // CRITICAL: Handle participant-updated for audio track changes
+    // Handle participant-updated for audio track changes
     const participantUpdatedHandler = (event: any) => {
       const participant = event.participant;
       if (!participant || participant.local) {
@@ -406,14 +398,6 @@ export function setupCallListeners(
       }
 
       const participantId = participant.session_id || participant.id;
-
-      if (__DEV__) {
-        console.log('[Daily] Participant updated:', {
-          id: participantId,
-          audio: participant.audio,
-          hasAudioTrack: !!participant.audioTrack,
-        });
-      }
 
       // Handle audio track changes for web
       if (Platform.OS === 'web') {
@@ -445,17 +429,8 @@ export function setupCallListeners(
     // Track events for audio playback (CRITICAL for hearing remote participants)
     // Listen for when remote audio tracks start
     const trackStartedHandler = (event: any) => {
-      if (__DEV__) {
-        console.log('[Daily] Track started:', {
-          participant: event.participant?.session_id,
-          track: event.track?.kind,
-          type: event.type,
-        });
-      }
       // Track started events indicate remote audio is available
       if (event.track?.kind === 'audio' && !event.participant?.local) {
-        console.log('[Daily] Remote audio track started - you should now hear the bot');
-
         // CRITICAL: Create audio element when track starts (web only)
         if (Platform.OS === 'web' && event.track) {
           const participantId = event.participant?.session_id || event.participant?.id;
@@ -468,43 +443,14 @@ export function setupCallListeners(
     call.on('track-started', trackStartedHandler);
     listeners.push({ event: 'track-started', handler: trackStartedHandler });
 
-    // Listen for track updates
-    const trackUpdatedHandler = (event: any) => {
-      if (__DEV__) {
-        console.log('[Daily] Track updated:', {
-          participant: event.participant?.session_id,
-          track: event.track?.kind,
-          state: event.track?.state,
-        });
-      }
-    };
-    call.on('track-updated', trackUpdatedHandler);
-    listeners.push({ event: 'track-updated', handler: trackUpdatedHandler });
-
-    // Listen for when tracks stop
-    const trackStoppedHandler = (event: any) => {
-      if (__DEV__) {
-        console.log('[Daily] Track stopped:', {
-          participant: event.participant?.session_id,
-          track: event.track?.kind,
-        });
-      }
-    };
-    call.on('track-stopped', trackStoppedHandler);
-    listeners.push({ event: 'track-stopped', handler: trackStoppedHandler });
-
-    if (__DEV__) {
-      console.log('[Daily] Event listeners setup:', listeners.length, 'listeners');
-    }
+    // Note: track-updated and track-stopped events are available if needed for debugging
+    // Currently handled via participant-updated event for audio management
 
     // Return cleanup function
     return () => {
       listeners.forEach(({ event, handler }) => {
         call.off(event, handler);
       });
-      if (__DEV__) {
-        console.log('[Daily] Event listeners cleaned up');
-      }
     };
   } catch (error) {
     if (__DEV__) {
@@ -537,17 +483,11 @@ export async function teardownCall(
     // Leave the room
     if (call) {
       await call.leave();
-      if (__DEV__) {
-        console.log('[Daily] Left room');
-      }
     }
 
     // Destroy the call object
     if (call) {
       call.destroy();
-      if (__DEV__) {
-        console.log('[Daily] Call object destroyed');
-      }
     }
   } catch (error) {
     if (__DEV__) {
@@ -658,17 +598,13 @@ export function manageAudioElement(
     audioElement = document.createElement('audio');
     audioElement.id = audioElementId;
     audioElement.autoplay = true; // Important for WebRTC
-    audioElement.playsInline = true; // For mobile browsers
+    (audioElement as any).playsInline = true; // For mobile browsers
 
     // Hide the element (audio only, no visual)
     audioElement.style.display = 'none';
 
     // Append to document body
     document.body.appendChild(audioElement);
-
-    if (__DEV__) {
-      console.log(`[Daily] Created audio element for participant ${participantId}`);
-    }
   }
 
   // Create MediaStream from the audio track
@@ -676,14 +612,9 @@ export function manageAudioElement(
   audioElement.srcObject = stream;
 
   // Attempt to play
-  audioElement.play().then(() => {
-    console.log(`✅ [Daily] Audio playing for participant ${participantId}`);
-  }).catch((error) => {
-    console.error(`❌ [Daily] Failed to play audio for ${participantId}:`, error);
-
-    // Common autoplay policy issue - might need user interaction
-    if (error.name === 'NotAllowedError') {
-      console.warn('[Daily] Browser autoplay policy blocked audio. User interaction required.');
+  audioElement.play().catch((error) => {
+    if (__DEV__) {
+      console.error(`[Daily] Failed to play audio for ${participantId}:`, error);
     }
   });
 }
