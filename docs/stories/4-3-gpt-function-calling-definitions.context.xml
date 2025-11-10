@@ -1,0 +1,238 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>3</storyId>
+    <title>GPT Function Calling Definitions</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-3-gpt-function-calling-definitions.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>GPT function definitions for numerology tools</iWant>
+    <soThat>the AI can call calculation functions during conversation</soThat>
+    <tasks>
+      - Create numerology_functions.py module with OpenAI tool definitions
+      - Define calculate_life_path tool with birth_date parameter
+      - Define calculate_expression_number tool with full_name parameter
+      - Define calculate_soul_urge_number tool with full_name parameter
+      - Define get_numerology_interpretation tool with number_type, number_value, category parameters
+      - Assemble NUMEROLOGY_TOOLS list in OpenAI format
+      - Validate JSON Schema compliance and test imports
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">
+      <title>Function Definitions File Created</title>
+      <description>File created at backend/src/voice_pipeline/numerology_functions.py with NUMEROLOGY_TOOLS export, OpenAI format, comprehensive docstring</description>
+    </criterion>
+    <criterion id="AC2">
+      <title>Life Path Calculation Tool</title>
+      <description>Function definition for calculate_life_path with birth_date parameter (string, YYYY-MM-DD format, required), clear description about life purpose</description>
+    </criterion>
+    <criterion id="AC3">
+      <title>Expression Number Calculation Tool</title>
+      <description>Function definition for calculate_expression_number with full_name parameter (string, required), description about natural talents and abilities</description>
+    </criterion>
+    <criterion id="AC4">
+      <title>Soul Urge Number Calculation Tool</title>
+      <description>Function definition for calculate_soul_urge_number with full_name parameter (string, required), description about inner desires and motivations</description>
+    </criterion>
+    <criterion id="AC5">
+      <title>Interpretation Retrieval Tool</title>
+      <description>Function definition for get_numerology_interpretation with number_type (enum), number_value (integer), category (optional enum) parameters</description>
+    </criterion>
+    <criterion id="AC6">
+      <title>OpenAI Tool Format Compliance</title>
+      <description>All definitions follow OpenAI tool format with type, function.name, function.description, function.parameters (JSON Schema)</description>
+    </criterion>
+    <criterion id="AC7">
+      <title>Integration-Ready Export</title>
+      <description>Module exports NUMEROLOGY_TOOLS list ready for Pipecat OpenAILLMContext.set_tools(), includes integration example</description>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Voice Pipeline Patterns - Numerology Function Calling</section>
+        <snippet>Pattern for GPT function calling with Pipecat: OpenAILLMContext accepts tools in OpenAI format, NUMEROLOGY_FUNCTIONS list defines available tools with JSON Schema parameters. Functions registered via @llm.event_handler for execution.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Tech Stack - LLM Reasoning</section>
+        <snippet>Azure OpenAI GPT-5-mini selected for function calling capability, real-time optimization, and cost-effectiveness. Supports structured tool definitions for numerology calculations.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics Document</title>
+        <section>Epic 4 - Story 4.3</section>
+        <snippet>Story defines 4 numerology tools: calculate_life_path, calculate_expression_number, calculate_soul_urge_number, and get_numerology_interpretation. Tools use OpenAI format with clear descriptions and parameter schemas.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR-1.3: AI Reasoning & Response Generation</section>
+        <snippet>System processes user questions via Azure OpenAI GPT-5-mini, maintains conversation context, and references numerology knowledge base for accurate interpretations.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-2-numerology-knowledge-base-schema-seeding.md</path>
+        <title>Previous Story 4.2</title>
+        <section>Completion Notes</section>
+        <snippet>Created NumerologyInterpretation model with 156 interpretations. Query pattern: filter by (number_type, number_value) using composite index. Number types: life_path, expression, soul_urge, birthday, personal_year. Categories: personality, strengths, challenges, career, relationships, talents, abilities, purpose.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-1-numerology-calculation-functions.md</path>
+        <title>Previous Story 4.1</title>
+        <section>Completion Notes</section>
+        <snippet>Created numerology_service.py with 5 calculation functions. MASTER_NUMBERS constant: {11, 22, 33}. Function signatures: calculate_life_path(birth_date: date) -> int, calculate_expression_number(full_name: str) -> int, calculate_soul_urge_number(full_name: str) -> int.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+        <kind>voice_pipeline</kind>
+        <symbol>OpenAILLMContext</symbol>
+        <lines>216</lines>
+        <reason>Shows where NUMEROLOGY_TOOLS will be integrated via llm_context.set_tools(). Currently uses basic messages, needs tool definitions added.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/services/numerology_service.py</path>
+        <kind>service</kind>
+        <symbol>calculate_life_path, calculate_expression_number, calculate_soul_urge_number</symbol>
+        <lines>all</lines>
+        <reason>Contains actual calculation implementations that GPT tools will invoke. Tool parameter schemas must match these function signatures.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/models/numerology_interpretation.py</path>
+        <kind>model</kind>
+        <symbol>NumerologyInterpretation</symbol>
+        <lines>all</lines>
+        <reason>Database model for interpretations. get_numerology_interpretation tool needs number_type and number_value fields that match this schema.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/__init__.py</path>
+        <kind>package</kind>
+        <symbol>N/A</symbol>
+        <lines>all</lines>
+        <reason>Package initialization for voice_pipeline module. May need to export NUMEROLOGY_TOOLS for easier imports.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/tests/services/test_numerology_service.py</path>
+        <kind>test</kind>
+        <symbol>test_calculate_*</symbol>
+        <lines>all</lines>
+        <reason>Test patterns for numerology functions. Story 4.4 will create similar tests for function handlers that use these tools.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="pipecat-ai" version=">=0.0.92" extras="daily,deepgram,azure,silero">Voice pipeline orchestration framework with OpenAI integration</package>
+        <package name="openai" version=">=2.7.1">OpenAI Python SDK for function calling format compatibility</package>
+        <package name="fastapi" version=">=0.109.0">Web framework for API endpoints</package>
+        <package name="sqlmodel" version=">=0.0.14">ORM for database queries in interpretation retrieval</package>
+        <package name="pydantic" version=">=2.5.0">Data validation, may use for tool parameter validation</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <title>OpenAI Tool Format Compliance</title>
+      <description>All function definitions must follow OpenAI's tool calling format with type="function", function.name, function.description, and function.parameters as JSON Schema object. This ensures compatibility with Azure OpenAI GPT-5-mini.</description>
+    </constraint>
+    <constraint>
+      <title>JSON Schema Type Mapping</title>
+      <description>Python types must map to JSON Schema types: str->string, int->integer, float->number, bool->boolean, dict->object, list->array. Use "format": "date" for date strings.</description>
+    </constraint>
+    <constraint>
+      <title>Parameter Schema Matching</title>
+      <description>Tool parameter schemas must exactly match numerology_service function signatures. Birth date as string (YYYY-MM-DD), full name as string, number types as enum matching database schema.</description>
+    </constraint>
+    <constraint>
+      <title>Clear Descriptions for GPT</title>
+      <description>Function descriptions must clearly explain: what it calculates, what it reveals, when to use it, and what data is needed. This helps GPT decide when to invoke each tool.</description>
+    </constraint>
+    <constraint>
+      <title>Enum Values from Database Schema</title>
+      <description>Enum values for number_type and category must match NumerologyInterpretation model exactly: life_path, expression, soul_urge, birthday, personal_year for types; personality, strengths, challenges, career, relationships, talents, abilities, purpose for categories.</description>
+    </constraint>
+    <constraint>
+      <title>Required vs Optional Parameters</title>
+      <description>Mark parameters as required in "required" array if they're essential for function execution. Category parameter in get_numerology_interpretation should be optional to allow retrieving all categories.</description>
+    </constraint>
+    <constraint>
+      <title>Pipecat Integration Pattern</title>
+      <description>Export NUMEROLOGY_TOOLS as a list that can be passed to OpenAILLMContext.set_tools(). Follow pipecat_bot.py pattern for context initialization (line 216).</description>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>NUMEROLOGY_TOOLS</name>
+      <kind>module export</kind>
+      <signature>NUMEROLOGY_TOOLS: list[dict]</signature>
+      <path>backend/src/voice_pipeline/numerology_functions.py</path>
+      <description>List of OpenAI tool definitions exported for Pipecat integration</description>
+    </interface>
+    <interface>
+      <name>OpenAILLMContext.set_tools</name>
+      <kind>pipecat method</kind>
+      <signature>llm_context.set_tools(tools: list[dict]) -> None</signature>
+      <path>pipecat.processors.aggregators.openai_llm_context</path>
+      <description>Pipecat method to register function calling tools with OpenAI LLM context</description>
+    </interface>
+    <interface>
+      <name>calculate_life_path</name>
+      <kind>service function</kind>
+      <signature>calculate_life_path(birth_date: date) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Life Path number from birth date, returns 1-9 or master numbers 11, 22, 33</description>
+    </interface>
+    <interface>
+      <name>calculate_expression_number</name>
+      <kind>service function</kind>
+      <signature>calculate_expression_number(full_name: str) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Expression number from full birth name, returns 1-9 or master numbers</description>
+    </interface>
+    <interface>
+      <name>calculate_soul_urge_number</name>
+      <kind>service function</kind>
+      <signature>calculate_soul_urge_number(full_name: str) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Soul Urge number from full birth name, returns 1-9 or master numbers</description>
+    </interface>
+    <interface>
+      <name>NumerologyInterpretation</name>
+      <kind>database model</kind>
+      <signature>class NumerologyInterpretation(SQLModel, table=True)</signature>
+      <path>backend/src/models/numerology_interpretation.py</path>
+      <description>Database model with fields: number_type (str), number_value (int), category (str), content (str). Query pattern: filter by (number_type, number_value) with optional category.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for all testing. Follow existing test patterns from test_numerology_service.py: parametrize decorator for multiple test cases, clear test function names (test_function_name), comprehensive edge case coverage including master numbers. Tests should validate tool definitions are JSON-serializable and contain all required fields.
+    </standards>
+    <locations>
+      - backend/tests/voice_pipeline/ (create for tool definition tests)
+      - backend/tests/services/ (existing numerology service tests for reference)
+    </locations>
+    <ideas>
+      <idea ac="AC1">Test that NUMEROLOGY_TOOLS can be imported successfully and is a list</idea>
+      <idea ac="AC2,AC3,AC4">Verify each calculation tool has correct structure: type, function.name, function.description, function.parameters with required fields</idea>
+      <idea ac="AC5">Verify get_numerology_interpretation has number_type enum with correct values matching database schema</idea>
+      <idea ac="AC6">Validate all tools are JSON-serializable using json.dumps(NUMEROLOGY_TOOLS)</idea>
+      <idea ac="AC6">Test parameter schemas have correct JSON Schema types (string, integer) and required arrays</idea>
+      <idea ac="AC7">Mock OpenAILLMContext.set_tools() to verify NUMEROLOGY_TOOLS can be passed without errors</idea>
+    </ideas>
+  </tests>
+</story-context>
