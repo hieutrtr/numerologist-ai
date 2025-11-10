@@ -1,0 +1,508 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.10</storyId>
+    <title>End-to-End Voice Test</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-10-end-to-end-voice-test.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>to validate the complete voice pipeline</iWant>
+    <soThat>I know voice conversations work end-to-end</soThat>
+    <tasks>
+### Task 1: Pre-Test Environment Setup (AC: #8, #9)
+- 1.1 Verify all API keys configured in backend/.env (DAILY_API_KEY, DEEPGRAM_API_KEY, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, ELEVENLABS_API_KEY)
+- 1.2 Start backend server: `uv run uvicorn src.main:app --reload`
+- 1.3 Start frontend dev server: `npm run web` (or iOS/Android build)
+- 1.4 Verify database is running and migrations applied
+- 1.5 Clear any old conversation records (optional)
+- 1.6 Open Daily.co dashboard for monitoring
+
+### Task 2: Execute End-to-End Test Flow (AC: #1-#7, #10)
+- 2.1 Login to app with test user account
+- 2.2 Navigate to conversation screen
+- 2.3 Start conversation flow (tap button, grant permission, wait for connected status, verify backend logs)
+- 2.4 Execute speech test (say "Hello, can you hear me?", wait for AI response, verify relevance)
+- 2.5 End conversation flow (tap button, verify clean disconnection, verify UI returns to ready state)
+- 2.6 Verify backend logs (Deepgram, LLM, ElevenLabs logs, note warnings/errors)
+- 2.7 Verify database record (query conversations table, confirm record exists with ended_at, duration_seconds, daily_room_id)
+
+### Task 3: Performance & Latency Measurement (AC: #6)
+- 3.1 Record timestamp when user starts speaking
+- 3.2 Record timestamp when AI audio starts playing
+- 3.3 Calculate round-trip latency
+- 3.4 Document latency in test results
+- 3.5 If latency >5s, note bottlenecks (STT, LLM, TTS, network, audio playback delay)
+- 3.6 Create performance baseline for future optimization
+
+### Task 4: Multi-Platform Testing (AC: #9)
+- 4.1 Test on web (Chrome)
+- 4.2 Test on web (Safari)
+- 4.3 Test on iOS device (if available)
+- 4.4 Test on Android device (if available)
+- 4.5 Test on iOS simulator (baseline)
+- 4.6 Document platform-specific issues (audio I/O, permissions, performance, browser compatibility)
+
+### Task 5: Error Scenario Testing (AC: #7, #8)
+- 5.1 Test without microphone permission (deny permission, verify error message, verify conversation doesn't start)
+- 5.2 Test network interruption (disconnect mid-conversation, verify error handling, verify graceful degradation)
+- 5.3 Test invalid API key (break one key temporarily, verify error logged, verify user-friendly error)
+- 5.4 Test multiple start/end cycles (3 consecutive conversations, verify no memory leaks, verify state resets)
+
+### Task 6: Documentation & Reporting (AC: #8)
+- 6.1 Document test results (success/failure for each AC, latency measurements, platform test results, known issues)
+- 6.2 Capture backend logs (save relevant snippets with timestamps, highlight warnings/errors)
+- 6.3 Capture screenshots/recordings (conversation screen states, Daily.co dashboard, database records)
+- 6.4 Update story with test results (mark passing ACs, document failures in Completion Notes, list known issues/workarounds)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+### AC1: Conversation Start Flow
+- User can tap "Start Conversation" button in mobile app
+- App requests and receives microphone permission
+- App successfully joins Daily.co room
+- Backend logs show bot joined room
+- Connection established within 3 seconds
+
+### AC2: Speech Recognition (STT)
+- User speaks: "Hello"
+- Deepgram detects speech and transcribes correctly
+- Backend logs show transcription: "Hello" or similar
+- Transcription latency <500ms
+
+### AC3: LLM Response Generation
+- GPT-5-mini (Azure OpenAI) receives transcribed text
+- LLM generates appropriate greeting response
+- Backend logs show LLM output text
+- LLM response latency <2 seconds
+
+### AC4: Speech Synthesis (TTS)
+- ElevenLabs receives LLM response text
+- TTS generates audio stream
+- Backend logs show TTS generation success
+- TTS latency <1 second
+
+### AC5: Audio Playback
+- User hears AI voice response in app
+- Audio quality is clear and natural
+- Audio plays without glitches or stuttering
+- Audio volume is appropriate (not too loud/quiet)
+
+### AC6: Round-Trip Performance
+- Total round-trip latency <5 seconds (user speaks → hears response)
+- Measured from speech start to audio playback start
+- Aim for <3 seconds (target for Epic 6 optimization)
+- Latency logged for monitoring
+
+### AC7: Conversation End Flow
+- User can tap "End Conversation" button
+- Conversation ends cleanly without errors
+- Backend updates conversation record (ended_at, duration_seconds)
+- Daily.co room deleted successfully
+- App returns to ready state
+
+### AC8: Backend Logging & Monitoring
+- All pipeline events logged: STT, LLM, TTS
+- Logs show timestamps for latency tracking
+- Errors logged with full context
+- Daily.co dashboard shows room activity
+- All API keys verified working
+
+### AC9: Device Testing
+- Test on web browser (Chrome/Safari)
+- Test on iOS device (if available)
+- Test on Android device (if available)
+- Test on simulator/emulator (baseline)
+- Document any platform-specific issues
+
+### AC10: Data Persistence
+- Conversation saved to database
+- Conversation record includes: id, user_id, started_at, ended_at, duration_seconds
+- Daily room ID stored correctly
+- User can view conversation in database (manual check)
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 3: Voice Infrastructure & Basic Conversation</title>
+        <section>Epic 3 Overview</section>
+        <snippet>Enable real-time voice conversations between user and AI through Pipecat-ai pipeline. Goal is core product differentiator - voice-first numerology conversations using Deepgram (STT), Azure OpenAI GPT-5-mini (LLM), and ElevenLabs (TTS) through Daily.co WebRTC.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Story 3.10: End-to-End Voice Test</title>
+        <section>Story Requirements</section>
+        <snippet>Validate complete voice pipeline end-to-end. Test on real devices, monitor backend logs for pipeline events, verify round-trip latency <5 seconds (aim for <3s in Epic 6). Manual test checklist covering start, speech recognition, LLM response, TTS, playback, and end conversation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Voice Pipeline Architecture</title>
+        <section>Tech Stack Decisions</section>
+        <snippet>Voice pipeline uses Pipecat-ai framework for orchestration: Deepgram SDK v5.2.0 (STT, <800ms latency), Azure OpenAI GPT-5-mini (LLM, <2s), ElevenLabs SDK v2.17.0 (TTS, <700ms), Daily.co WebRTC (transport). Architecture optimized for <3 second voice latency.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>MVP Voice Experience</title>
+        <section>Success Criteria</section>
+        <snippet>Users complete 8-12 minute voice sessions without friction. Voice recognition accuracy >85% for clear speech. Response latency <3 seconds maintaining natural conversation flow. Voice pipeline orchestrates reliably through Pipecat-ai.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-9-end-conversation-cleanup.md</path>
+        <title>Story 3.9: End Conversation & Cleanup</title>
+        <section>Learnings and Patterns</section>
+        <snippet>End conversation endpoint implements best-effort cleanup pattern. Uses timezone-aware datetime handling. WebSocket cleanup warnings are harmless when ending conversations. Frontend calls teardownCall() BEFORE backend API. State must be fully reset after each conversation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-4-conversation-model-start-endpoint.md</path>
+        <title>Story 3.4: Conversation Model & Start Endpoint</title>
+        <section>Start Conversation Pattern</section>
+        <snippet>POST /api/v1/conversations/start creates conversation record, establishes Daily.co room, spawns Pipecat bot in background. Returns conversation_id, daily_room_url, and daily_token to client for joining room.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-3-basic-pipecat-bot-with-greeting.md</path>
+        <title>Story 3.3: Basic Pipecat Bot with Greeting</title>
+        <section>Bot Implementation</section>
+        <snippet>Pipecat bot orchestrates voice pipeline: Daily.co transport, Deepgram STT, Azure OpenAI LLM, ElevenLabs TTS. Bot runs as background task (asyncio.create_task). Implements basic greeting and system prompts.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <!-- Backend Voice Pipeline -->
+      <artifact>
+        <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+        <kind>service</kind>
+        <symbol>run_bot</symbol>
+        <lines>full file</lines>
+        <reason>Main Pipecat bot orchestration - connects STT, LLM, TTS services through Daily.co transport. Critical for understanding voice pipeline flow being tested.</reason>
+      </artifact>
+
+      <!-- Backend Conversation Endpoints -->
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>controller</kind>
+        <symbol>start_conversation</symbol>
+        <lines>27-123</lines>
+        <reason>POST /start endpoint creates conversation, spawns bot. Entry point for conversation flow being tested.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>controller</kind>
+        <symbol>end_conversation</symbol>
+        <lines>126-279</lines>
+        <reason>POST /{id}/end endpoint for cleanup. Validates conversation persistence and duration calculation being tested in AC7 and AC10.</reason>
+      </artifact>
+
+      <!-- Backend Services -->
+      <artifact>
+        <path>backend/src/services/daily_service.py</path>
+        <kind>service</kind>
+        <symbol>create_room, delete_room</symbol>
+        <lines>full file</lines>
+        <reason>Daily.co room management - creates rooms for conversations, deletes on end. Critical for AC1 and AC7 testing.</reason>
+      </artifact>
+
+      <!-- Backend Models -->
+      <artifact>
+        <path>backend/src/models/conversation.py</path>
+        <kind>model</kind>
+        <symbol>Conversation</symbol>
+        <lines>full file</lines>
+        <reason>Conversation database model with calculate_duration() method. Validates data persistence requirements in AC10.</reason>
+      </artifact>
+
+      <!-- Backend Tests -->
+      <artifact>
+        <path>backend/tests/api/v1/endpoints/test_conversations.py</path>
+        <kind>test</kind>
+        <symbol>test_end_conversation_*</symbol>
+        <lines>full file</lines>
+        <reason>Existing test patterns for conversation endpoints. Reference for understanding expected behavior and test structure.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/tests/voice_pipeline/test_pipecat_bot.py</path>
+        <kind>test</kind>
+        <symbol>test_*</symbol>
+        <lines>full file</lines>
+        <reason>Bot unit tests. Reference for mocking voice services in automated tests.</reason>
+      </artifact>
+
+      <!-- Frontend Conversation Screen -->
+      <artifact>
+        <path>mobile/src/app/(tabs)/index.tsx</path>
+        <kind>component</kind>
+        <symbol>ConversationScreen</symbol>
+        <lines>full file</lines>
+        <reason>Main conversation UI with Start/End buttons, connection status. Primary interface for E2E testing.</reason>
+      </artifact>
+
+      <!-- Frontend State Management -->
+      <artifact>
+        <path>mobile/src/stores/useConversationStore.ts</path>
+        <kind>store</kind>
+        <symbol>useConversationStore</symbol>
+        <lines>full file</lines>
+        <reason>Zustand store managing conversation state. Critical for verifying state resets correctly after each conversation (AC7, Task 5.4).</reason>
+      </artifact>
+
+      <!-- Frontend Services -->
+      <artifact>
+        <path>mobile/src/services/daily.service.ts</path>
+        <kind>service</kind>
+        <symbol>setupCall, teardownCall</symbol>
+        <lines>full file</lines>
+        <reason>Daily.co client integration - joins rooms, handles WebRTC connection. Critical for AC1 connection testing.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/audio.service.ts</path>
+        <kind>service</kind>
+        <symbol>requestMicrophonePermission</symbol>
+        <lines>full file</lines>
+        <reason>Microphone permission handling. Required for AC1 permission testing and Task 5.1 error scenario.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <python>
+        <package name="pipecat-ai[daily,deepgram,azure,silero]" version=">=0.0.92" />
+        <package name="elevenlabs" version=">=2.17.0" />
+        <package name="openai" version=">=2.7.1" />
+        <package name="fastapi" version=">=0.109.0" />
+        <package name="pytest" version=">=7.4.0" />
+        <package name="pytest-asyncio" version=">=0.23.0" />
+      </python>
+      <javascript>
+        <package name="@daily-co/daily-js" version="^0.85.0" />
+        <package name="@daily-co/react-native-daily-js" version="^0.82.0" />
+        <package name="@daily-co/react-native-webrtc" version="^124.0.6-daily.1" />
+        <package name="expo" version="~54.0.22" />
+        <package name="expo-av" version="^16.0.7" />
+        <package name="react-native" version="0.81.5" />
+        <package name="zustand" version="^5.0.8" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <!-- Testing Approach -->
+    <constraint>This is a VALIDATION story, not implementation. All components should already be working from previous Epic 3 stories (3.1-3.9).</constraint>
+    <constraint>Manual testing required - no automated tests for full voice pipeline yet. Automated tests exist for individual components but E2E requires real voice interaction.</constraint>
+    <constraint>Test on REAL devices, not just simulators/emulators. Web browser testing (Chrome/Safari) is baseline, but iOS/Android device testing is critical for production validation.</constraint>
+    <constraint>Document ALL test results in story Completion Notes section. Include success/failure for each AC, latency measurements, platform differences, and known issues.</constraint>
+
+    <!-- Prerequisites -->
+    <constraint>ALL previous Epic 3 stories (3.1-3.9) must be complete and working. This story validates integration, not individual components.</constraint>
+    <constraint>All API keys must be configured: DAILY_API_KEY, DEEPGRAM_API_KEY, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, ELEVENLABS_API_KEY.</constraint>
+    <constraint>Database must be running with migrations applied. Backend and frontend servers must be running.</constraint>
+
+    <!-- Performance Requirements -->
+    <constraint>Round-trip latency target: <5 seconds for MVP (AC6). This is measured from user speech start to AI audio playback start.</constraint>
+    <constraint>Component latency targets: STT <500ms, LLM <2s, TTS <1s, Network/Audio <1.5s. Document actual latencies for baseline.</constraint>
+    <constraint>Aim for <3 seconds total latency as Epic 6 optimization target. This story establishes baseline for future optimization.</constraint>
+
+    <!-- Error Handling -->
+    <constraint>Test error scenarios: microphone permission denied, network interruption, invalid API keys, multiple start/end cycles (Task 5).</constraint>
+    <constraint>WebSocket cleanup warnings are expected and harmless when ending conversations while bot is connected (documented in Story 3.9).</constraint>
+    <constraint>Best-effort cleanup pattern: conversation end should succeed even if Daily.co room deletion fails (rooms auto-expire).</constraint>
+
+    <!-- State Management -->
+    <constraint>Conversation state must fully reset after each conversation. Test 3 consecutive start-end cycles to verify no memory leaks or stale state.</constraint>
+    <constraint>Frontend must call Daily.co teardownCall() BEFORE calling backend /end endpoint to ensure clean disconnection.</constraint>
+  </constraints>
+
+  <interfaces>
+    <!-- REST API Endpoints -->
+    <interface>
+      <name>POST /api/v1/conversations/start</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        Request: Authenticated (JWT Bearer token)
+        Response: {
+          "conversation_id": "uuid",
+          "daily_room_url": "https://domain.daily.co/room-name",
+          "daily_token": "jwt-token"
+        }
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py:27-123</path>
+    </interface>
+
+    <interface>
+      <name>POST /api/v1/conversations/{conversation_id}/end</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        Request: Authenticated (JWT Bearer token), conversation_id: UUID
+        Response: {
+          "message": "Conversation ended successfully",
+          "conversation": {
+            "id": "uuid",
+            "started_at": "ISO datetime",
+            "ended_at": "ISO datetime",
+            "duration_seconds": number
+          }
+        }
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py:126-279</path>
+    </interface>
+
+    <!-- Daily.co Room Management -->
+    <interface>
+      <name>create_room</name>
+      <kind>async function</kind>
+      <signature>
+        async def create_room(room_name: str) -> dict:
+          returns: {
+            "room_url": str,
+            "room_name": str,
+            "meeting_token": str
+          }
+      </signature>
+      <path>backend/src/services/daily_service.py</path>
+    </interface>
+
+    <interface>
+      <name>delete_room</name>
+      <kind>async function</kind>
+      <signature>
+        async def delete_room(room_name: str) -> bool:
+          returns: True if deleted, False if already gone
+      </signature>
+      <path>backend/src/services/daily_service.py</path>
+    </interface>
+
+    <!-- Pipecat Bot -->
+    <interface>
+      <name>run_bot</name>
+      <kind>async function</kind>
+      <signature>
+        async def run_bot(room_url: str, token: str) -> None:
+          Spawned as background task via asyncio.create_task()
+          Orchestrates voice pipeline: Daily.co → Deepgram STT → Azure OpenAI LLM → ElevenLabs TTS → Daily.co
+      </signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+    </interface>
+
+    <!-- Frontend Daily.co Service -->
+    <interface>
+      <name>setupCall</name>
+      <kind>async function</kind>
+      <signature>
+        async setupCall(roomUrl: string, token: string): Promise&lt;void&gt;
+        Joins Daily.co room with provided credentials
+      </signature>
+      <path>mobile/src/services/daily.service.ts</path>
+    </interface>
+
+    <interface>
+      <name>teardownCall</name>
+      <kind>async function</kind>
+      <signature>
+        async teardownCall(): Promise&lt;void&gt;
+        Leaves Daily.co room and cleans up resources
+        MUST be called BEFORE backend /end endpoint
+      </signature>
+      <path>mobile/src/services/daily.service.ts:473-503</path>
+    </interface>
+
+    <!-- Frontend Store Actions -->
+    <interface>
+      <name>startConversation</name>
+      <kind>zustand action</kind>
+      <signature>
+        startConversation: () => Promise&lt;void&gt;
+        Calls backend /start, joins Daily.co room, updates state
+      </signature>
+      <path>mobile/src/stores/useConversationStore.ts</path>
+    </interface>
+
+    <interface>
+      <name>endConversation</name>
+      <kind>zustand action</kind>
+      <signature>
+        endConversation: () => Promise&lt;void&gt;
+        Tears down Daily.co call, calls backend /end, resets state
+      </signature>
+      <path>mobile/src/stores/useConversationStore.ts:242-301</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Backend uses pytest for unit tests with async support (pytest-asyncio). Tests mock external services (Daily.co, voice services) using unittest.mock. Test structure: Arrange-Act-Assert pattern. Tests are located in backend/tests/ mirroring src/ structure.
+
+      Frontend manual testing is required for E2E voice pipeline validation - no automated E2E tests yet. Component-level tests would use Jest/React Testing Library (not yet implemented).
+
+      This story is primarily a MANUAL TESTING story to validate the complete voice pipeline works end-to-end. Automated tests exist for individual components but cannot test real voice interaction.
+    </standards>
+
+    <locations>
+      backend/tests/api/v1/endpoints/test_conversations.py
+      backend/tests/voice_pipeline/test_pipecat_bot.py
+      backend/tests/services/test_daily_service.py
+      Manual E2E: Follow testing checklist in story Tasks section
+    </locations>
+
+    <ideas>
+      <!-- AC1: Conversation Start Flow -->
+      <test ac="AC1">Verify user can tap Start Conversation button and app requests microphone permission (manual test)</test>
+      <test ac="AC1">Verify app successfully joins Daily.co room and backend logs show bot joined (check logs)</test>
+      <test ac="AC1">Measure connection establishment time, should be <3 seconds (use timestamps)</test>
+
+      <!-- AC2: Speech Recognition (STT) -->
+      <test ac="AC2">Speak "Hello" and verify Deepgram transcription appears in backend logs (manual + logs)</test>
+      <test ac="AC2">Measure STT latency from speech end to transcription log, should be <500ms (timestamps)</test>
+
+      <!-- AC3: LLM Response Generation -->
+      <test ac="AC3">Verify Azure OpenAI receives transcription and generates response in backend logs (logs)</test>
+      <test ac="AC3">Measure LLM latency from transcription to response, should be <2s (timestamps)</test>
+
+      <!-- AC4: Speech Synthesis (TTS) -->
+      <test ac="AC4">Verify ElevenLabs receives LLM text and generates audio in backend logs (logs)</test>
+      <test ac="AC4">Measure TTS latency from LLM response to audio generation, should be <1s (timestamps)</test>
+
+      <!-- AC5: Audio Playback -->
+      <test ac="AC5">Verify user hears AI voice response clearly without glitches (manual listening test)</test>
+      <test ac="AC5">Verify audio volume is appropriate, not too loud or quiet (subjective assessment)</test>
+
+      <!-- AC6: Round-Trip Performance -->
+      <test ac="AC6">Measure total latency from user speech start to AI audio playback start (stopwatch/timestamps)</test>
+      <test ac="AC6">Verify total latency <5 seconds for MVP, document actual time for baseline (critical measurement)</test>
+      <test ac="AC6">Document component latencies (STT, LLM, TTS, network) to identify bottlenecks if >5s (analysis)</test>
+
+      <!-- AC7: Conversation End Flow -->
+      <test ac="AC7">Verify End Conversation button works and conversation ends cleanly (manual test)</test>
+      <test ac="AC7">Verify backend updates conversation record with ended_at and duration_seconds (database query)</test>
+      <test ac="AC7">Verify Daily.co room is deleted or deletion attempted (Daily.co dashboard + logs)</test>
+      <test ac="AC7">Verify app UI returns to ready state after ending (visual check)</test>
+
+      <!-- AC8: Backend Logging & Monitoring -->
+      <test ac="AC8">Verify all pipeline events logged: STT transcriptions, LLM responses, TTS generation (log review)</test>
+      <test ac="AC8">Verify logs include timestamps for latency tracking (log format check)</test>
+      <test ac="AC8">Verify errors logged with full context if any failures occur (error scenarios)</test>
+      <test ac="AC8">Verify Daily.co dashboard shows room activity during conversation (dashboard monitoring)</test>
+
+      <!-- AC9: Device Testing -->
+      <test ac="AC9">Test full flow on Chrome web browser (baseline test)</test>
+      <test ac="AC9">Test full flow on Safari web browser (browser compatibility)</test>
+      <test ac="AC9">Test on iOS device if available (real device test)</test>
+      <test ac="AC9">Test on Android device if available (real device test)</test>
+      <test ac="AC9">Document any platform-specific issues: audio quality, permissions, performance (cross-platform validation)</test>
+
+      <!-- AC10: Data Persistence -->
+      <test ac="AC10">Query conversations table after test and verify record exists (SQL query)</test>
+      <test ac="AC10">Verify conversation record includes: id, user_id, started_at, ended_at, duration_seconds (field validation)</test>
+      <test ac="AC10">Verify daily_room_id is stored correctly (data integrity)</test>
+
+      <!-- Error Scenarios (Task 5) -->
+      <test ac="AC1,AC8">Test microphone permission denied - verify error message and conversation doesn't start (error handling)</test>
+      <test ac="AC8">Test network interruption mid-conversation - verify graceful degradation (resilience)</test>
+      <test ac="AC8">Test invalid API key - verify error logged and user-friendly message (configuration validation)</test>
+      <test ac="AC7">Test 3 consecutive start/end cycles - verify no memory leaks and state resets (stability)</test>
+    </ideas>
+  </tests>
+</story-context>

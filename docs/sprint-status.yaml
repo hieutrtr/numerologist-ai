@@ -81,7 +81,7 @@ development_status:
   3-7-conversation-screen-ui: review
   3-8-daily-co-react-native-integration: review
   3-9-end-conversation-cleanup: in-progress
-  3-10-end-to-end-voice-test: backlog
+  3-10-end-to-end-voice-test: done
   epic-3-retrospective: optional
 
   # ============================================================================
