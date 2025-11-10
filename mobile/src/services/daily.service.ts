@@ -112,8 +112,18 @@ export async function initializeCall(): Promise<DailyCallObject> {
       // Note: audioOutput is not a valid property for createCallObject()
       // Audio output is automatically configured when joining a room
       receiveSettings: {
+        // CRITICAL: Subscribe to all audio tracks to hear remote participants (bot)
+        audio: {
+          subscribeToAll: true,  // Subscribe to all audio tracks
+        },
+        screenAudio: {
+          subscribeToAll: true,  // Subscribe to screen share audio if any
+        },
         screenVideo: {
-          subscribeToAll: false,
+          subscribeToAll: false, // Don't subscribe to screen video
+        },
+        video: {
+          subscribeToAll: false, // Don't subscribe to video tracks
         },
       },
     });
@@ -390,6 +400,49 @@ export function setupCallListeners(
       listeners.push({ event: 'network-quality-change', handler });
     }
 
+    // Track events for audio playback (CRITICAL for hearing remote participants)
+    // Listen for when remote audio tracks start
+    const trackStartedHandler = (event: any) => {
+      if (__DEV__) {
+        console.log('[Daily] Track started:', {
+          participant: event.participant?.session_id,
+          track: event.track?.kind,
+          type: event.type,
+        });
+      }
+      // Track started events indicate remote audio is available
+      if (event.track?.kind === 'audio' && !event.participant?.local) {
+        console.log('[Daily] Remote audio track started - you should now hear the bot');
+      }
+    };
+    call.on('track-started', trackStartedHandler);
+    listeners.push({ event: 'track-started', handler: trackStartedHandler });
+
+    // Listen for track updates
+    const trackUpdatedHandler = (event: any) => {
+      if (__DEV__) {
+        console.log('[Daily] Track updated:', {
+          participant: event.participant?.session_id,
+          track: event.track?.kind,
+          state: event.track?.state,
+        });
+      }
+    };
+    call.on('track-updated', trackUpdatedHandler);
+    listeners.push({ event: 'track-updated', handler: trackUpdatedHandler });
+
+    // Listen for when tracks stop
+    const trackStoppedHandler = (event: any) => {
+      if (__DEV__) {
+        console.log('[Daily] Track stopped:', {
+          participant: event.participant?.session_id,
+          track: event.track?.kind,
+        });
+      }
+    };
+    call.on('track-stopped', trackStoppedHandler);
+    listeners.push({ event: 'track-stopped', handler: trackStoppedHandler });
+
     if (__DEV__) {
       console.log('[Daily] Event listeners setup:', listeners.length, 'listeners');
     }
@@ -512,6 +565,53 @@ export function isConnected(call: DailyCallObject): boolean {
   }
 }
 
+/**
+ * Debug audio state for all participants
+ *
+ * Helps diagnose audio playback issues by logging detailed audio state
+ * for all participants including track information.
+ *
+ * @param call - Daily call object
+ */
+export function debugAudioState(call: DailyCallObject): void {
+  try {
+    const participants = call.getParticipants();
+
+    console.log('=== Daily Audio Debug ===');
+    console.log('Total participants:', Object.keys(participants).length);
+
+    Object.entries(participants).forEach(([id, participant]: [string, any]) => {
+      console.log(`\nParticipant: ${id}`);
+      console.log('  Name:', participant.name || 'Unknown');
+      console.log('  Local:', participant.local);
+      console.log('  Audio State:', {
+        audio: participant.audio,
+        audioTrack: participant.audioTrack ? 'Present' : 'Missing',
+        tracks: participant.tracks,
+      });
+
+      // Check for audio tracks
+      if (participant.tracks) {
+        Object.entries(participant.tracks).forEach(([trackId, track]: [string, any]) => {
+          if (track.kind === 'audio') {
+            console.log(`  Audio Track ${trackId}:`, {
+              state: track.state,
+              subscribed: track.subscribed,
+              blocked: track.blocked,
+              off: track.off,
+              playable: track.playable,
+            });
+          }
+        });
+      }
+    });
+
+    console.log('=== End Audio Debug ===');
+  } catch (error) {
+    console.error('[Daily] Audio debug error:', error);
+  }
+}
+
 export default {
   initializeCall,
   configureAudio,
@@ -520,4 +620,5 @@ export default {
   teardownCall,
   getParticipants,
   isConnected,
+  debugAudioState,
 };

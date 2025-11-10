@@ -58,6 +58,7 @@ interface ConversationState {
   startConversation: () => Promise<void>;
   endConversation: () => Promise<void>;
   toggleMic: () => void;
+  debugAudio: () => void; // Debug audio state for troubleshooting
 }
 
 /**
@@ -326,6 +327,31 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         }
         // Silently fail - don't update state if SDK call fails
       }
+    }
+  },
+
+  /**
+   * Debug audio state for troubleshooting playback issues
+   * Call this from browser console: useConversationStore.getState().debugAudio()
+   */
+  debugAudio: () => {
+    const { dailyCall } = get();
+
+    if (dailyCall) {
+      console.log('🔊 Debugging Audio State...');
+      dailyService.debugAudioState(dailyCall);
+
+      // Also log current store state
+      const state = get();
+      console.log('Store State:', {
+        conversationId: state.conversationId,
+        isConnected: state.isConnected,
+        isMicActive: state.isMicActive,
+        isAISpeaking: state.isAISpeaking,
+        error: state.error,
+      });
+    } else {
+      console.log('⚠️ No active Daily call to debug');
     }
   },
 }));
