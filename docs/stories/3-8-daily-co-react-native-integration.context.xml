@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="story-3-8-daily-co-react-native-integration" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.8</storyId>
+    <storyKey>3-8-daily-co-react-native-integration</storyKey>
+    <title>Daily.co React Native Integration</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-8-daily-co-react-native-integration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>frontend developer</asA>
+    <iWant>Daily.co SDK integrated in React Native</iWant>
+    <soThat>the mobile app can join voice rooms and enable real-time voice conversations</soThat>
+    <tasks>
+      <task n="1">Install Daily.co React Native SDK (AC1)</task>
+      <task n="2">Create Daily.co Call Integration Module (AC2, AC9)</task>
+      <task n="3">Implement Room Joining Logic (AC3, AC9)</task>
+      <task n="4">Audio Configuration (AC4, AC8)</task>
+      <task n="5">Event Handler Setup (AC6, AC7, AC9)</task>
+      <task n="6">Call Object Lifecycle Management (AC9)</task>
+      <task n="7">Error Handling & User Feedback (AC10)</task>
+      <task n="8">Testing (AC1-AC10)</task>
+      <task n="9">Performance & Optimization (AC4, AC5)</task>
+      <task n="10">Documentation (AC2, AC9)</task>
+      <task n="11">Integration Verification (AC1-AC10)</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Daily.co SDK Installation: @daily-co/react-native-daily-js package installed, dependencies resolved, can import without errors, version compatible with web SDK</criterion>
+    <criterion id="AC2">Daily Call Object Creation: Can create call object, exposes standard API methods, manages connection state, handles participant events, error handling for failures</criterion>
+    <criterion id="AC3">Joining Rooms: Call can join with URL and token, async join operation, triggers joined-meeting event, failure shows error, can join backend-created rooms</criterion>
+    <criterion id="AC4">Audio Input/Output Working: Microphone and speaker activated automatically, audio levels monitorable, no clipping/latency issues</criterion>
+    <criterion id="AC5">Bot Communication: Can hear bot speaking, bot receives user audio, two-way communication verified, acceptable audio quality, no dropouts</criterion>
+    <criterion id="AC6">Connection Status Events: connected/disconnected/error events trigger properly, network-quality tracked, status flows to UI via store</criterion>
+    <criterion id="AC7">Participant Events & Tracking: participant-joined/updated/left events, participant list queryable, each participant has ID/audio/video state, bot detected separately</criterion>
+    <criterion id="AC8">Platform-Specific Configuration: Audio permissions on Android/iOS, background audio configured, device routing configured, works with Expo Go</criterion>
+    <criterion id="AC9">Integration with Conversation Store: Store creates call object, manages lifecycle, handles joining after room created, updates UI based on events, handles disconnection</criterion>
+    <criterion id="AC10">Error Handling & Recovery: Network errors, permission denial, room expiration, malformed URL/token, user-friendly messages, can retry after errors</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Voice Services & Daily.co Integration</section>
+        <snippet>WebRTC Transport: Daily.co, Via Pipecat integration. Managed WebRTC, reliable mobile support, Pipecat-native. Voice Orchestration: Pipecat-ai, Latest (Python >=3.11).</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-5-frontend-conversation-state-zustand.md</path>
+        <title>Story 3.5: Frontend Conversation State (Zustand)</title>
+        <section>Store Interface & Event Flow</section>
+        <snippet>Zustand store manages conversation state: isConnected, isMicActive, isAISpeaking, error. Store provides startConversation() and endConversation() methods. UI subscribes to state changes.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-4-conversation-model-start-endpoint.md</path>
+        <title>Story 3.4: Conversation Model & Start Endpoint</title>
+        <section>Backend API Response</section>
+        <snippet>POST /api/v1/conversations/start returns: conversation_id, daily_room_url, daily_token. Frontend receives credentials for joining Daily.co room.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-2-daily-co-room-management-service.md</path>
+        <title>Story 3.2: Daily.co Room Management Service</title>
+        <section>Backend Room Creation</section>
+        <snippet>Backend creates Daily.co room with unique name, sets 2-hour expiry, generates meeting token. Frontend joins using room_url and token returned by Story 3.4 endpoint.</snippet>
+      </doc>
+      <doc>
+        <path>mobile/package.json</path>
+        <title>Mobile Project Dependencies</title>
+        <section>Current State Management & Audio Setup</section>
+        <snippet>Already installed: zustand@5.0.8, expo-av@16.0.7, @daily-co/daily-js@0.85.0 (web). Will add: @daily-co/react-native-daily-js for mobile native integration.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>mobile/src/stores/useConversationStore.ts</path>
+        <kind>store</kind>
+        <symbol>useConversationStore</symbol>
+        <reason>Story 3.5 store to be extended with Daily.co integration. daily.service will update store state based on Daily.co events. This is the integration point where daily.service hooks into the store lifecycle.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/audio.service.ts</path>
+        <kind>service</kind>
+        <symbol>checkMicrophonePermission, requestMicrophonePermission</symbol>
+        <reason>Story 3.6 permission service already handles microphone access. daily.service should leverage this before joining rooms to ensure permissions are granted upfront (AC4, AC8).</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(tabs)/index.tsx</path>
+        <kind>component</kind>
+        <symbol>ConversationScreen</symbol>
+        <reason>Story 3.7 UI component that displays connection state managed by store. Subscribes to isConnected, isAISpeaking, error state updated by daily.service events. Test connection state changes triggered by Daily.co events.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/__tests__/app/(tabs)/index.test.tsx</path>
+        <kind>test</kind>
+        <symbol>ConversationScreen tests</symbol>
+        <reason>Story 3.7 test patterns: Zustand store mocking, event simulation, state-based UI testing. Apply these patterns to daily.service tests to mock Daily.co SDK events and verify store updates.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <npm>
+        <package name="@daily-co/react-native-daily-js" version="latest" status="NEW">React Native SDK for Daily.co. Required for mobile native integration.</package>
+        <package name="zustand" version="^5.0.8" status="existing">State management for conversation store. daily.service will trigger store updates on Daily.co events.</package>
+        <package name="expo" version="~54.0.22" status="existing">Expo framework provides platform abstraction, audio permissions, build tools.</package>
+        <package name="expo-av" version="^16.0.7" status="existing">Audio management (used by audio.service for permissions). daily.service builds on this foundation.</package>
+        <package name="react-native" version="0.81.5" status="existing">Core framework for mobile UI components.</package>
+        <package name="typescript" version="~5.9.2" status="existing">Type safety for daily.service and store integration.</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint priority="critical">
+      **Event-Driven Architecture**: All state changes must flow through Zustand store, triggered by Daily.co events. Component never directly accesses Daily call object. Pattern from Story 3.7: store is single source of truth, components are view-only.
+    </constraint>
+    <constraint priority="critical">
+      **Permission Prerequisite**: Microphone permission must be granted before joining room (AC4, AC8). Use audio.service.requestMicrophonePermission() before daily.service.joinRoom(). Pattern from Story 3.6.
+    </constraint>
+    <constraint priority="critical">
+      **Async/Await Pattern**: All Daily.co operations (create, join, setup listeners) are async. Use consistent await pattern. Never ignore promise rejections. Handle errors at all levels.
+    </constraint>
+    <constraint priority="high">
+      **Error Mapping**: Map Daily.co SDK errors to user-friendly messages (AC10). Never expose raw API error strings to user. Examples: "Can't connect to call" vs "WebRTC connection failed", "Network unstable" vs "connection timeout".
+    </constraint>
+    <constraint priority="high">
+      **Resource Cleanup**: Always clean up Daily call object on disconnect (AC9, AC6). Memory leaks are common with WebRTC. Implement proper teardown: remove listeners, close connection, null out references.
+    </constraint>
+    <constraint priority="high">
+      **Testing Strategy**: From architecture: use Jest for unit tests (mock Daily.co SDK), integration tests (daily.service + store), manual device testing. Test both happy path and error scenarios.
+    </constraint>
+    <constraint priority="medium">
+      **Platform Handling**: Android and iOS have different audio routing (speaker vs receiver). Use Platform.OS to branch if needed. Test on actual devices; simulators hide audio issues.
+    </constraint>
+    <constraint priority="medium">
+      **TypeScript Types**: Export types for Daily call object, event payloads, store callbacks. Ensure daily.service and store have full type coverage. No `any` types in integration points.
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Daily.co Call Object (React Native)</name>
+      <kind>SDK API</kind>
+      <signature>const call = DailyIframe.createCallObject(options); await call.join({url, token}); call.on(eventName, callback); await call.leave();</signature>
+      <path>@daily-co/react-native-daily-js package docs</path>
+      <description>Standard Daily.co JavaScript API adapted for React Native. Must be initialized in daily.service and passed to store. Events include: connected, disconnected, participant-joined, participant-updated, participant-left, error.</description>
+    </interface>
+
+    <interface>
+      <name>Conversation Store API (Story 3.5)</name>
+      <kind>Zustand store</kind>
+      <signature>const { isConnected, isAISpeaking, error, startConversation, endConversation } = useConversationStore();</signature>
+      <path>mobile/src/stores/useConversationStore.ts</path>
+      <description>Store to be extended by Story 3.8. daily.service updates store state (isConnected, error) based on Daily.co events. startConversation() will use daily.service to create and join call.</description>
+    </interface>
+
+    <interface>
+      <name>Backend Conversation Endpoint (Story 3.4)</name>
+      <kind>REST API</kind>
+      <signature>POST /api/v1/conversations/start → {conversation_id, daily_room_url, daily_token}</signature>
+      <path>docs/stories/3-4-conversation-model-start-endpoint.md</path>
+      <description>Frontend calls this endpoint (via axios) in store.startConversation() to get Daily.co credentials. daily.service uses room_url and token to join room.</description>
+    </interface>
+
+    <interface>
+      <name>Permission Service (Story 3.6)</name>
+      <kind>service functions</kind>
+      <signature>checkMicrophonePermission(): Promise<boolean>; requestMicrophonePermission(): Promise<boolean>;</signature>
+      <path>mobile/src/services/audio.service.ts</path>
+      <description>Already available from Story 3.6. daily.service should call these before joining room to ensure microphone is accessible. Pattern: check first (no dialog), then request if needed.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      From architecture & Story 3.7: Use Jest for unit tests with mocked Daily.co SDK. Mock Zustand store to simulate state updates. Create integration tests combining daily.service + store. Manually test on Android device/emulator and iOS simulator to verify actual audio I/O. Test error scenarios: network failures, permission denial, invalid credentials, room expiration. Target: all 10 ACs + edge cases covered.
+    </standards>
+    <locations>
+      mobile/__tests__/services/daily.service.test.ts - Unit tests for daily.service functions
+      mobile/__tests__/stores/useConversationStore.test.ts - Store integration with daily.service (may update existing Story 3.5 tests)
+      Mobile device/emulator: Manual audio testing
+      iOS simulator: Manual audio testing
+    </locations>
+    <ideas>
+      AC1 Test: Import @daily-co/react-native-daily-js, verify no build errors
+      AC2 Test: Mock Daily.co, call initializeCall(), verify call object created with correct config
+      AC3 Test: Mock Daily.co, call joinRoom(url, token), verify join() called, joined-meeting event fired
+      AC4 Test: Mock Daily.co events, verify audio config applied (audio_in_enabled, audio_out_enabled)
+      AC5 Test: Manual device test - user speaks, record audio, verify bot hears transcription in backend logs
+      AC6 Test: Mock connected/disconnected events, verify store.isConnected updates UI via component re-render
+      AC7 Test: Mock participant events, verify participant list tracked, bot detected
+      AC8 Test: On Android, verify permissions requested. On iOS, verify audio session configured for speaker.
+      AC9 Test: Integration test - startConversation() → daily.service.joinRoom() → store.isConnected = true → UI updates
+      AC10 Test: Inject error scenarios (bad URL, network timeout), verify user-friendly messages shown, button functional for retry
+    </ideas>
+  </tests>
+
+</story-context>

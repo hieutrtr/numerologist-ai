@@ -2,7 +2,7 @@
 
 **Epic:** Epic 3 - Voice Infrastructure & Basic Conversation
 **Story ID:** 3.8
-**Status:** drafted
+**Status:** ready-for-dev
 **Created:** 2025-11-10
 
 ---
@@ -405,7 +405,7 @@ END: Ready for Story 3.9 (End Conversation Cleanup)
 
 ### Context Reference
 
-<!-- Path to story context XML will be added here by story-context workflow -->
+docs/stories/3-8-daily-co-react-native-integration.context.xml
 
 ### Agent Model Used
 
