@@ -89,7 +89,7 @@ development_status:
   # ============================================================================
   epic-4: backlog
   4-1-numerology-calculation-functions: done
-  4-2-numerology-knowledge-base-schema-seeding: backlog
+  4-2-numerology-knowledge-base-schema-seeding: done
   4-3-gpt-function-calling-definitions: backlog
   4-4-function-call-handler-implementation: backlog
   4-5-numerology-system-prompt: backlog

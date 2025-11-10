@@ -1,0 +1,253 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.2</storyId>
+    <title>Numerology Knowledge Base Schema & Seeding</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-2-numerology-knowledge-base-schema-seeding.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>a database table with numerology interpretations</iWant>
+    <soThat>the AI can provide accurate, detailed guidance during conversations</soThat>
+    <tasks>
+      <task id="1" ac="1">Create Numerology Interpretation Model
+        - Create file backend/src/models/numerology_interpretation.py
+        - Import SQLModel, Field, datetime
+        - Define NumerologyInterpretation class with fields (id, number_type, number_value, category, content, timestamps)
+        - Set table=True for SQLModel table generation
+        - Add comprehensive docstring and type hints</task>
+      <task id="2" ac="2">Create Database Migration
+        - Generate migration: alembic revision -m "add_numerology_interpretation_table"
+        - Create table with all columns in upgrade()
+        - Add index on (number_type, number_value) for performance
+        - Implement downgrade() to drop table
+        - Test migration up and down</task>
+      <task id="3" ac="3">Create Seed Script Structure
+        - Create file backend/src/scripts/seed_numerology.py
+        - Import model, database session, SQLModel select
+        - Create main() async function
+        - Check if data exists, prompt for overwrite
+        - Set up progress tracking</task>
+      <task id="4" ac="4">Seed Life Path Interpretations
+        - Create helper function seed_life_path_interpretations(session)
+        - Define interpretations for Life Path 1-9 (personality, strengths, challenges, career, relationships)
+        - Define interpretations for master numbers: 11, 22, 33
+        - Minimum 50+ Life Path interpretation entries</task>
+      <task id="5" ac="5">Seed Expression Number Interpretations
+        - Create helper function seed_expression_interpretations(session)
+        - Define interpretations for Expression 1-9 (talents, abilities, purpose)
+        - Define interpretations for master numbers: 11, 22, 33
+        - Minimum 40+ Expression interpretation entries</task>
+      <task id="6" ac="6">Seed Other Number Type Interpretations
+        - Create helper functions for soul_urge, birthday, personal_year
+        - Define interpretations for each number type (1-9, 11, 22, 33)
+        - Minimum coverage: 30+ entries per number type</task>
+      <task id="7" ac="7">Testing and Validation
+        - Run seed script: uv run python -m src.scripts.seed_numerology
+        - Verify console output shows progress
+        - Query database: Check total count of interpretations (200+)
+        - Test programmatic access from Python shell
+        - Verify no duplicate entries
+        - Test skip/overwrite logic</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="1">Numerology Interpretation Model
+      - Model created at backend/src/models/numerology_interpretation.py
+      - Inherits from SQLModel base class following project pattern
+      - Fields: id (UUID), number_type (str), number_value (int), category (str), content (str), timestamps
+      - Model properly documented with docstrings
+      - Type hints for all fields</ac>
+    <ac id="2">Database Migration
+      - Alembic migration created: backend/alembic/versions/xxx_add_numerology_interpretation_table.py
+      - Migration creates numerology_interpretation table with all fields
+      - Includes indexes on number_type and number_value for query performance
+      - Migration reversible (includes downgrade)
+      - Run: uv run alembic upgrade head creates table successfully</ac>
+    <ac id="3">Seed Script Structure
+      - Seed script created at backend/src/scripts/seed_numerology.py
+      - Script uses SQLModel session for database operations
+      - Checks if data already exists (prevent duplicate seeding)
+      - Comprehensive interpretations for all number types and values
+      - Can run: uv run python -m src.scripts.seed_numerology
+      - Script provides progress output during seeding</ac>
+    <ac id="4">Life Path Interpretations
+      - Interpretations for Life Path 1-9, 11, 22, 33
+      - Categories covered: personality, strengths, challenges, career, relationships
+      - At least 3-5 interpretation entries per Life Path number
+      - Content is detailed and actionable (not generic)</ac>
+    <ac id="5">Expression Number Interpretations
+      - Interpretations for Expression 1-9, 11, 22, 33
+      - Categories covered: talents, abilities, life purpose
+      - At least 3 interpretation entries per Expression number</ac>
+    <ac id="6">Other Number Types
+      - Soul Urge interpretations (1-9, 11, 22, 33)
+      - Birthday interpretations (1-9, 11, 22, 33)
+      - Personal Year interpretations (1-9, 11, 22, 33)
+      - Minimum coverage for each number type to enable AI guidance</ac>
+    <ac id="7">Database Validation
+      - After seeding: database contains 200+ interpretation entries
+      - Query test: Can retrieve interpretations by number_type and number_value
+      - Data integrity: No duplicate entries for same (number_type, number_value, category)
+      - Can query interpretations programmatically from Python</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 4: Numerology Engine Integration</title>
+        <section>Story 4.2: Numerology Knowledge Base Schema & Seeding</section>
+        <snippet>Database table with comprehensive numerology interpretations for all number types. Stores expert guidance for Life Path, Expression, Soul Urge, Birthday, and Personal Year numbers (1-9, 11, 22, 33). Enables AI to provide detailed, accurate interpretations during voice conversations.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Numerologist AI - Product Requirements Document</title>
+        <section>FR-2: Numerology Calculation Engine</section>
+        <snippet>Knowledge base requirement: System shall store comprehensive interpretations for all numerology numbers across multiple categories (personality, strengths, challenges, career, relationships). Content must be detailed, actionable, and grounded in traditional Pythagorean numerology.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Data Architecture - Database Models</section>
+        <snippet>SQLModel approach for database models. Use UUID for primary keys, index fields used in queries, timestamps with default_factory. Models inherit from SQLModel with table=True. Alembic for migrations.</snippet>
+      </doc>
+      <doc>
+        <path>stories/4-1-numerology-calculation-functions.md</path>
+        <title>Story 4.1: Numerology Calculation Functions</title>
+        <section>Learnings - Service Pattern</section>
+        <snippet>Calculation functions completed at backend/src/services/numerology_service.py with 5 functions (calculate_life_path, calculate_expression_number, calculate_soul_urge_number, calculate_birthday_number, calculate_personal_year). MASTER_NUMBERS constant {11, 22, 33}. All pure functions with comprehensive test suite (38 tests, 100% pass rate).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/models/user.py</path>
+        <kind>model</kind>
+        <symbol>User</symbol>
+        <lines>15-80</lines>
+        <reason>Reference SQLModel pattern: UUID primary key, Field with index=True, timestamps with default_factory, comprehensive docstrings. Follow this structure for NumerologyInterpretation model.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/alembic/versions/7a8b9c0d1e2f_add_conversations_table.py</path>
+        <kind>migration</kind>
+        <symbol>upgrade, downgrade</symbol>
+        <lines>22-48</lines>
+        <reason>Reference Alembic migration pattern: create_table with sa.Column definitions, UUID columns, create_index for query optimization, reversible downgrade. Follow this structure for numerology_interpretation table migration.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/database.py</path>
+        <kind>database</kind>
+        <symbol>get_session</symbol>
+        <lines>all</lines>
+        <reason>Database session management for seed script. Use get_session() async context manager for database operations in seed_numerology.py script.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/services/numerology_service.py</path>
+        <kind>service</kind>
+        <symbol>MASTER_NUMBERS, calculate_*</symbol>
+        <lines>all</lines>
+        <reason>MASTER_NUMBERS constant {11, 22, 33} defines valid number values. Calculation functions available for testing seed data. Import to verify interpretation data covers all calculated number types.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <runtime>Python 3.11+</runtime>
+        <packages>
+          <package name="sqlmodel" version=">=0.0.16">ORM/database models</package>
+          <package name="alembic" version=">=1.13.0">Database migrations</package>
+          <package name="asyncpg" version=">=0.29.0">Async PostgreSQL driver</package>
+        </packages>
+        <stdlib>
+          <package>datetime</package>
+          <package>uuid</package>
+          <package>asyncio</package>
+          <package>typing</package>
+        </stdlib>
+      </python>
+      <database>
+        <system>PostgreSQL 15+</system>
+        <driver>asyncpg</driver>
+        <note>Table: numerology_interpretation with UUID primary key, string/int/text fields, indexes on (number_type, number_value)</note>
+      </database>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>UUID Primary Keys - Consistent with User model pattern</constraint>
+    <constraint>SQLModel Pattern - Inherit from SQLModel with table=True</constraint>
+    <constraint>Timestamps - created_at, updated_at with default_factory=datetime.utcnow</constraint>
+    <constraint>Index Fields - number_type and number_value must be indexed for query performance</constraint>
+    <constraint>Master Numbers - Support values 11, 22, 33 (never reduced)</constraint>
+    <constraint>Number Types - life_path, expression, soul_urge, birthday, personal_year</constraint>
+    <constraint>Categories - personality, strengths, challenges, career, relationships, talents, abilities, purpose, spiritual</constraint>
+    <constraint>Content Quality - 2-4 sentences, specific/actionable, balanced, second person voice, grounded in Pythagorean numerology</constraint>
+    <constraint>Minimum Coverage - 200+ total interpretation entries across all number types</constraint>
+    <constraint>No Duplicates - Unique constraint on (number_type, number_value, category)</constraint>
+    <constraint>Alembic Migration - Reversible with both upgrade() and downgrade()</constraint>
+    <constraint>Seed Script - Check for existing data, prompt for confirmation, provide progress output</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>NumerologyInterpretation</name>
+      <kind>model</kind>
+      <signature>class NumerologyInterpretation(SQLModel, table=True)</signature>
+      <path>backend/src/models/numerology_interpretation.py</path>
+      <description>Database model for numerology interpretation knowledge base. Fields: id (UUID), number_type (str), number_value (int), category (str), content (str), created_at, updated_at. Table name: numerology_interpretation.</description>
+    </interface>
+    <interface>
+      <name>seed_numerology.main</name>
+      <kind>async function</kind>
+      <signature>async def main() -> None</signature>
+      <path>backend/src/scripts/seed_numerology.py</path>
+      <description>Main entry point for seed script. Checks for existing data, prompts for overwrite, seeds all number types with interpretations. Run with: uv run python -m src.scripts.seed_numerology</description>
+    </interface>
+    <interface>
+      <name>seed_life_path_interpretations</name>
+      <kind>async function</kind>
+      <signature>async def seed_life_path_interpretations(session) -> None</signature>
+      <path>backend/src/scripts/seed_numerology.py</path>
+      <description>Helper function to seed Life Path interpretations (1-9, 11, 22, 33) across categories: personality, strengths, challenges, career, relationships.</description>
+    </interface>
+    <interface>
+      <name>seed_expression_interpretations</name>
+      <kind>async function</kind>
+      <signature>async def seed_expression_interpretations(session) -> None</signature>
+      <path>backend/src/scripts/seed_numerology.py</path>
+      <description>Helper function to seed Expression interpretations (1-9, 11, 22, 33) across categories: talents, abilities, purpose.</description>
+    </interface>
+    <interface>
+      <name>migration upgrade</name>
+      <kind>function</kind>
+      <signature>def upgrade() -> None</signature>
+      <path>backend/alembic/versions/xxx_add_numerology_interpretation_table.py</path>
+      <description>Alembic migration upgrade: Create numerology_interpretation table with all columns and indexes.</description>
+    </interface>
+    <interface>
+      <name>migration downgrade</name>
+      <kind>function</kind>
+      <signature>def downgrade() -> None</signature>
+      <path>backend/alembic/versions/xxx_add_numerology_interpretation_table.py</path>
+      <description>Alembic migration downgrade: Drop numerology_interpretation table and indexes.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Testing approach: Manual validation via seed script execution and database queries. No unit tests required for data seeding. Validation steps: 1) Run seed script and verify console output, 2) Query database to check record count (200+), 3) Test retrieval by number_type and number_value, 4) Verify no duplicates, 5) Test programmatic access from Python shell, 6) Test skip/overwrite logic on re-run.</standards>
+    <locations>Validation via: uv run python -m src.scripts.seed_numerology (seed script execution), psql or Python shell (database queries), backend/src/scripts/seed_numerology.py (script itself for debugging)</locations>
+    <ideas>
+      <test ac="1,2">After migration: Verify table exists with correct schema using psql \d numerology_interpretation or Python inspect. Check columns, types, primary key, indexes.</test>
+      <test ac="3">Run seed script first time: Should complete successfully with progress output. Check console shows "Seeding Life Path interpretations...", "Seeding Expression interpretations...", etc.</test>
+      <test ac="4,5,6">After seeding: Query count by number_type: SELECT number_type, COUNT(*) FROM numerology_interpretation GROUP BY number_type. Verify Life Path 50+, Expression 40+, others 30+ each.</test>
+      <test ac="7">Query specific interpretation: SELECT * FROM numerology_interpretation WHERE number_type='life_path' AND number_value=1. Verify returns multiple entries across different categories.</test>
+      <test ac="7">Test for duplicates: SELECT number_type, number_value, category, COUNT(*) FROM numerology_interpretation GROUP BY number_type, number_value, category HAVING COUNT(*) > 1. Should return empty result set.</test>
+      <test ac="3">Run seed script second time: Should prompt "Found X existing interpretations. Clear and reseed? (yes/no):". Test both yes (clears and reseeds) and no (skips) paths.</test>
+      <test ac="7">Python shell access: from src.models.numerology_interpretation import NumerologyInterpretation; from sqlmodel import select; # query interpretations programmatically</test>
+    </ideas>
+  </tests>
+</story-context>
