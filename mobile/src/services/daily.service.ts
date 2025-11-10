@@ -117,6 +117,8 @@ export async function initializeCall(): Promise<DailyCallObject> {
         },
       },
     });
+    console.log('DailyIframe:', DailyIframe);
+    console.log('Daily call object:', call);
 
     if (!call) {
       throw new Error('Failed to create Daily call object');
