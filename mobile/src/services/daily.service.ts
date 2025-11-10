@@ -42,8 +42,11 @@ export interface DailyCallObject {
   off: (event: string, callback: (...args: any[]) => void) => void;
   getParticipants: () => Record<string, any>;
   getParticipantCount: () => number;
-  setAudioInputEnabled: (enabled: boolean) => Promise<void>;
-  setAudioOutputEnabled: (enabled: boolean) => Promise<void>;
+  // Audio control methods - same in both web (daily-js) and React Native (react-native-daily-js)
+  setLocalAudio: (enabled: boolean) => DailyCallObject; // Returns 'this' for chaining
+  setLocalVideo: (enabled: boolean) => DailyCallObject; // Returns 'this' for chaining
+  localAudio: () => boolean | null; // Returns current audio state or null if not in call
+  localVideo: () => boolean | null; // Returns current video state or null if not in call
 }
 
 export interface RoomCredentials {
@@ -153,14 +156,19 @@ export async function configureAudio(
       echoCancellation = true,
     } = config;
 
-    // Set audio input (microphone)
+    // Set audio input (microphone) using Daily.co SDK method
+    // Note: Daily.co SDKs use setLocalAudio() not setAudioInputEnabled()
+    // This method is the same across both web (daily-js) and React Native (react-native-daily-js)
     if (audioInputEnabled !== undefined) {
-      await call.setAudioInputEnabled(audioInputEnabled);
+      call.setLocalAudio(audioInputEnabled);
     }
 
-    // Set audio output (speaker)
-    if (audioOutputEnabled !== undefined) {
-      await call.setAudioOutputEnabled(audioOutputEnabled);
+    // Note: Daily.co doesn't have a separate setAudioOutputEnabled() method.
+    // Audio output (speaker) is controlled by the system/platform level.
+    // In React Native, the native layer handles speaker routing via setNativeInCallAudioMode()
+    // For web, speaker output is handled by browser audio output configuration.
+    if (audioOutputEnabled !== undefined && __DEV__) {
+      console.log('[Daily] Audio output is system-managed, not directly controllable via SDK');
     }
 
     // Platform-specific audio routing
@@ -175,12 +183,17 @@ export async function configureAudio(
       if (__DEV__) {
         console.log('[Daily] Audio configured for iOS (speaker)');
       }
+    } else if (Platform.OS === 'web') {
+      // Web: Browser handles speaker configuration via system audio settings
+      if (__DEV__) {
+        console.log('[Daily] Audio configured for Web (browser-managed)');
+      }
     }
 
     if (__DEV__) {
       console.log('[Daily] Audio configured:', {
         audioInputEnabled,
-        audioOutputEnabled,
+        audioOutputEnabled: 'system-managed',
         noiseSuppression,
         echoCancellation,
       });
