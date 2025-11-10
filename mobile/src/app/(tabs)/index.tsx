@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -56,11 +56,11 @@ export default function ConversationScreen() {
   // Animation values for pulsing microphone when connected
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  // Track if currently processing permission/start to prevent rapid taps
-  const isProcessingRef = useRef(false);
+  // Track if currently processing permission/start to prevent rapid taps (using state for UI updates)
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Debounce timeout ref
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Debounce timeout ref (use ReturnType<typeof setTimeout> for cross-platform compatibility)
+  const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Start pulsing animation when connected
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function ConversationScreen() {
    */
   const handlePress = useCallback(async () => {
     // Prevent rapid taps
-    if (isProcessingRef.current) {
+    if (isProcessing) {
       return;
     }
 
@@ -103,7 +103,7 @@ export default function ConversationScreen() {
 
     // If connected, end the conversation
     if (isConnected) {
-      isProcessingRef.current = true;
+      setIsProcessing(true);
       try {
         await endConversation();
       } catch (err) {
@@ -112,13 +112,13 @@ export default function ConversationScreen() {
           'Failed to end conversation. Please try again.'
         );
       } finally {
-        isProcessingRef.current = false;
+        setIsProcessing(false);
       }
       return;
     }
 
     // If not connected, start conversation with permission check
-    isProcessingRef.current = true;
+    setIsProcessing(true);
 
     try {
       // Step 1: Check if permission already granted
@@ -145,6 +145,7 @@ export default function ConversationScreen() {
             },
           ]
         );
+        setIsProcessing(false);
         return;
       }
 
@@ -159,10 +160,10 @@ export default function ConversationScreen() {
     } finally {
       // Use debounce to prevent rapid re-taps
       debounceTimeoutRef.current = setTimeout(() => {
-        isProcessingRef.current = false;
+        setIsProcessing(false);
       }, 500);
     }
-  }, [isConnected, startConversation, endConversation]);
+  }, [isConnected, startConversation, endConversation, isProcessing]);
 
   /**
    * Generate status message based on connection state
@@ -266,7 +267,7 @@ export default function ConversationScreen() {
       <TouchableOpacity
         style={getButtonStyle()}
         onPress={handlePress}
-        disabled={isProcessingRef.current}
+        disabled={isProcessing}
         activeOpacity={0.85}
         accessibilityRole="button"
         accessibilityLabel={isConnected ? 'End conversation' : 'Start conversation'}

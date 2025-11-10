@@ -1,0 +1,433 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>9</storyId>
+    <title>End Conversation & Cleanup</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-9-end-conversation-cleanup.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to end conversations cleanly</iWant>
+    <soThat>resources are released and conversation is saved</soThat>
+    <tasks>
+### Task 1: Backend Endpoint Implementation (AC: #1, #2)
+- **1.1** Add `end_conversation()` endpoint to `backend/src/api/v1/endpoints/conversations.py`
+- **1.2** Implement endpoint logic (query, validate, update ended_at, duration_seconds, commit)
+- **1.3** Integrate Daily.co room cleanup via daily_service.delete_room()
+- **1.4** Add error handling (HTTPException for 404, 400, 403)
+
+### Task 2: Daily.co Service Verification (AC: #2)
+- **2.1** Check if `delete_room()` exists in `backend/src/services/daily_service.py`
+- **2.2** If missing, implement delete_room() function
+- **2.3** Add unit tests for delete_room()
+
+### Task 3: Frontend Store Update (AC: #3)
+- **3.1** Add endConversation() action to useConversationStore
+- **3.2** Add error handling (catch exceptions, set error state)
+- **3.3** Verify teardownCall() integration from Story 3.8
+
+### Task 4: Error Handling & Edge Cases (AC: #4)
+- **4.1** Backend error responses (HTTPException handlers)
+- **4.2** Frontend error display (map errors to user messages)
+- **4.3** Graceful degradation (continue cleanup if services fail)
+
+### Task 5: Multiple Cycle Testing (AC: #5)
+- **5.1** Create test script for multiple cycles
+- **5.2** Manual testing on web (3+ cycles)
+- **5.3** Memory leak checks
+
+### Task 6: Integration & E2E Testing (AC: #6)
+- **6.1** Backend integration test (start → end lifecycle)
+- **6.2** Frontend integration test (optional)
+- **6.3** Manual E2E test
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+### AC1: Backend End Conversation Endpoint
+- Implement `POST /api/v1/conversations/{conversation_id}/end` endpoint
+- Endpoint requires authentication (get_current_user dependency)
+- Update conversation record (ended_at, duration_seconds)
+- Call daily_service.delete_room() for cleanup
+- Return success response with conversation details
+
+### AC2: Daily.co Room Deletion
+- Verify daily_service.delete_room() function exists
+- If missing, implement DELETE request to Daily.co REST API
+- Handle 404 gracefully (room may already be deleted/expired)
+- Log success/failure, don't fail endpoint if Daily deletion fails
+
+### AC3: Frontend Store Integration
+- Update useConversationStore with endConversation() action
+- Call dailyService.teardownCall() to cleanup Daily call object
+- Call backend API to end conversation
+- Reset all conversation-related state after cleanup
+- Handle errors gracefully (best-effort cleanup)
+
+### AC4: Error Handling
+- Backend: Handle 404 (not found), 400 (already ended), 403 (unauthorized)
+- Frontend: Display user-friendly error messages, cleanup even if backend fails
+- Graceful degradation for both backend and frontend
+
+### AC5: Multiple Start/End Cycles
+- Test 3+ consecutive start → end cycles
+- Verify separate database records and Daily rooms created
+- Verify proper cleanup and state reset between cycles
+- Check for memory leaks or lingering connections
+
+### AC6: Integration Testing
+- Backend integration test (full start → end lifecycle)
+- Frontend integration test (store actions, state transitions)
+- Manual E2E test with verification of database and Daily room cleanup
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 3: Voice Infrastructure & Basic Conversation</title>
+        <section>Story 3.9: End Conversation & Cleanup</section>
+        <snippet>Endpoint POST /api/v1/conversations/{id}/end updates conversation record (ended_at, duration_seconds), stops Pipecat bot, deletes Daily.co room. Frontend cleans up Daily call object.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-4-conversation-model-start-endpoint.md</path>
+        <title>Story 3.4: Conversation Model & Start Endpoint</title>
+        <section>Conversation Model and Database Schema</section>
+        <snippet>Conversation model has id, user_id, daily_room_id, started_at, ended_at, duration_seconds fields. Calculate_duration() helper method computes duration from timestamps.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-8-daily-co-react-native-integration.md</path>
+        <title>Story 3.8: Daily.co React Native Integration</title>
+        <section>Daily Call Lifecycle Management</section>
+        <snippet>teardownCall() function leaves Daily room and destroys call object. Event-driven store updates with graceful error handling.</snippet>
+      </doc>
+      <doc>
+        <path>docs/.bmad/audio-playback-complete-fix.md</path>
+        <title>Audio Playback Complete Fix</title>
+        <section>Daily Call Lifecycle Management</section>
+        <snippet>Proper cleanup pattern: leave room, destroy call object, cleanup audio elements. Best-effort error handling for external service failures.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Documentation</title>
+        <section>API Contracts & Error Handling</section>
+        <snippet>API endpoints follow pattern: authentication via get_current_user, validate ownership, handle errors with HTTPException. Graceful degradation for external service failures.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>API endpoint</kind>
+        <symbol>start_conversation</symbol>
+        <lines>25-122</lines>
+        <reason>Existing /start endpoint shows pattern for authentication, database operations, and error handling. /end endpoint will follow similar pattern.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/services/daily_service.py</path>
+        <kind>Service</kind>
+        <symbol>delete_room</symbol>
+        <lines>154-203</lines>
+        <reason>ALREADY IMPLEMENTED: delete_room() function handles Daily.co room deletion with 404 graceful handling. Returns bool indicating success.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/models/conversation.py</path>
+        <kind>Model</kind>
+        <symbol>Conversation</symbol>
+        <lines>15-118</lines>
+        <reason>Conversation model has ended_at, duration_seconds fields and calculate_duration() helper method for computing duration from timestamps.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/stores/useConversationStore.ts</path>
+        <kind>State Management</kind>
+        <symbol>endConversation</symbol>
+        <lines>242-301</lines>
+        <reason>ALREADY IMPLEMENTED: endConversation() action calls teardownCall(), notifies backend API, and resets state. Has graceful error handling.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/daily.service.ts</path>
+        <kind>Service</kind>
+        <symbol>teardownCall</symbol>
+        <lines>473-503</lines>
+        <reason>ALREADY IMPLEMENTED: teardownCall() function leaves Daily room and destroys call object. Best-effort error handling.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/deps.py</path>
+        <kind>Dependencies</kind>
+        <symbol>get_current_user, get_session</symbol>
+        <reason>Required dependencies for endpoint authentication and database access.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <backend>
+        <package>fastapi</package>
+        <version>0.115.5</version>
+        <usage>Router, Depends, HTTPException, status codes</usage>
+      </backend>
+      <backend>
+        <package>sqlmodel</package>
+        <version>0.0.22</version>
+        <usage>Session for database operations</usage>
+      </backend>
+      <backend>
+        <package>httpx</package>
+        <version>latest</version>
+        <usage>Async HTTP client for Daily.co API calls (already used in daily_service)</usage>
+      </backend>
+      <frontend>
+        <package>zustand</package>
+        <version>latest</version>
+        <usage>State management store (already has endConversation implemented)</usage>
+      </frontend>
+      <frontend>
+        <package>@daily-co/daily-js</package>
+        <version>latest</version>
+        <usage>Daily.co WebRTC SDK (already has teardownCall implemented)</usage>
+      </frontend>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+### Development Constraints
+
+**Backend Constraints:**
+- Endpoint must require authentication via get_current_user dependency
+- Must validate conversation ownership (conversation.user_id == current_user.id)
+- Must handle edge cases: conversation not found (404), already ended (400), unauthorized (403)
+- Must NOT fail if Daily.co room deletion fails (rooms auto-expire, best-effort cleanup)
+- Must use existing Conversation.calculate_duration() method for duration calculation
+- Must commit database changes before calling external services
+- Must log all errors for monitoring/debugging
+
+**Frontend Constraints:**
+- endConversation() ALREADY IMPLEMENTED in useConversationStore (lines 242-301)
+- teardownCall() ALREADY IMPLEMENTED in daily.service.ts (lines 473-503)
+- Must call teardownCall() BEFORE backend API call (cleanup local resources first)
+- Must reset ALL conversation state after cleanup
+- Must handle errors gracefully (best-effort cleanup, don't block user)
+- Must not re-throw errors (cleanup should be forgiving)
+
+**Architecture Constraints:**
+- Follow existing API endpoint pattern from /start endpoint
+- Use Conversation.calculate_duration() helper method (don't duplicate logic)
+- Use existing daily_service.delete_room() function (already implemented)
+- Follow error handling pattern: catch exceptions, log, continue cleanup
+- Graceful degradation: continue even if external services fail
+
+**Testing Constraints:**
+- Backend tests must mock Daily.co API responses
+- Backend tests must verify database state updates
+- Backend tests must cover all error cases (404, 400, 403, Daily API failure)
+- Integration tests must verify full start → end lifecycle
+- Must test multiple consecutive cycles (3+) for memory leaks
+  </constraints>
+
+  <interfaces>
+### Backend API Interface
+
+**Endpoint: POST /api/v1/conversations/{conversation_id}/end**
+```python
+@router.post("/{conversation_id}/end", status_code=status.HTTP_200_OK)
+async def end_conversation(
+    conversation_id: UUID,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+) -> dict:
+    """
+    End a conversation and cleanup resources.
+
+    Returns:
+        {
+            "message": "Conversation ended successfully",
+            "conversation": {
+                "id": "uuid",
+                "started_at": "2025-11-10T14:00:00Z",
+                "ended_at": "2025-11-10T14:15:00Z",
+                "duration_seconds": 900
+            }
+        }
+
+    Raises:
+        HTTPException 404: Conversation not found
+        HTTPException 400: Conversation already ended
+        HTTPException 403: Not authorized
+    """
+```
+
+**Daily Service Interface (ALREADY EXISTS)**
+```python
+async def delete_room(room_name: str) -> bool:
+    """
+    Delete a Daily.co room. Returns True if deleted, False if not found or failed.
+    Handles 404 gracefully (room may already be deleted/expired).
+    """
+```
+
+**Conversation Model Interface (ALREADY EXISTS)**
+```python
+class Conversation:
+    id: UUID
+    user_id: UUID
+    daily_room_id: Optional[str]
+    started_at: datetime
+    ended_at: Optional[datetime]
+    duration_seconds: Optional[int]
+
+    def calculate_duration(self) -> None:
+        """Calculate and set duration_seconds from ended_at - started_at"""
+```
+
+### Frontend Interface (ALREADY IMPLEMENTED)
+
+**Store Action: endConversation() - IMPLEMENTED**
+```typescript
+endConversation: async () => {
+    // 1. Cleanup Daily.co call using teardownCall()
+    // 2. Call backend API: POST /api/v1/conversations/{id}/end
+    // 3. Reset all conversation state
+    // 4. Handle errors gracefully (best-effort)
+}
+```
+
+**Daily Service: teardownCall() - IMPLEMENTED**
+```typescript
+export async function teardownCall(
+    call: DailyCallObject,
+    cleanupListeners?: () => void
+): Promise<void>
+```
+  </interfaces>
+  <tests>
+    <standards>
+**Backend Testing Standards:**
+- Use pytest as testing framework
+- Mock external services (Daily.co API) using pytest fixtures
+- Test database operations with test database session
+- Follow arrange-act-assert pattern
+- Use httpx.AsyncClient for API endpoint testing
+- Mock authentication with test user fixtures
+
+**Frontend Testing Standards:**
+- Use Jest/React Native Testing Library for unit tests
+- Mock API calls using jest.mock()
+- Mock Daily.co SDK call objects
+- Test state management with store actions
+- Verify state transitions and cleanup
+- Use async/await for async actions
+
+**Integration Testing:**
+- Test full conversation lifecycle (start → end)
+- Verify database state changes
+- Test error handling paths
+- Verify external service integrations (mocked)
+    </standards>
+    <locations>
+**Backend Test Locations:**
+- backend/tests/api/test_conversations.py - API endpoint tests
+- backend/tests/services/test_daily_service.py - Service tests (if needed)
+
+**Frontend Test Locations:**
+- mobile/src/stores/__tests__/useConversationStore.test.ts - Store tests
+- mobile/src/services/__tests__/daily.service.test.ts - Service tests
+
+**Integration Test Locations:**
+- backend/tests/integration/test_conversation_lifecycle.py - Full lifecycle tests
+    </locations>
+    <ideas>
+### Backend Test Ideas
+
+**Test 1: Successful Conversation End (AC1, AC2)**
+- Arrange: Create conversation via /start, authenticate user
+- Act: Call POST /conversations/{id}/end
+- Assert:
+  - Response 200 with conversation details
+  - ended_at is set in database
+  - duration_seconds calculated correctly
+  - Daily.co delete_room called (mocked)
+
+**Test 2: Conversation Not Found (AC4)**
+- Arrange: Use non-existent conversation ID
+- Act: Call POST /conversations/{id}/end
+- Assert: Response 404 with "Conversation not found" message
+
+**Test 3: Already Ended (AC4)**
+- Arrange: Create and end a conversation
+- Act: Call POST /conversations/{id}/end again
+- Assert: Response 400 with "Conversation already ended" message
+
+**Test 4: Unauthorized Access (AC4)**
+- Arrange: Create conversation for user A
+- Act: Call POST /conversations/{id}/end as user B
+- Assert: Response 403 with "Not authorized" message
+
+**Test 5: Daily.co Deletion Failure (AC2, AC4)**
+- Arrange: Mock delete_room to raise exception
+- Act: Call POST /conversations/{id}/end
+- Assert:
+  - Response 200 (endpoint continues)
+  - ended_at still updated in database
+  - Error logged but not propagated
+
+**Test 6: Multiple Start/End Cycles (AC5)**
+- Arrange: None
+- Act: Start conversation → end → start → end (3 cycles)
+- Assert:
+  - 3 separate conversation records in database
+  - Each has valid ended_at and duration_seconds
+  - No database constraint violations
+
+### Frontend Test Ideas
+
+**Test 7: endConversation Success (AC3)**
+- Arrange: Mock teardownCall, mock API client
+- Act: Call store.endConversation()
+- Assert:
+  - teardownCall called with call object
+  - API POST called with correct conversationId
+  - All state fields reset to initial values
+  - No error in state
+
+**Test 8: endConversation with teardownCall Failure (AC4)**
+- Arrange: Mock teardownCall to throw error
+- Act: Call store.endConversation()
+- Assert:
+  - Error logged but not thrown
+  - Backend API still called
+  - State still reset
+  - Best-effort cleanup completed
+
+**Test 9: endConversation with API Failure (AC4)**
+- Arrange: Mock API to throw error
+- Act: Call store.endConversation()
+- Assert:
+  - teardownCall still executed
+  - State still reset
+  - Error logged but not thrown
+  - User not blocked
+
+### Integration Test Ideas
+
+**Test 10: Full Lifecycle (AC6)**
+- Arrange: Authenticated user
+- Act:
+  1. POST /conversations/start
+  2. Verify conversation created
+  3. POST /conversations/{id}/end
+- Assert:
+  - Conversation record has valid ended_at
+  - duration_seconds calculated correctly
+  - Daily room deleted (check mock calls)
+  - No orphaned resources
+
+**Test 11: Memory Leak Check (AC5)**
+- Manual test using browser DevTools
+- Start conversation → end → repeat 5 times
+- Check for growing memory usage
+- Verify no retained Daily connections
+- Verify audio elements cleaned up
+    </ideas>
+  </tests>
+</story-context>

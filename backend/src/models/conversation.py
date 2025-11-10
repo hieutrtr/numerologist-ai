@@ -105,6 +105,9 @@ class Conversation(SQLModel, table=True):
         Should be called after setting ended_at to compute the total conversation duration.
         If ended_at is not set or is before started_at, duration remains unchanged.
 
+        Handles both timezone-aware and timezone-naive datetimes by ensuring both
+        are converted to UTC before calculation.
+
         Example:
         ```python
         conversation.ended_at = datetime.now(timezone.utc)
@@ -113,5 +116,18 @@ class Conversation(SQLModel, table=True):
         ```
         """
         if self.ended_at and self.started_at:
-            delta = self.ended_at - self.started_at
+            # Ensure both datetimes are timezone-aware (convert to UTC if needed)
+            started = self.started_at
+            ended = self.ended_at
+
+            # If started_at is naive, assume it's UTC
+            if started.tzinfo is None:
+                started = started.replace(tzinfo=timezone.utc)
+
+            # If ended_at is naive, assume it's UTC
+            if ended.tzinfo is None:
+                ended = ended.replace(tzinfo=timezone.utc)
+
+            # Now we can safely subtract
+            delta = ended - started
             self.duration_seconds = int(delta.total_seconds())
