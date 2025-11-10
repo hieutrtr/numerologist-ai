@@ -19,6 +19,18 @@
 import { Platform } from 'react-native';
 
 /**
+ * Platform detection helper
+ * Determines if we're in a native environment or web
+ */
+const isNativeEnvironment = (): boolean => {
+  try {
+    return Platform.OS !== 'web';
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Type definitions for Daily.co integration
  */
 
@@ -78,9 +90,18 @@ export interface DailyServiceCallbacks {
  */
 export async function initializeCall(): Promise<DailyCallObject> {
   try {
-    // Import Daily SDK dynamically to handle both web and native
-    const DailyIframe = require('@daily-co/react-native-daily-js').default ||
-                       require('@daily-co/react-native-daily-js');
+    let DailyIframe;
+
+    // Use appropriate SDK based on platform
+    if (isNativeEnvironment()) {
+      // React Native: Use react-native-daily-js
+      DailyIframe = require('@daily-co/react-native-daily-js').default ||
+                    require('@daily-co/react-native-daily-js');
+    } else {
+      // Web/Expo Web: Use daily-js (web SDK)
+      DailyIframe = require('@daily-co/daily-js').default ||
+                    require('@daily-co/daily-js');
+    }
 
     const call = await DailyIframe.createCallObject({
       videoSource: false, // No video for voice-first app
@@ -98,7 +119,7 @@ export async function initializeCall(): Promise<DailyCallObject> {
     }
 
     if (__DEV__) {
-      console.log('[Daily] Call object initialized');
+      console.log('[Daily] Call object initialized on', isNativeEnvironment() ? 'native' : 'web');
     }
 
     return call;
