@@ -358,3 +358,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
 // Export type for component usage
 export type { ConversationState };
+
+// Expose store to window for debugging (only in development)
+if (typeof window !== 'undefined' && __DEV__) {
+  (window as any).conversationStore = useConversationStore;
+  console.log('🔧 Debug: conversationStore exposed to window. Use conversationStore.getState().debugAudio()');
+}

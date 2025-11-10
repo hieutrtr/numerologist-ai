@@ -367,6 +367,12 @@ export function setupCallListeners(
               blocked: participant.videoBlock === true,
             },
           });
+
+          // CRITICAL: Create audio element for remote participant (web only)
+          if (!participant.local && participant.audioTrack && Platform.OS === 'web') {
+            const participantId = participant.session_id || participant.id;
+            manageAudioElement(participantId, participant.audioTrack, 'create');
+          }
         }
       };
       call.on('participant-joined', handler);
@@ -381,11 +387,47 @@ export function setupCallListeners(
         }
         if (participantId) {
           callbacks.onParticipantLeft?.(participantId);
+
+          // Clean up audio element for web
+          if (Platform.OS === 'web') {
+            manageAudioElement(participantId, null, 'remove');
+          }
         }
       };
       call.on('participant-left', handler);
       listeners.push({ event: 'participant-left', handler });
     }
+
+    // CRITICAL: Handle participant-updated for audio track changes
+    const participantUpdatedHandler = (event: any) => {
+      const participant = event.participant;
+      if (!participant || participant.local) {
+        return; // Skip local participant
+      }
+
+      const participantId = participant.session_id || participant.id;
+
+      if (__DEV__) {
+        console.log('[Daily] Participant updated:', {
+          id: participantId,
+          audio: participant.audio,
+          hasAudioTrack: !!participant.audioTrack,
+        });
+      }
+
+      // Handle audio track changes for web
+      if (Platform.OS === 'web') {
+        if (participant.audioTrack && participant.audio) {
+          // Audio track available and unmuted
+          manageAudioElement(participantId, participant.audioTrack, 'create');
+        } else {
+          // Audio track removed or muted
+          manageAudioElement(participantId, null, 'remove');
+        }
+      }
+    };
+    call.on('participant-updated', participantUpdatedHandler);
+    listeners.push({ event: 'participant-updated', handler: participantUpdatedHandler });
 
     // Network quality
     if (callbacks.onNetworkQuality) {
@@ -413,6 +455,14 @@ export function setupCallListeners(
       // Track started events indicate remote audio is available
       if (event.track?.kind === 'audio' && !event.participant?.local) {
         console.log('[Daily] Remote audio track started - you should now hear the bot');
+
+        // CRITICAL: Create audio element when track starts (web only)
+        if (Platform.OS === 'web' && event.track) {
+          const participantId = event.participant?.session_id || event.participant?.id;
+          if (participantId) {
+            manageAudioElement(participantId, event.track, 'create');
+          }
+        }
       }
     };
     call.on('track-started', trackStartedHandler);
@@ -566,6 +616,79 @@ export function isConnected(call: DailyCallObject): boolean {
 }
 
 /**
+ * Manage audio elements for web playback
+ *
+ * CRITICAL: Daily.co doesn't automatically create audio elements for remote participants.
+ * We must manually create HTML audio elements and attach the MediaStreamTrack.
+ *
+ * @param participantId - Unique identifier for the participant
+ * @param audioTrack - MediaStreamTrack for audio
+ * @param action - 'create' to add audio, 'remove' to cleanup
+ */
+export function manageAudioElement(
+  participantId: string,
+  audioTrack?: MediaStreamTrack | null,
+  action: 'create' | 'remove' = 'create'
+): void {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return; // Not in browser environment
+  }
+
+  const audioElementId = `daily-audio-${participantId}`;
+  const existingElement = document.getElementById(audioElementId) as HTMLAudioElement;
+
+  if (action === 'remove' || !audioTrack) {
+    // Remove existing audio element
+    if (existingElement) {
+      existingElement.pause();
+      existingElement.srcObject = null;
+      existingElement.remove();
+      if (__DEV__) {
+        console.log(`[Daily] Removed audio element for participant ${participantId}`);
+      }
+    }
+    return;
+  }
+
+  // Create or update audio element
+  let audioElement = existingElement;
+
+  if (!audioElement) {
+    // Create new audio element
+    audioElement = document.createElement('audio');
+    audioElement.id = audioElementId;
+    audioElement.autoplay = true; // Important for WebRTC
+    audioElement.playsInline = true; // For mobile browsers
+
+    // Hide the element (audio only, no visual)
+    audioElement.style.display = 'none';
+
+    // Append to document body
+    document.body.appendChild(audioElement);
+
+    if (__DEV__) {
+      console.log(`[Daily] Created audio element for participant ${participantId}`);
+    }
+  }
+
+  // Create MediaStream from the audio track
+  const stream = new MediaStream([audioTrack]);
+  audioElement.srcObject = stream;
+
+  // Attempt to play
+  audioElement.play().then(() => {
+    console.log(`✅ [Daily] Audio playing for participant ${participantId}`);
+  }).catch((error) => {
+    console.error(`❌ [Daily] Failed to play audio for ${participantId}:`, error);
+
+    // Common autoplay policy issue - might need user interaction
+    if (error.name === 'NotAllowedError') {
+      console.warn('[Daily] Browser autoplay policy blocked audio. User interaction required.');
+    }
+  });
+}
+
+/**
  * Debug audio state for all participants
  *
  * Helps diagnose audio playback issues by logging detailed audio state
@@ -621,4 +744,5 @@ export default {
   getParticipants,
   isConnected,
   debugAudioState,
+  manageAudioElement,
 };
