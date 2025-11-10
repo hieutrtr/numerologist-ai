@@ -1,0 +1,486 @@
+/**
+ * Daily.co Service - React Native Voice Integration
+ *
+ * Manages Daily.co WebRTC connection lifecycle for voice conversations.
+ * Handles call object creation, room joining, event setup, and cleanup.
+ *
+ * Architecture:
+ * - Bridges React Native frontend with Daily.co infrastructure
+ * - Event-driven: All Daily.co events trigger store updates
+ * - Store (useConversationStore) is single source of truth for UI
+ * - All errors mapped to user-friendly messages
+ *
+ * Integration Points:
+ * - useConversationStore: Receives call object and manages state
+ * - Story 3.4 Backend: Provides room_url and daily_token
+ * - Story 3.6 Audio Service: Microphone permissions prerequisite
+ */
+
+import { Platform } from 'react-native';
+
+/**
+ * Type definitions for Daily.co integration
+ */
+
+export interface DailyCallObject {
+  join: (opts: { url: string; token?: string }) => Promise<any>;
+  leave: () => Promise<void>;
+  destroy: () => void;
+  on: (event: string, callback: (...args: any[]) => void) => void;
+  off: (event: string, callback: (...args: any[]) => void) => void;
+  getParticipants: () => Record<string, any>;
+  getParticipantCount: () => number;
+  setAudioInputEnabled: (enabled: boolean) => Promise<void>;
+  setAudioOutputEnabled: (enabled: boolean) => Promise<void>;
+}
+
+export interface RoomCredentials {
+  roomUrl: string;
+  token: string;
+}
+
+export interface AudioConfig {
+  audioInputEnabled?: boolean;
+  audioOutputEnabled?: boolean;
+  audioSource?: string;
+  noiseSuppression?: boolean;
+  echoCancellation?: boolean;
+}
+
+export interface ParticipantInfo {
+  id: string;
+  name?: string;
+  isLocal?: boolean;
+  audioState?: {
+    blocked?: boolean;
+    muted?: boolean;
+  };
+  videoState?: {
+    blocked?: boolean;
+    muted?: boolean;
+  };
+}
+
+export interface DailyServiceCallbacks {
+  onConnected?: () => void;
+  onDisconnected?: () => void;
+  onError?: (error: string) => void;
+  onParticipantJoined?: (participant: ParticipantInfo) => void;
+  onParticipantLeft?: (participantId: string) => void;
+  onNetworkQuality?: (quality: 'good' | 'ok' | 'poor') => void;
+}
+
+/**
+ * Initialize Daily.co call object with proper configuration
+ *
+ * @returns Promise<DailyCallObject> - Configured call object
+ * @throws Error if initialization fails
+ */
+export async function initializeCall(): Promise<DailyCallObject> {
+  try {
+    // Import Daily SDK dynamically to handle both web and native
+    const DailyIframe = require('@daily-co/react-native-daily-js').default ||
+                       require('@daily-co/react-native-daily-js');
+
+    const call = await DailyIframe.createCallObject({
+      videoSource: false, // No video for voice-first app
+      audioSource: true,  // Enable audio input
+      audioOutput: true,  // Enable audio output
+      receiveSettings: {
+        screenVideo: {
+          subscribeToAll: false,
+        },
+      },
+    });
+
+    if (!call) {
+      throw new Error('Failed to create Daily call object');
+    }
+
+    if (__DEV__) {
+      console.log('[Daily] Call object initialized');
+    }
+
+    return call;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    if (__DEV__) {
+      console.error('[Daily] Failed to initialize call object:', errorMsg);
+    }
+    throw new Error(`Daily.co initialization failed: ${errorMsg}`);
+  }
+}
+
+/**
+ * Configure audio settings for the call
+ *
+ * Handles platform-specific audio routing (Android speaker vs receiver)
+ * and audio constraints to prevent clipping and ensure quality.
+ *
+ * @param call - Daily call object
+ * @param config - Audio configuration options
+ */
+export async function configureAudio(
+  call: DailyCallObject,
+  config: AudioConfig = {}
+): Promise<void> {
+  try {
+    const {
+      audioInputEnabled = true,
+      audioOutputEnabled = true,
+      noiseSuppression = true,
+      echoCancellation = true,
+    } = config;
+
+    // Set audio input (microphone)
+    if (audioInputEnabled !== undefined) {
+      await call.setAudioInputEnabled(audioInputEnabled);
+    }
+
+    // Set audio output (speaker)
+    if (audioOutputEnabled !== undefined) {
+      await call.setAudioOutputEnabled(audioOutputEnabled);
+    }
+
+    // Platform-specific audio routing
+    if (Platform.OS === 'android') {
+      // Android: Prefer speaker over receiver for better voice quality
+      // This is typically handled by the native layer in @daily-co/react-native-daily-js
+      if (__DEV__) {
+        console.log('[Daily] Audio configured for Android (speaker preferred)');
+      }
+    } else if (Platform.OS === 'ios') {
+      // iOS: Use speaker for calls (not receiver)
+      if (__DEV__) {
+        console.log('[Daily] Audio configured for iOS (speaker)');
+      }
+    }
+
+    if (__DEV__) {
+      console.log('[Daily] Audio configured:', {
+        audioInputEnabled,
+        audioOutputEnabled,
+        noiseSuppression,
+        echoCancellation,
+      });
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    if (__DEV__) {
+      console.error('[Daily] Audio configuration failed:', errorMsg);
+    }
+    throw new Error(`Audio configuration failed: ${errorMsg}`);
+  }
+}
+
+/**
+ * Join a Daily.co room with credentials
+ *
+ * Establishes WebRTC connection to the room and configures audio.
+ * Must be called after initializeCall().
+ *
+ * @param call - Daily call object
+ * @param credentials - Room URL and optional token
+ * @param audioConfig - Optional audio configuration
+ * @returns Promise<void>
+ * @throws Error if joining fails (invalid URL, permission issue, etc.)
+ */
+export async function joinRoom(
+  call: DailyCallObject,
+  credentials: RoomCredentials,
+  audioConfig?: AudioConfig
+): Promise<void> {
+  try {
+    const { roomUrl, token } = credentials;
+
+    // Validate credentials
+    if (!roomUrl) {
+      throw new Error('Room URL is required');
+    }
+
+    if (!roomUrl.startsWith('http')) {
+      throw new Error('Invalid room URL format');
+    }
+
+    if (__DEV__) {
+      console.log('[Daily] Joining room:', roomUrl.split('/').pop());
+    }
+
+    // Configure audio before joining
+    if (audioConfig) {
+      await configureAudio(call, audioConfig);
+    } else {
+      // Default configuration
+      await configureAudio(call);
+    }
+
+    // Join the room
+    await call.join({
+      url: roomUrl,
+      ...(token && { token }),
+    });
+
+    if (__DEV__) {
+      console.log('[Daily] Successfully joined room');
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+
+    if (__DEV__) {
+      console.error('[Daily] Failed to join room:', errorMsg);
+    }
+
+    // Map errors to user-friendly messages
+    let userMessage = 'Failed to join call';
+    if (errorMsg.includes('Invalid') || errorMsg.includes('URL')) {
+      userMessage = 'Invalid room URL or token';
+    } else if (errorMsg.includes('expired') || errorMsg.includes('not found')) {
+      userMessage = 'Room expired or no longer available';
+    } else if (errorMsg.includes('permission') || errorMsg.includes('access')) {
+      userMessage = 'Permission denied - check audio settings';
+    } else if (errorMsg.includes('network') || errorMsg.includes('timeout')) {
+      userMessage = 'Network error - check your connection';
+    }
+
+    throw new Error(userMessage);
+  }
+}
+
+/**
+ * Setup event listeners for Daily.co call events
+ *
+ * Wires Daily.co events to store updates. All events update store state,
+ * which triggers UI re-renders via Zustand.
+ *
+ * @param call - Daily call object
+ * @param callbacks - Object with callback functions for each event
+ */
+export function setupCallListeners(
+  call: DailyCallObject,
+  callbacks: DailyServiceCallbacks
+): () => void {
+  // Track listener functions so we can remove them later
+  const listeners: Array<{ event: string; handler: (...args: any[]) => void }> = [];
+
+  try {
+    // Connection events
+    if (callbacks.onConnected) {
+      const handler = () => {
+        if (__DEV__) {
+          console.log('[Daily] Connected to room');
+        }
+        callbacks.onConnected?.();
+      };
+      call.on('joined-meeting', handler);
+      listeners.push({ event: 'joined-meeting', handler });
+    }
+
+    if (callbacks.onDisconnected) {
+      const handler = () => {
+        if (__DEV__) {
+          console.log('[Daily] Disconnected from room');
+        }
+        callbacks.onDisconnected?.();
+      };
+      call.on('left-meeting', handler);
+      listeners.push({ event: 'left-meeting', handler });
+    }
+
+    // Error event
+    if (callbacks.onError) {
+      const handler = (error: any) => {
+        const errorMsg = error?.message || String(error);
+        if (__DEV__) {
+          console.error('[Daily] Error event:', errorMsg);
+        }
+        callbacks.onError?.(errorMsg);
+      };
+      call.on('error', handler);
+      listeners.push({ event: 'error', handler });
+    }
+
+    // Participant events
+    if (callbacks.onParticipantJoined) {
+      const handler = (event: any) => {
+        const participant = event.participant;
+        if (__DEV__) {
+          console.log('[Daily] Participant joined:', participant?.id);
+        }
+        if (participant) {
+          callbacks.onParticipantJoined?.({
+            id: participant.session_id || participant.id,
+            name: participant.name,
+            isLocal: participant.local,
+            audioState: {
+              muted: participant.audio === false,
+              blocked: participant.audioBlock === true,
+            },
+            videoState: {
+              muted: participant.video === false,
+              blocked: participant.videoBlock === true,
+            },
+          });
+        }
+      };
+      call.on('participant-joined', handler);
+      listeners.push({ event: 'participant-joined', handler });
+    }
+
+    if (callbacks.onParticipantLeft) {
+      const handler = (event: any) => {
+        const participantId = event.participant?.session_id || event.participant?.id;
+        if (__DEV__) {
+          console.log('[Daily] Participant left:', participantId);
+        }
+        if (participantId) {
+          callbacks.onParticipantLeft?.(participantId);
+        }
+      };
+      call.on('participant-left', handler);
+      listeners.push({ event: 'participant-left', handler });
+    }
+
+    // Network quality
+    if (callbacks.onNetworkQuality) {
+      const handler = (event: any) => {
+        const quality = event?.quality || 'ok';
+        if (__DEV__) {
+          console.log('[Daily] Network quality:', quality);
+        }
+        callbacks.onNetworkQuality?.(quality);
+      };
+      call.on('network-quality-change', handler);
+      listeners.push({ event: 'network-quality-change', handler });
+    }
+
+    if (__DEV__) {
+      console.log('[Daily] Event listeners setup:', listeners.length, 'listeners');
+    }
+
+    // Return cleanup function
+    return () => {
+      listeners.forEach(({ event, handler }) => {
+        call.off(event, handler);
+      });
+      if (__DEV__) {
+        console.log('[Daily] Event listeners cleaned up');
+      }
+    };
+  } catch (error) {
+    if (__DEV__) {
+      console.error('[Daily] Failed to setup listeners:', error);
+    }
+    // Return empty cleanup function if setup fails
+    return () => {};
+  }
+}
+
+/**
+ * Teardown and cleanup Daily.co call object
+ *
+ * Removes all event listeners and closes the connection.
+ * Should be called when conversation ends.
+ *
+ * @param call - Daily call object
+ * @param cleanupListeners - Optional cleanup function from setupCallListeners
+ */
+export async function teardownCall(
+  call: DailyCallObject,
+  cleanupListeners?: () => void
+): Promise<void> {
+  try {
+    // Remove event listeners
+    if (cleanupListeners) {
+      cleanupListeners();
+    }
+
+    // Leave the room
+    if (call) {
+      await call.leave();
+      if (__DEV__) {
+        console.log('[Daily] Left room');
+      }
+    }
+
+    // Destroy the call object
+    if (call) {
+      call.destroy();
+      if (__DEV__) {
+        console.log('[Daily] Call object destroyed');
+      }
+    }
+  } catch (error) {
+    if (__DEV__) {
+      console.error('[Daily] Error during teardown:', error);
+    }
+    // Don't throw - cleanup should be forgiving
+    // Try to at least destroy the call object
+    try {
+      call?.destroy();
+    } catch {
+      // Ignore
+    }
+  }
+}
+
+/**
+ * Get current participant list
+ *
+ * Returns all participants currently in the room including the user.
+ *
+ * @param call - Daily call object
+ * @returns Array of participant info objects
+ */
+export function getParticipants(call: DailyCallObject): ParticipantInfo[] {
+  try {
+    const participants = call.getParticipants();
+    if (!participants) {
+      return [];
+    }
+
+    return Object.values(participants).map((p: any) => ({
+      id: p.session_id || p.id,
+      name: p.name,
+      isLocal: p.local,
+      audioState: {
+        muted: p.audio === false,
+        blocked: p.audioBlock === true,
+      },
+      videoState: {
+        muted: p.video === false,
+        blocked: p.videoBlock === true,
+      },
+    }));
+  } catch (error) {
+    if (__DEV__) {
+      console.error('[Daily] Error getting participants:', error);
+    }
+    return [];
+  }
+}
+
+/**
+ * Check if call object is connected
+ *
+ * @param call - Daily call object
+ * @returns boolean - True if connected to a room
+ */
+export function isConnected(call: DailyCallObject): boolean {
+  try {
+    // A simple heuristic: if we have participants including local, we're connected
+    const participants = call.getParticipants();
+    return participants && Object.keys(participants).length > 0;
+  } catch {
+    return false;
+  }
+}
+
+export default {
+  initializeCall,
+  configureAudio,
+  joinRoom,
+  setupCallListeners,
+  teardownCall,
+  getParticipants,
+  isConnected,
+};

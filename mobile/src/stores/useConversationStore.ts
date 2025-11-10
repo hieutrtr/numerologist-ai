@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { apiClient } from '../services/api';
+import * as dailyService from '../services/daily.service';
 
 /**
  * Zustand store for managing conversation state and Daily.co integration.
@@ -97,46 +98,125 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
    * @throws Error if backend call fails or Daily.co connection fails
    */
   startConversation: async () => {
+    let cleanupListeners: (() => void) | null = null;
+
     try {
-      // Call backend to create conversation and get Daily.co credentials
+      // Step 1: Call backend to create conversation and get Daily.co credentials
+      if (__DEV__) {
+        console.log('[Store] Starting conversation - calling backend');
+      }
+
       const response = await apiClient.post<ConversationStartResponse>(
         '/api/v1/conversations/start'
       );
 
       const { conversation_id, daily_room_url, daily_token } = response.data;
 
-      // Import Daily.co SDK dynamically to handle optional dependency
-      // This allows store to be imported even if Daily.co is not yet installed
-      let DailyIframe;
-      try {
-        // Try to import the Daily.co SDK
-        const DailyModule = await import('@daily-co/daily-js');
-        DailyIframe = DailyModule.default;
-      } catch (importError) {
-        throw new Error(
-          'Daily.co SDK not installed. Run: npm install @daily-co/daily-js'
-        );
+      if (!conversation_id || !daily_room_url || !daily_token) {
+        throw new Error('Backend did not return required conversation details');
       }
 
-      // Create and join Daily.co room
-      const callFrame = DailyIframe.createCallObject();
+      if (__DEV__) {
+        console.log('[Store] Backend returned credentials for conversation:', conversation_id);
+      }
 
-      await callFrame.join({
-        url: daily_room_url,
+      // Step 2: Initialize Daily.co call object
+      const callObject = await dailyService.initializeCall();
+
+      // Step 3: Setup event listeners to update store on Daily.co events
+      cleanupListeners = dailyService.setupCallListeners(callObject, {
+        onConnected: () => {
+          set({ isConnected: true, error: null });
+          if (__DEV__) {
+            console.log('[Store] Update: connected');
+          }
+        },
+        onDisconnected: () => {
+          set({ isConnected: false });
+          if (__DEV__) {
+            console.log('[Store] Update: disconnected');
+          }
+        },
+        onError: (errorMsg: string) => {
+          // Map error to user-friendly message if needed
+          let userMessage = errorMsg;
+          if (errorMsg.includes('permission')) {
+            userMessage = 'Microphone permission denied';
+          } else if (errorMsg.includes('network')) {
+            userMessage = 'Network error - check your connection';
+          }
+          set({ error: userMessage });
+          if (__DEV__) {
+            console.log('[Store] Error:', userMessage);
+          }
+        },
+        onParticipantJoined: (participant) => {
+          if (__DEV__) {
+            console.log('[Store] Participant joined:', participant.id, participant.isLocal ? '(local)' : '(bot)');
+          }
+          // Store can track participants if needed for future features
+        },
+        onParticipantLeft: (participantId) => {
+          if (__DEV__) {
+            console.log('[Store] Participant left:', participantId);
+          }
+        },
+        onNetworkQuality: (quality) => {
+          if (__DEV__) {
+            console.log('[Store] Network quality:', quality);
+          }
+          // Could update network quality indicator in future
+        },
+      });
+
+      // Step 4: Join the Daily.co room with credentials
+      if (__DEV__) {
+        console.log('[Store] Joining Daily.co room...');
+      }
+
+      await dailyService.joinRoom(callObject, {
+        roomUrl: daily_room_url,
         token: daily_token,
       });
 
-      // Update state with connection details
+      // Step 5: Update store state with connection details
       set({
         conversationId: conversation_id,
-        dailyCall: callFrame,
+        dailyCall: callObject,
         isConnected: true,
         isMicActive: true,
         error: null,
       });
+
+      if (__DEV__) {
+        console.log('[Store] Conversation started successfully');
+      }
     } catch (error) {
+      // Clean up listeners if they were setup but connection failed
+      if (cleanupListeners) {
+        cleanupListeners();
+      }
+
       const errorMessage = error instanceof Error ? error.message : String(error);
-      set({ error: errorMessage });
+
+      // Map technical errors to user-friendly messages
+      let userMessage = errorMessage;
+      if (errorMessage.includes('Backend did not return')) {
+        userMessage = 'Server error - please try again';
+      } else if (errorMessage.includes('room')) {
+        userMessage = 'Failed to join room - room may be expired';
+      } else if (errorMessage.includes('audio') || errorMessage.includes('permission')) {
+        userMessage = 'Microphone access required to start conversation';
+      } else if (errorMessage.includes('network')) {
+        userMessage = 'Network error - check your internet connection';
+      }
+
+      set({ error: userMessage });
+
+      if (__DEV__) {
+        console.error('[Store] Failed to start conversation:', errorMessage);
+      }
+
       throw error; // Re-throw for caller to handle
     }
   },
@@ -162,40 +242,41 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     const { dailyCall, conversationId } = get();
 
     try {
-      // Clean up Daily.co call
+      if (__DEV__) {
+        console.log('[Store] Ending conversation');
+      }
+
+      // Step 1: Clean up Daily.co call using daily.service
       if (dailyCall) {
         try {
-          await dailyCall.leave();
-        } catch (leaveError) {
+          await dailyService.teardownCall(dailyCall);
           if (__DEV__) {
-            console.error('Error leaving Daily.co room:', leaveError);
+            console.log('[Store] Daily.co call cleaned up');
           }
-          // Continue with destroy even if leave fails
-        }
-
-        try {
-          dailyCall.destroy();
-        } catch (destroyError) {
+        } catch (teardownError) {
           if (__DEV__) {
-            console.error('Error destroying Daily.co call object:', destroyError);
+            console.error('[Store] Error during Daily.co cleanup:', teardownError);
           }
-          // Continue with backend notification even if destroy fails
+          // Continue with backend notification even if cleanup fails
         }
       }
 
-      // Notify backend conversation is ended
+      // Step 2: Notify backend conversation is ended
       if (conversationId) {
         try {
           await apiClient.post(`/api/v1/conversations/${conversationId}/end`);
+          if (__DEV__) {
+            console.log('[Store] Backend notified of conversation end');
+          }
         } catch (backendError) {
           if (__DEV__) {
-            console.error('Error ending conversation on backend:', backendError);
+            console.error('[Store] Error ending conversation on backend:', backendError);
           }
           // Continue with state reset even if backend call fails
         }
       }
 
-      // Reset state
+      // Step 3: Reset state
       set({
         conversationId: null,
         dailyCall: null,
@@ -204,8 +285,15 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         isAISpeaking: false,
         error: null,
       });
+
+      if (__DEV__) {
+        console.log('[Store] Conversation ended and state reset');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      if (__DEV__) {
+        console.error('[Store] Error during conversation end:', errorMessage);
+      }
       set({ error: errorMessage });
       // Don't re-throw - cleanup should be best-effort
     }
