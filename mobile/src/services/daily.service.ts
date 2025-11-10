@@ -109,7 +109,8 @@ export async function initializeCall(): Promise<DailyCallObject> {
     const call = await DailyIframe.createCallObject({
       videoSource: false, // No video for voice-first app
       audioSource: true,  // Enable audio input
-      audioOutput: true,  // Enable audio output
+      // Note: audioOutput is not a valid property for createCallObject()
+      // Audio output is automatically configured when joining a room
       receiveSettings: {
         screenVideo: {
           subscribeToAll: false,
