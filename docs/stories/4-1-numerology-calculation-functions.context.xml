@@ -1,0 +1,240 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.1</storyId>
+    <title>Numerology Calculation Functions</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-10</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-1-numerology-calculation-functions.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>Python functions for all numerology calculations</iWant>
+    <soThat>the AI can compute numbers from user data during conversations</soThat>
+    <tasks>
+      <task id="1" ac="1">Create Service File &amp; Helper Functions
+        - Create file `backend/src/services/numerology_service.py`
+        - Add imports: `from datetime import date` and `from typing import Optional`
+        - Define `MASTER_NUMBERS = {11, 22, 33}` constant
+        - Implement `_reduce_to_single_digit(number: int) -> int` helper
+        - Add docstrings for module and helper function</task>
+      <task id="2" ac="2">Implement Life Path Calculation
+        - Define `calculate_life_path(birth_date: date) -> int` function
+        - Extract month, day, year from birth_date
+        - Reduce each component separately using helper
+        - Sum reduced components and reduce final sum
+        - Add docstring with example
+        - Test manually with 1990-05-15 (should return 7)</task>
+      <task id="3" ac="3">Implement Expression Number Calculation
+        - Define `calculate_expression_number(full_name: str) -> int` function
+        - Create letter-to-number mapping dictionary (Pythagorean: A=1, B=2, ..., Z=26, reduce to 1-9)
+        - Clean input: uppercase, remove non-letters
+        - Map each letter to number and sum
+        - Reduce sum using helper
+        - Add docstring with example
+        - Test manually with "John Smith"</task>
+      <task id="4" ac="4">Implement Soul Urge Number Calculation
+        - Define `calculate_soul_urge_number(full_name: str) -> int` function
+        - Define vowels: A, E, I, O, U (Y is vowel if not at start)
+        - Filter name to only vowels
+        - Apply same letter-to-number mapping
+        - Sum vowel values and reduce using helper
+        - Add docstring with example</task>
+      <task id="5" ac="5">Implement Birthday Number Calculation
+        - Define `calculate_birthday_number(birth_date: date) -> int` function
+        - Extract day from birth_date
+        - Reduce day using helper (handles 11, 22 master numbers)
+        - Add docstring with example
+        - Test manually with 15th (should return 6)</task>
+      <task id="6" ac="6">Implement Personal Year Calculation
+        - Define `calculate_personal_year(birth_date: date, current_year: Optional[int] = None) -> int` function
+        - Default current_year to `date.today().year` if None
+        - Extract birth month and day
+        - Combine: month + day + current_year digits
+        - Reduce sum using helper
+        - Add docstring with example</task>
+      <task id="7" ac="7">Write Unit Tests
+        - Create test file `backend/tests/services/test_numerology_service.py`
+        - Import pytest and numerology_service functions
+        - Write test_reduce_to_single_digit() - test helper function
+        - Write test_calculate_life_path() - multiple birth dates, including master numbers
+        - Write test_calculate_expression_number() - multiple names
+        - Write test_calculate_soul_urge_number() - multiple names
+        - Write test_calculate_birthday_number() - various days including 11, 22
+        - Write test_calculate_personal_year() - multiple dates and years
+        - Write test_master_numbers_preserved() - verify 11, 22, 33 not reduced
+        - Run tests: `uv run pytest tests/services/test_numerology_service.py -v`
+        - Verify all tests pass</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="1">Service File Structure
+      - Service created at `backend/src/services/numerology_service.py`
+      - Module contains MASTER_NUMBERS constant: {11, 22, 33}
+      - Helper function `_reduce_to_single_digit(number: int) -> int` implemented
+      - All calculation functions properly documented with docstrings</ac>
+    <ac id="2">Life Path Number Calculation
+      - `calculate_life_path(birth_date: date) -> int` function implemented
+      - Returns 1-9, 11, 22, or 33
+      - Uses reduction method: reduce month, day, year separately, then combine
+      - Handles master numbers correctly (stops reduction at 11, 22, 33)
+      - Test case: 1990-05-15 → Life Path 7</ac>
+    <ac id="3">Expression/Destiny Number Calculation
+      - `calculate_expression_number(full_name: str) -> int` function implemented
+      - Uses Pythagorean letter-to-number mapping (A=1, B=2, ..., Z=26, then reduce)
+      - Ignores spaces, punctuation, case-insensitive
+      - Reduces to single digit or master number
+      - Test case: "John Smith" → Expression 5</ac>
+    <ac id="4">Soul Urge Number Calculation
+      - `calculate_soul_urge_number(full_name: str) -> int` function implemented
+      - Extracts only vowels (A, E, I, O, U, sometimes Y)
+      - Applies same Pythagorean mapping and reduction
+      - Test case: Known soul urge calculation</ac>
+    <ac id="5">Birthday Number Calculation
+      - `calculate_birthday_number(birth_date: date) -> int` function implemented
+      - Extracts day of month and reduces (if > 9 and not master)
+      - Test case: 15th → Birthday 6</ac>
+    <ac id="6">Personal Year Calculation
+      - `calculate_personal_year(birth_date: date, current_year: Optional[int] = None) -> int` function implemented
+      - Combines birth month + day + current year, then reduces
+      - Defaults to current year if not provided
+      - Test case: Birth 05-15, Year 2025 → Personal Year calculation</ac>
+    <ac id="7">Test Coverage
+      - Test file created: `backend/tests/services/test_numerology_service.py`
+      - Tests for each calculation function with known test cases
+      - Tests for master number handling (11, 22, 33)
+      - Tests for edge cases (single-digit results, reduction logic)
+      - All tests pass: `uv run pytest tests/services/test_numerology_service.py -v`</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 4: Numerology Engine Integration</title>
+        <section>Story 4.1: Numerology Calculation Functions</section>
+        <snippet>Backend service implementing five core Pythagorean numerology calculations: Life Path, Expression, Soul Urge, Birthday, and Personal Year numbers. All calculations follow master number rules (11, 22, 33) and include comprehensive unit tests.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Numerologist AI - Product Requirements Document</title>
+        <section>FR-2: Numerology Calculation Engine</section>
+        <snippet>Functional requirements for all five numerology calculations. System shall calculate using Pythagorean method with accurate interpretations. Core product value enabling AI to become an actual numerologist.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Naming Conventions - Python Code</section>
+        <snippet>Python coding standards: Files snake_case.py, Classes PascalCase, Functions snake_case(), Constants UPPER_SNAKE_CASE, Private functions _leading_underscore. Type hints required for all parameters and returns.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/services/daily_service.py</path>
+        <kind>service</kind>
+        <symbol>module structure</symbol>
+        <lines>1-50</lines>
+        <reason>Reference service pattern: module docstring, constants, type hints, async functions. Follow this structure for numerology_service.py</reason>
+      </artifact>
+      <artifact>
+        <path>backend/tests/services/test_daily_service.py</path>
+        <kind>test</kind>
+        <symbol>test structure</symbol>
+        <lines>1-50</lines>
+        <reason>Reference test pattern: pytest fixtures, parametrize decorator, comprehensive test coverage. Follow this structure for test_numerology_service.py</reason>
+      </artifact>
+      <artifact>
+        <path>backend/tests/services/__init__.py</path>
+        <kind>test</kind>
+        <symbol>test module marker</symbol>
+        <lines>all</lines>
+        <reason>Existing test services directory - add test_numerology_service.py here</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <runtime>Python 3.11+</runtime>
+        <stdlib>
+          <package>datetime</package>
+          <package>typing</package>
+        </stdlib>
+        <testing>
+          <package name="pytest" version=">=7.4.0">Unit testing framework</package>
+          <package name="pytest-asyncio" version=">=0.23.0">Async test support (if needed)</package>
+        </testing>
+      </python>
+      <notes>No external dependencies required for numerology calculations - pure Python implementation using standard library only</notes>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Pure Functions - No external dependencies (no database, no API calls)</constraint>
+    <constraint>Deterministic - Same input always produces same output</constraint>
+    <constraint>Type Hints - All function parameters and return types must be typed</constraint>
+    <constraint>Master Numbers - 11, 22, 33 must never be reduced further</constraint>
+    <constraint>Pythagorean System - Letter mapping: A=1, B=2, C=3... I=9, then cycles (J=1, K=2...)</constraint>
+    <constraint>Private Helpers - Use _leading_underscore for internal helper functions</constraint>
+    <constraint>Docstrings - Module, public functions, and helpers must have docstrings with examples</constraint>
+    <constraint>Test Coverage - Each public function requires unit tests with multiple test cases</constraint>
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>calculate_life_path</name>
+      <kind>function</kind>
+      <signature>def calculate_life_path(birth_date: date) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Life Path number from birth date. Returns 1-9, 11, 22, or 33.</description>
+    </interface>
+    <interface>
+      <name>calculate_expression_number</name>
+      <kind>function</kind>
+      <signature>def calculate_expression_number(full_name: str) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Expression/Destiny number from full name using Pythagorean mapping.</description>
+    </interface>
+    <interface>
+      <name>calculate_soul_urge_number</name>
+      <kind>function</kind>
+      <signature>def calculate_soul_urge_number(full_name: str) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Soul Urge number from vowels in name.</description>
+    </interface>
+    <interface>
+      <name>calculate_birthday_number</name>
+      <kind>function</kind>
+      <signature>def calculate_birthday_number(birth_date: date) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Birthday number from day of month.</description>
+    </interface>
+    <interface>
+      <name>calculate_personal_year</name>
+      <kind>function</kind>
+      <signature>def calculate_personal_year(birth_date: date, current_year: Optional[int] = None) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Calculate Personal Year cycle from birth date and current year.</description>
+    </interface>
+    <interface>
+      <name>_reduce_to_single_digit</name>
+      <kind>function</kind>
+      <signature>def _reduce_to_single_digit(number: int) -> int</signature>
+      <path>backend/src/services/numerology_service.py</path>
+      <description>Private helper to reduce any number to single digit or master number (11, 22, 33).</description>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>Testing framework: pytest (>=7.4.0). Test file naming: test_{service_name}.py. Test function naming: test_{function_name}_{scenario}(). Use pytest.mark.parametrize for multiple test cases with same logic. Assert exact values for deterministic functions. Each public function requires unit tests with multiple test cases including edge cases and master numbers (11, 22, 33). Run tests with: uv run pytest tests/services/test_numerology_service.py -v</standards>
+    <locations>backend/tests/services/test_numerology_service.py</locations>
+    <ideas>
+      <test ac="1">Test _reduce_to_single_digit helper with various inputs: 15->6, 99->9, 11->11 (master), 22->22 (master), 33->33 (master), 100->1</test>
+      <test ac="2">Test calculate_life_path with multiple birth dates including master number results: 1990-05-15->7, 1984-11-02->8, 1979-09-02->11 (master number Life Path)</test>
+      <test ac="3">Test calculate_expression_number with various names: "John Smith"->expected value, names with master numbers, single names, names with punctuation/spaces</test>
+      <test ac="4">Test calculate_soul_urge_number with multiple names focusing on vowel extraction: different vowel patterns, Y as vowel cases, all consonants edge case</test>
+      <test ac="5">Test calculate_birthday_number with various days: 1->1, 15->6, 11->11 (master), 22->22 (master), 31->4</test>
+      <test ac="6">Test calculate_personal_year with multiple dates and years: specific year provided, default to current year, boundary years</test>
+      <test ac="7">Test master numbers preservation across all functions: verify 11, 22, 33 never reduced further in any calculation</test>
+    </ideas>
+  </tests>
+</story-context>

@@ -73,14 +73,14 @@ development_status:
   # ============================================================================
   epic-3: backlog
   3-1-add-voice-pipeline-dependencies: done
-  3-2-daily-co-room-management-service: review
-  3-3-basic-pipecat-bot-with-greeting: review
+  3-2-daily-co-room-management-service: done
+  3-3-basic-pipecat-bot-with-greeting: done
   3-4-conversation-model-start-endpoint: done
-  3-5-frontend-conversation-state-zustand: review
+  3-5-frontend-conversation-state-zustand: done
   3-6-microphone-permission-setup: done
-  3-7-conversation-screen-ui: review
-  3-8-daily-co-react-native-integration: review
-  3-9-end-conversation-cleanup: in-progress
+  3-7-conversation-screen-ui: done
+  3-8-daily-co-react-native-integration: done
+  3-9-end-conversation-cleanup: done
   3-10-end-to-end-voice-test: done
   epic-3-retrospective: optional
 
@@ -88,7 +88,7 @@ development_status:
   # EPIC 4: Numerology Engine Integration
   # ============================================================================
   epic-4: backlog
-  4-1-numerology-calculation-functions: backlog
+  4-1-numerology-calculation-functions: done
   4-2-numerology-knowledge-base-schema-seeding: backlog
   4-3-gpt-function-calling-definitions: backlog
   4-4-function-call-handler-implementation: backlog
