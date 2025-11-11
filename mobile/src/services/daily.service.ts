@@ -366,7 +366,7 @@ export function setupCallListeners(
           // Create audio element for remote participant (web only)
           if (!participant.local && participant.audioTrack && Platform.OS === 'web') {
             const participantId = participant.session_id || participant.id;
-            manageAudioElement(participantId, participant.audioTrack, 'create');
+            debouncedManageAudioElement(participantId, participant.audioTrack, 'create');
           }
         }
       };
@@ -382,7 +382,7 @@ export function setupCallListeners(
 
           // Clean up audio element for web
           if (Platform.OS === 'web') {
-            manageAudioElement(participantId, null, 'remove');
+            debouncedManageAudioElement(participantId, null, 'remove');
           }
         }
       };
@@ -403,10 +403,10 @@ export function setupCallListeners(
       if (Platform.OS === 'web') {
         if (participant.audioTrack && participant.audio) {
           // Audio track available and unmuted
-          manageAudioElement(participantId, participant.audioTrack, 'create');
+          debouncedManageAudioElement(participantId, participant.audioTrack, 'create');
         } else {
           // Audio track removed or muted
-          manageAudioElement(participantId, null, 'remove');
+          debouncedManageAudioElement(participantId, null, 'remove');
         }
       }
     };
@@ -435,7 +435,7 @@ export function setupCallListeners(
         if (Platform.OS === 'web' && event.track) {
           const participantId = event.participant?.session_id || event.participant?.id;
           if (participantId) {
-            manageAudioElement(participantId, event.track, 'create');
+            debouncedManageAudioElement(participantId, event.track, 'create');
           }
         }
       }
@@ -555,6 +555,44 @@ export function isConnected(call: DailyCallObject): boolean {
   }
 }
 
+// Track pending play promises to avoid conflicts
+const pendingPlayPromises = new Map<string, Promise<void>>();
+const audioElementStates = new Map<string, { track: MediaStreamTrack; element: HTMLAudioElement }>();
+
+// Debounce map to prevent rapid successive audio element updates
+const audioUpdateDebounceTimers = new Map<string, NodeJS.Timeout>();
+
+/**
+ * Debounced wrapper for manageAudioElement to prevent rapid successive calls
+ */
+function debouncedManageAudioElement(
+  participantId: string,
+  audioTrack?: MediaStreamTrack | null,
+  action: 'create' | 'remove' = 'create',
+  delay: number = 100
+): void {
+  // Clear existing timer if any
+  const existingTimer = audioUpdateDebounceTimers.get(participantId);
+  if (existingTimer) {
+    clearTimeout(existingTimer);
+  }
+
+  // For remove actions, execute immediately without debounce
+  if (action === 'remove') {
+    audioUpdateDebounceTimers.delete(participantId);
+    manageAudioElement(participantId, audioTrack, action);
+    return;
+  }
+
+  // Debounce create/update actions
+  const timer = setTimeout(() => {
+    audioUpdateDebounceTimers.delete(participantId);
+    manageAudioElement(participantId, audioTrack, action);
+  }, delay);
+
+  audioUpdateDebounceTimers.set(participantId, timer);
+}
+
 /**
  * Manage audio elements for web playback
  *
@@ -575,14 +613,24 @@ export function manageAudioElement(
   }
 
   const audioElementId = `daily-audio-${participantId}`;
-  const existingElement = document.getElementById(audioElementId) as HTMLAudioElement;
 
   if (action === 'remove' || !audioTrack) {
-    // Remove existing audio element
-    if (existingElement) {
-      existingElement.pause();
-      existingElement.srcObject = null;
-      existingElement.remove();
+    // Cancel any pending play promise
+    pendingPlayPromises.delete(participantId);
+
+    // Remove from state tracking
+    const state = audioElementStates.get(participantId);
+    if (state) {
+      // Pause and cleanup the audio element
+      try {
+        state.element.pause();
+        state.element.srcObject = null;
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+      state.element.remove();
+      audioElementStates.delete(participantId);
+
       if (__DEV__) {
         console.log(`[Daily] Removed audio element for participant ${participantId}`);
       }
@@ -590,8 +638,24 @@ export function manageAudioElement(
     return;
   }
 
-  // Create or update audio element
-  let audioElement = existingElement;
+  // Check if we already have this exact track
+  const existingState = audioElementStates.get(participantId);
+  if (existingState && existingState.track === audioTrack) {
+    // Same track, no need to update
+    if (__DEV__) {
+      console.log(`[Daily] Audio track unchanged for participant ${participantId}, skipping update`);
+    }
+    return;
+  }
+
+  // Wait for any pending play promise to resolve before updating
+  const previousPlayPromise = pendingPlayPromises.get(participantId);
+  if (previousPlayPromise) {
+    // Cancel the previous play by waiting for it to complete or fail
+    previousPlayPromise.catch(() => {}); // Ignore errors from cancelled plays
+  }
+
+  let audioElement = existingState?.element;
 
   if (!audioElement) {
     // Create new audio element
@@ -605,18 +669,60 @@ export function manageAudioElement(
 
     // Append to document body
     document.body.appendChild(audioElement);
+  } else {
+    // Pause existing element before updating source
+    try {
+      audioElement.pause();
+    } catch (e) {
+      // Ignore pause errors
+    }
   }
 
   // Create MediaStream from the audio track
   const stream = new MediaStream([audioTrack]);
-  audioElement.srcObject = stream;
 
-  // Attempt to play
-  audioElement.play().catch((error) => {
-    if (__DEV__) {
-      console.error(`[Daily] Failed to play audio for ${participantId}:`, error);
-    }
-  });
+  // Small delay to ensure previous operations complete
+  setTimeout(() => {
+    if (!audioElement) return; // Safety check
+
+    // Update the source
+    audioElement.srcObject = stream;
+
+    // Attempt to play with proper error handling
+    const playPromise = audioElement.play()
+      .then(() => {
+        if (__DEV__) {
+          console.log(`[Daily] Audio playing for participant ${participantId}`);
+        }
+        // Update state after successful play
+        audioElementStates.set(participantId, { track: audioTrack, element: audioElement! });
+      })
+      .catch((error) => {
+        // Handle different error types
+        if (error.name === 'AbortError') {
+          // This is expected when rapidly switching tracks
+          if (__DEV__) {
+            console.log(`[Daily] Play aborted for participant ${participantId} (expected during track switch)`);
+          }
+        } else if (error.name === 'NotAllowedError') {
+          // User hasn't interacted with the page yet
+          if (__DEV__) {
+            console.warn(`[Daily] Auto-play blocked for participant ${participantId}. User interaction required.`);
+          }
+        } else {
+          if (__DEV__) {
+            console.error(`[Daily] Failed to play audio for ${participantId}:`, error.name, error.message);
+          }
+        }
+      })
+      .finally(() => {
+        // Clean up the pending promise
+        pendingPlayPromises.delete(participantId);
+      });
+
+    // Track the pending play promise
+    pendingPlayPromises.set(participantId, playPromise);
+  }, 50); // Small delay to avoid rapid successive calls
 }
 
 /**
@@ -676,4 +782,5 @@ export default {
   isConnected,
   debugAudioState,
   manageAudioElement,
+  debouncedManageAudioElement,
 };
