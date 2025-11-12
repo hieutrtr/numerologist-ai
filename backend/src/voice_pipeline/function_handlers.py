@@ -54,7 +54,7 @@ from datetime import datetime
 import logging
 
 from sqlmodel import Session, select
-from pipecat.services.llm_service import FunctionCallParams
+from pipecat.services.llm_service import FunctionCallParams, FunctionCallResultProperties
 
 from src.services.numerology_service import (
     calculate_life_path,
@@ -99,7 +99,9 @@ async def handle_calculate_life_path(params: FunctionCallParams):
 
         logger.info(f"Successfully calculated Life Path number: {result}")
 
-        await params.result_callback({"life_path_number": result})
+        # Tell Pipecat to run the LLM after this function result
+        properties = FunctionCallResultProperties(run_llm=True)
+        await params.result_callback({"life_path_number": result}, properties=properties)
 
     except ValueError as e:
         logger.error(f"Invalid date format: {birth_date}", exc_info=True)
@@ -152,7 +154,9 @@ async def handle_calculate_expression(params: FunctionCallParams):
 
         logger.info(f"Successfully calculated Expression number: {result}")
 
-        await params.result_callback({"expression_number": result})
+        # Tell Pipecat to run the LLM after this function result
+        properties = FunctionCallResultProperties(run_llm=True)
+        await params.result_callback({"expression_number": result}, properties=properties)
 
     except Exception as e:
         logger.error(f"Error in handle_calculate_expression", exc_info=True)
@@ -199,7 +203,9 @@ async def handle_calculate_soul_urge(params: FunctionCallParams):
 
         logger.info(f"Successfully calculated Soul Urge number: {result}")
 
-        await params.result_callback({"soul_urge_number": result})
+        # Tell Pipecat to run the LLM after this function result
+        properties = FunctionCallResultProperties(run_llm=True)
+        await params.result_callback({"soul_urge_number": result}, properties=properties)
 
     except Exception as e:
         logger.error(f"Error in handle_calculate_soul_urge", exc_info=True)
@@ -266,7 +272,9 @@ async def handle_get_interpretation(params: FunctionCallParams):
 
             logger.info(f"Retrieved {len(interpretations)} interpretation(s)")
 
-            await params.result_callback({"interpretations": interpretations})
+            # Tell Pipecat to run the LLM after this function result
+            properties = FunctionCallResultProperties(run_llm=True)
+            await params.result_callback({"interpretations": interpretations}, properties=properties)
 
     except Exception as e:
         logger.error(f"Database error in handle_get_interpretation", exc_info=True)
