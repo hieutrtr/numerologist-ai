@@ -92,7 +92,7 @@ development_status:
   4-2-numerology-knowledge-base-schema-seeding: done
   4-3-gpt-function-calling-definitions: done
   4-4-function-call-handler-implementation: review
-  4-5-numerology-system-prompt: backlog
+  4-5-numerology-system-prompt: ready-for-dev
   4-6-update-conversation-endpoint-with-user-context: backlog
   4-7-test-numerology-conversation-end-to-end: backlog
   epic-4-retrospective: optional

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>5</storyId>
+    <title>Numerology System Prompt</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-12</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-5-numerology-system-prompt.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>a specialized system prompt that makes the AI a numerology expert</iWant>
+    <soThat>conversations feel authentic and knowledgeable</soThat>
+    <tasks>
+      <task name="Create System Prompts Module">
+        <subtask>Create file backend/src/voice_pipeline/system_prompts.py</subtask>
+        <subtask>Add comprehensive module docstring explaining prompt strategy</subtask>
+        <subtask>Import necessary modules (User model, datetime, logging)</subtask>
+        <subtask>Set up logger</subtask>
+      </task>
+      <task name="Implement get_numerology_system_prompt Function in Vietnamese">
+        <subtask>Define function signature accepting User parameter</subtask>
+        <subtask>Build prompt with Vietnamese role definition</subtask>
+        <subtask>Add KIẾN THỨC (Knowledge) section in Vietnamese</subtask>
+        <subtask>Add CÔNG CỤ (Tools) section with function names in English</subtask>
+        <subtask>Add PHONG CÁCH HỘI THOẠI (Conversation Style) section in Vietnamese</subtask>
+        <subtask>Add RANH GIỚI (Boundaries) section with guardrails in Vietnamese</subtask>
+        <subtask>Add THÔNG TIN NGƯỜI DÙNG (User Info) section with name and birth date</subtask>
+        <subtask>Add warm opening instruction in Vietnamese</subtask>
+        <subtask>Return complete prompt string</subtask>
+      </task>
+      <task name="Handle Edge Cases">
+        <subtask>Add try/except for None user.birth_date</subtask>
+        <subtask>Provide Vietnamese fallback for missing data</subtask>
+        <subtask>Handle None user.full_name gracefully</subtask>
+        <subtask>Ensure no exceptions are raised</subtask>
+      </task>
+      <task name="Integration with Pipecat Bot">
+        <subtask>Open backend/src/voice_pipeline/pipecat_bot.py</subtask>
+        <subtask>Import system prompt function</subtask>
+        <subtask>Find async def run_bot() function signature</subtask>
+        <subtask>Verify function accepts User parameter</subtask>
+        <subtask>Locate where messages are initialized</subtask>
+        <subtask>Add system message generation with Vietnamese prompt</subtask>
+        <subtask>Verify system message is first in messages list</subtask>
+        <subtask>Remove hardcoded system prompts</subtask>
+        <subtask>CRITICAL: Verify tools from Story 4.3 are NOT modified</subtask>
+      </task>
+      <task name="Testing and Validation">
+        <subtask>Test get_numerology_system_prompt with valid User</subtask>
+        <subtask>Verify Vietnamese content in output</subtask>
+        <subtask>Verify user personalization with name and birth date</subtask>
+        <subtask>Test with None birth_date</subtask>
+        <subtask>Verify function names stay English</subtask>
+        <subtask>Verify boundaries section in Vietnamese</subtask>
+        <subtask>Create unit tests in backend/tests/voice_pipeline/test_system_prompts.py</subtask>
+        <subtask>Run pytest to verify all tests pass</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1" title="System Prompt Module Created">
+      File created at backend/src/voice_pipeline/system_prompts.py with comprehensive module docstring, exports get_numerology_system_prompt function, includes type hints for all functions.
+    </criterion>
+    <criterion id="AC2" title="System Prompt Content - Role Definition">
+      Prompt identifies AI as "master Pythagorean numerologist" with personality name "Aria" (warm, wise, interested). Prompt establishes expertise and encouraging tone.
+    </criterion>
+    <criterion id="AC3" title="System Prompt Content - Knowledge Scope">
+      Prompt lists numerology knowledge areas (Life Path, Expression, Soul Urge, Birthday, Personal Year), mentions Master Numbers (11, 22, 33), and references Pythagorean system specifically.
+    </criterion>
+    <criterion id="AC4" title="System Prompt Content - Tool Usage Instructions">
+      Prompt instructs AI on when to use calculate_life_path, calculate_expression_number, and get_numerology_interpretation functions, encouraging tool use over estimation.
+    </criterion>
+    <criterion id="AC5" title="System Prompt Content - User Context">
+      Prompt includes user's full name and birth date formatted readably, with warm personalized opening greeting.
+    </criterion>
+    <criterion id="AC6" title="System Prompt Content - Conversational Tone">
+      Prompt instructs natural speech, follow-up questions, connecting insights to situations, maintaining warm supportive tone.
+    </criterion>
+    <criterion id="AC7" title="System Prompt Content - Boundaries &amp; Guardrails">
+      Prompt explicitly prevents medical, legal, financial advice and refers serious issues to professionals. Clarifies this is entertainment and spiritual guidance.
+    </criterion>
+    <criterion id="AC8" title="Dynamic Prompt Generation">
+      Function accepts User parameter, returns string with placeholders filled, handles missing data gracefully, is deterministic.
+    </criterion>
+    <criterion id="AC9" title="Integration with Pipecat Bot">
+      Bot receives User object during initialization, system prompt generated from user data before pipeline setup, used as initial system message, no hardcoded prompts.
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epics and Stories Breakdown</title>
+        <section>Story 4.5: Numerology System Prompt</section>
+        <snippet>Story 4.5 requires: System prompt function that makes AI a numerology expert, generates Vietnamese prompts, includes user context (name, birth date), integrates with Pipecat bot initialization.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture Documentation</title>
+        <section>Voice Pipeline, Pipecat Integration, System Prompt Patterns</section>
+        <snippet>Architecture covers Pipecat-ai framework, LLM context aggregation, daily.co WebRTC transport, and message initialization patterns required for system prompt integration.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/stories/4-3-gpt-function-calling-definitions.md</path>
+        <title>GPT Function Calling Definitions (Story 4.3)</title>
+        <section>Tool Definitions, Function Names, Parameter Schemas</section>
+        <snippet>Story 4.3 defines NUMEROLOGY_TOOLS list with 4 tools: calculate_life_path, calculate_expression_number, calculate_soul_urge_number, get_numerology_interpretation. System prompt must reference these tool names in English.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/stories/4-4-function-call-handler-implementation.md</path>
+        <title>Function Call Handler Implementation (Story 4.4)</title>
+        <section>Handler Functions, Error Handling, Pipecat Integration</section>
+        <snippet>Story 4.4 implements handlers that execute when GPT calls numerology functions. System prompt instructs AI when to use these functions via their English names.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/MULTILINGUAL_IMPLEMENTATION.md</path>
+        <title>Multilingual Implementation Guide</title>
+        <section>Vietnamese Support Strategy, Function Definitions Remain English</section>
+        <snippet>Comprehensive guide on Vietnamese voice bot implementation: System prompt entirely in Vietnamese, function definitions stay in English for reliability. Verified approach from OpenAI, arXiv research, industry best practices.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/VIETNAMESE_EXAMPLES.md</path>
+        <title>Vietnamese System Prompt Examples</title>
+        <section>Complete System Prompt Template, Conversation Flows, Translation Examples</section>
+        <snippet>Complete Vietnamese system prompt template, example conversation flows, Vietnamese terminology reference, function calling internals, date format handling, boundary enforcement examples.</snippet>
+      </artifact>
+    </docs>
+    <code>
+      <artifact>
+        <path>backend/src/models/user.py</path>
+        <kind>model</kind>
+        <symbol>User class</symbol>
+        <lines>15-82</lines>
+        <reason>User model defines full_name and birth_date fields that system prompt function must access. Required to understand User class structure for function signature and attribute access.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+        <kind>bot-implementation</kind>
+        <symbol>run_bot function</symbol>
+        <lines>90-150</lines>
+        <reason>Pipecat bot implementation showing how to initialize pipeline, create LLM context, and set system messages. System prompt will integrate here via run_bot function signature and message initialization.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/numerology_functions.py</path>
+        <kind>tool-definitions</kind>
+        <symbol>NUMEROLOGY_TOOLS list</symbol>
+        <reason>Tool definitions created in Story 4.3. System prompt must reference these tool names (calculate_life_path, calculate_expression_number, get_numerology_interpretation) in English. DO NOT TRANSLATE.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/function_handlers.py</path>
+        <kind>handler-functions</kind>
+        <symbol>handle_numerology_function router</symbol>
+        <reason>Handler functions from Story 4.4. System prompt instructs AI when to call these functions. Handlers remain unchanged - language-independent implementation layer.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/services/numerology_service.py</path>
+        <kind>service</kind>
+        <symbol>calculate_life_path, calculate_expression_number, calculate_soul_urge_number functions</symbol>
+        <reason>Numerology service functions from Story 4.1 that back the tool calling. System prompt encourages AI to use tools that call these services.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/settings.py</path>
+        <kind>configuration</kind>
+        <symbol>settings configuration</symbol>
+        <reason>Application settings including Azure OpenAI configuration. Understanding how environment variables and settings work helps with proper logging and debugging setup in system_prompts module.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="python">
+        <package name="pipecat-ai" version="latest">Framework for voice orchestration and LLM context management</package>
+        <package name="sqlmodel" version="latest">ORM for database models including User model access</package>
+        <package name="python-dateutil" version="latest">Date parsing and formatting utilities</package>
+        <package name="logging" version="builtin">Python standard logging for module instrumentation</package>
+      </ecosystem>
+      <ecosystem name="frameworks">
+        <framework name="Pipecat">Voice orchestration framework, LLM context pattern, message initialization pattern</framework>
+        <framework name="FastAPI">Backend web framework, async patterns, dependency injection</framework>
+        <framework name="SQLModel">ORM and data validation, User model</framework>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="language">
+      System prompt must be ENTIRELY IN VIETNAMESE. All visible text to user comes from this prompt. Role, knowledge scope, tool instructions (tool names stay English), conversation style, boundaries, user greeting - all Vietnamese.
+    </constraint>
+    <constraint type="function-definitions">
+      Function names in numerology_functions.py MUST STAY IN ENGLISH. Tool calling schemas are language-agnostic and work best with English. System prompt can reference "calculate_life_path" in English within Vietnamese text. This is verified best practice for multilingual LLM function calling.
+    </constraint>
+    <constraint type="handler-integration">
+      System prompt references functions that were defined in Story 4.3 (tool definitions) and implemented in Story 4.4 (handlers). These must not be modified. Story 4.5 only creates the system prompt that instructs AI when/how to use them.
+    </constraint>
+    <constraint type="user-data">
+      System prompt accesses User.full_name and User.birth_date. Must handle None values gracefully. Birth date format should be Vietnamese: "15/05/1990" in prompt, but ISO "1990-05-15" when calling functions.
+    </constraint>
+    <constraint type="pipecat-pattern">
+      System prompt function must integrate with run_bot in pipecat_bot.py. The prompt is passed to Pipecat as first message in LLM context. Must follow Pipecat's OpenAILLMContext pattern for message initialization.
+    </constraint>
+    <constraint type="testing">
+      Module must be testable and loggable. Use Python logging with appropriate levels (INFO, ERROR). All functions must return strings without raising exceptions (graceful degradation for missing data).
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>get_numerology_system_prompt</name>
+      <kind>function</kind>
+      <signature>def get_numerology_system_prompt(user: User) -> str:</signature>
+      <path>backend/src/voice_pipeline/system_prompts.py</path>
+      <description>Main function that generates Vietnamese system prompt for Pipecat bot. Accepts User object with full_name and birth_date, returns complete system prompt string in Vietnamese. Handles None values gracefully.</description>
+    </interface>
+    <interface>
+      <name>User Model</name>
+      <kind>sqlmodel-class</kind>
+      <signature>class User(SQLModel, table=True): full_name: str; birth_date: date;</signature>
+      <path>backend/src/models/user.py</path>
+      <description>User model with full_name and birth_date fields needed by system prompt function. Birth_date is required for numerology calculations.</description>
+    </interface>
+    <interface>
+      <name>run_bot</name>
+      <kind>async-function</kind>
+      <signature>async def run_bot(room_url: str, token: str, user: User) -> Optional[PipelineTask]:</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+      <description>Pipecat bot runner function that should accept User parameter and initialize pipeline with Vietnamese system prompt. System prompt integration point.</description>
+    </interface>
+    <interface>
+      <name>NUMEROLOGY_TOOLS</name>
+      <kind>tool-list</kind>
+      <signature>NUMEROLOGY_TOOLS: List[Dict] containing tool definitions for: calculate_life_path, calculate_expression_number, calculate_soul_urge_number, get_numerology_interpretation</signature>
+      <path>backend/src/voice_pipeline/numerology_functions.py</path>
+      <description>Tool definitions from Story 4.3. System prompt must reference these tool names (in English) to guide AI when to call them. These definitions must NOT be modified or translated.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests use pytest framework. Test files located in backend/tests/. Patterns established in Story 4.1 (numerology_service tests) and Story 4.4 (function_handlers tests). System prompt module should follow same patterns: test file at backend/tests/voice_pipeline/test_system_prompts.py with comprehensive test cases covering function generation, Vietnamese content validation, user personalization, edge cases (None birth_date), and boundary enforcement.</standards>
+    <locations>
+      backend/tests/voice_pipeline/
+      backend/tests/voice_pipeline/test_system_prompts.py (to be created)
+    </locations>
+    <ideas>
+      Test: Test basic generation with valid User object - verify Vietnamese content present, user name personalized, birth date formatted
+      Test: Test None birth_date handling - verify function handles gracefully with fallback text
+      Test: Test None full_name handling - verify function handles gracefully
+      Test: Verify Vietnamese translations - "nhà số học Pythagorean", "KIẾN THỨC", "CÔNG CỤ", "RANH GIỚI" present in output
+      Test: Verify function names stay English - "calculate_life_path", "calculate_expression_number", etc. appear in prompt untranslated
+      Test: Verify boundaries section - medical, legal, financial advice warnings present in Vietnamese
+      Test: Verify no hardcoded English text leaks - assert "warm" and "wise" NOT in prompt (should be "ấm áp" and "khôn ngoan")
+      Test: Test with various Vietnamese names - ensure Unicode handling works correctly
+      Test: Test date formatting - verify Vietnamese date format (15/05/1990) not ISO format in prompt
+      Test: Integration test with Pipecat bot - verify system prompt integrates correctly when passed to run_bot
+    </ideas>
+  </tests>
+</story-context>
