@@ -70,8 +70,9 @@ from pipecat.processors.aggregators.llm_response import (
 )
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 
-# Application settings
+# Application settings and models
 from src.core.settings import settings
+from src.models.user import User
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ class PipecatBotError(Exception):
     pass
 
 
-async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
+async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Optional[PipelineTask]:
     """
     Run a Pipecat voice AI bot in a Daily.co room.
 
@@ -95,14 +96,19 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
     1. Connects to Daily.co room via DailyTransport
     2. Initializes speech services (Deepgram STT, Azure OpenAI LLM, ElevenLabs TTS)
     3. Builds Pipecat pipeline with proper component ordering
-    4. Runs pipeline asynchronously until room closes or bot is stopped
+    4. Initializes system prompt based on user context and language
+    5. Runs pipeline asynchronously until room closes or bot is stopped
 
-    The bot responds to user speech with a friendly greeting (configured via system prompt).
-    In future stories, this will be enhanced with numerology-specific functionality.
+    The bot responds to user speech with a numerology-expert system prompt generated
+    from the User object. For Vietnamese language (vi), uses specialized system prompt
+    from system_prompts.get_numerology_system_prompt(user). For other languages,
+    falls back to default generic greeting.
 
     Args:
         room_url: Full URL to the Daily.co room (e.g., "https://domain.daily.co/room-name")
         token: JWT meeting token for secure room access
+        user: Optional User object for personalization. If provided and language is Vietnamese,
+              generates personalized numerology system prompt. If None, uses generic greeting.
 
     Returns:
         PipelineTask instance for lifecycle management (stop, monitor status)
@@ -113,13 +119,16 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
         PipecatBotError: If bot initialization or service setup fails
 
     Example:
+        >>> from src.models.user import User
         >>> room_info = await daily_service.create_room("conv-123")
-        >>> task = await run_bot(room_info["room_url"], room_info["meeting_token"])
-        >>> # Bot now running in background, handles voice interactions
+        >>> user = User(id=..., full_name="Nguyễn Văn A", birth_date=date(1990, 5, 15), ...)
+        >>> task = await run_bot(room_info["room_url"], room_info["meeting_token"], user)
+        >>> # Bot now running in background, handles voice interactions with Vietnamese system prompt
         >>> # To stop: await task.cancel()
 
     Notes:
         - Bot runs until Daily.co room closes or pipeline is explicitly stopped
+        - System prompt personalized when user object provided for Vietnamese conversations
         - All errors are logged with descriptive messages
         - Pipeline uses lazy validation pattern (validates at runtime, not import)
         - VAD (Voice Activity Detection) enabled for natural conversation flow
@@ -216,21 +225,30 @@ async def run_bot(room_url: str, token: str) -> Optional[PipelineTask]:
         )
 
         # Initialize conversation with language-aware system prompt
-        system_prompts = {
-            "en": "You are a friendly AI assistant. Greet the user warmly and ask how you can help them today.",
-            "vi": "Bạn là một trợ lý AI thân thiện. Chào người dùng một cách ấm áp và hỏi bạn có thể giúp gì cho họ hôm nay.",
-            "es": "Eres un asistente de IA amable. Saluda al usuario calurosamente y pregunta cómo puedes ayudarlo hoy.",
-            "fr": "Vous êtes un assistant IA amical. Accueillez chaleureusement l'utilisateur et demandez comment vous pouvez l'aider aujourd'hui.",
-            "de": "Du bist ein freundlicher KI-Assistent. Grüße den Benutzer warm und frage, wie du ihm heute helfen kannst.",
-            "ja": "あなたはフレンドリーなAIアシスタントです。ユーザーに温かく挨拶し、今日どのように手伝えるか尋ねます。",
-            "zh": "您是一个友好的AI助手。热情地问候用户，并询问您今天如何能帮助他们。",
-            "pt": "Você é um assistente de IA amigável. Cumprimente o usuário calurosamente e pergunte como você pode ajudá-lo hoje.",
-        }
+        # For Vietnamese with user object: use specialized numerology prompt
+        # Otherwise: use generic language-specific greeting
+        if settings.voice_language == "vi" and user is not None:
+            # Vietnamese with user context: use specialized numerology system prompt
+            from src.voice_pipeline.system_prompts import get_numerology_system_prompt
+            system_prompt = get_numerology_system_prompt(user)
+            logger.info(f"Generated Vietnamese numerology system prompt for user: {user.full_name}")
+        else:
+            # Generic language-specific greetings (for non-Vietnamese or no user context)
+            generic_prompts = {
+                "en": "You are a friendly AI assistant. Greet the user warmly and ask how you can help them today.",
+                "vi": "Bạn là một trợ lý AI thân thiện. Chào người dùng một cách ấm áp và hỏi bạn có thể giúp gì cho họ hôm nay.",
+                "es": "Eres un asistente de IA amable. Saluda al usuario calurosamente y pregunta cómo puedes ayudarlo hoy.",
+                "fr": "Vous êtes un assistant IA amical. Accueillez chaleureusement l'utilisateur et demandez comment vous pouvez l'aider aujourd'hui.",
+                "de": "Du bist ein freundlicher KI-Assistent. Grüße den Benutzer warm und frage, wie du ihm heute helfen kannst.",
+                "ja": "あなたはフレンドリーなAIアシスタントです。ユーザーに温かく挨拶し、今日どのように手伝えるか尋ねます。",
+                "zh": "您是一个友好的AI助手。热情地问候用户，并询问您今天如何能帮助他们。",
+                "pt": "Você é um assistente de IA amigável. Cumprimente o usuário calurosamente e pergunte como você pode ajudá-lo hoje.",
+            }
 
-        system_prompt = system_prompts.get(
-            settings.voice_language,
-            system_prompts["en"]  # Fallback to English
-        )
+            system_prompt = generic_prompts.get(
+                settings.voice_language,
+                generic_prompts["en"]  # Fallback to English
+            )
 
         messages = [
             {
