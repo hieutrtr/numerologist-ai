@@ -96,7 +96,7 @@ async def start_conversation(
         # Step 4: Spawn bot in background (non-blocking)
         logger.info(f"Spawning Pipecat bot for conversation {conversation.id}")
         asyncio.create_task(
-            run_bot(room_data["room_url"], room_data["meeting_token"])
+            run_bot(room_data["room_url"], room_data["meeting_token"], current_user)
         )
 
         logger.info(f"Bot spawned for conversation {conversation.id}")
