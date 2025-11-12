@@ -257,12 +257,11 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
             }
         ]
 
-        # Create LLM context for managing conversation history
-        llm_context = OpenAILLMContext(messages=messages)
-
-        # Import and register numerology function calling tools
+        # Import numerology function calling tools
         from src.voice_pipeline.numerology_functions import NUMEROLOGY_TOOLS
-        llm_context.set_tools(NUMEROLOGY_TOOLS)
+
+        # Create LLM context for managing conversation history with tools
+        llm_context = OpenAILLMContext(messages=messages, tools=NUMEROLOGY_TOOLS)
         logger.info(f"Registered {len(NUMEROLOGY_TOOLS)} numerology tools with LLM context")
 
         # Create message aggregators for conversation history
