@@ -165,7 +165,7 @@ get_numerology_interpretation_function = FunctionSchema(
     required=["number_type", "number_value"]
 )
 
-# Create ToolsSchema with all numerology functions
+# Create ToolsSchema with all numerology functions (for LLM service registration)
 numerology_tools_schema = ToolsSchema(standard_tools=[
     calculate_life_path_function,
     calculate_expression_number_function,
@@ -173,10 +173,27 @@ numerology_tools_schema = ToolsSchema(standard_tools=[
     get_numerology_interpretation_function
 ])
 
-# Export list of function schemas for direct use with OpenAILLMContext
+# Convert FunctionSchema objects to OpenAI JSON format for OpenAILLMContext
+# OpenAI expects: [{"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}]
+def _function_schema_to_openai_format(func_schema: FunctionSchema) -> dict:
+    """Convert Pipecat FunctionSchema to OpenAI JSON format."""
+    return {
+        "type": "function",
+        "function": {
+            "name": func_schema.name,
+            "description": func_schema.description,
+            "parameters": {
+                "type": "object",
+                "properties": func_schema.properties,
+                "required": func_schema.required
+            }
+        }
+    }
+
+# Export tools in OpenAI JSON format for OpenAILLMContext
 numerology_tools = [
-    calculate_life_path_function,
-    calculate_expression_number_function,
-    calculate_soul_urge_number_function,
-    get_numerology_interpretation_function
+    _function_schema_to_openai_format(calculate_life_path_function),
+    _function_schema_to_openai_format(calculate_expression_number_function),
+    _function_schema_to_openai_format(calculate_soul_urge_number_function),
+    _function_schema_to_openai_format(get_numerology_interpretation_function),
 ]
