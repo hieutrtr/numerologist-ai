@@ -166,9 +166,17 @@ get_numerology_interpretation_function = FunctionSchema(
 )
 
 # Create ToolsSchema with all numerology functions
-numerology_tools = ToolsSchema(standard_tools=[
+numerology_tools_schema = ToolsSchema(standard_tools=[
     calculate_life_path_function,
     calculate_expression_number_function,
     calculate_soul_urge_number_function,
     get_numerology_interpretation_function
 ])
+
+# Export list of function schemas for direct use with OpenAILLMContext
+numerology_tools = [
+    calculate_life_path_function,
+    calculate_expression_number_function,
+    calculate_soul_urge_number_function,
+    get_numerology_interpretation_function
+]
