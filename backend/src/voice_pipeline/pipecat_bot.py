@@ -202,9 +202,9 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
 
         # Register function handlers with LLM service
         llm.register_function("calculate_life_path", handle_calculate_life_path, cancel_on_interruption=False)
-        # llm.register_function("calculate_expression_number", handle_calculate_expression, cancel_on_interruption=False)
-        # llm.register_function("calculate_soul_urge_number", handle_calculate_soul_urge, cancel_on_interruption=False)
-        # llm.register_function("get_numerology_interpretation", handle_get_interpretation, cancel_on_interruption=False)
+        llm.register_function("calculate_expression_number", handle_calculate_expression, cancel_on_interruption=False)
+        llm.register_function("calculate_soul_urge_number", handle_calculate_soul_urge, cancel_on_interruption=False)
+        llm.register_function("get_numerology_interpretation", handle_get_interpretation, cancel_on_interruption=False)
 
         logger.info("Registered 4 numerology function handlers with LLM service")
 

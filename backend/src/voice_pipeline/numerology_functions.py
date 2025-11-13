@@ -193,7 +193,7 @@ def _function_schema_to_openai_format(func_schema: FunctionSchema) -> dict:
 # Export tools in OpenAI JSON format for OpenAILLMContext
 numerology_tools = [
     _function_schema_to_openai_format(calculate_life_path_function),
-    # _function_schema_to_openai_format(calculate_expression_number_function),
-    # _function_schema_to_openai_format(calculate_soul_urge_number_function),
-    # _function_schema_to_openai_format(get_numerology_interpretation_function),
+    _function_schema_to_openai_format(calculate_expression_number_function),
+    _function_schema_to_openai_format(calculate_soul_urge_number_function),
+    _function_schema_to_openai_format(get_numerology_interpretation_function),
 ]
