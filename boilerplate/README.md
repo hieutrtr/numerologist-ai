@@ -88,13 +88,21 @@ boilerplate/
 │   └── tests/
 │       ├── test_pipeline.py           # Pipeline tests
 │       └── test_functions.py          # Function calling tests
-├── mobile/                            # React Native app (optional)
-│   ├── package.json
-│   ├── src/
-│   │   ├── hooks/
-│   │   │   └── useConversation.ts     # Conversation hook
-│   │   └── services/
-│   │       └── daily.ts               # Daily.co integration
+├── mobile/                            # React Native mobile app
+│   ├── README.md                      # Mobile setup guide
+│   ├── package.json                   # Node dependencies
+│   ├── App.tsx                        # App entry point
+│   ├── app.json                       # Expo configuration
+│   └── src/
+│       ├── components/
+│       │   ├── VoiceVisualizer.tsx    # Voice activity animation
+│       │   └── ConnectionStatus.tsx   # Status indicator
+│       ├── hooks/
+│       │   └── useConversation.ts     # Conversation hook
+│       ├── screens/
+│       │   └── ConversationScreen.tsx # Main UI screen
+│       └── services/
+│           └── api.ts                 # Backend API client
 └── docs/
     ├── ARCHITECTURE.md                # Architecture overview
     ├── FUNCTION_CALLING.md            # Function calling guide

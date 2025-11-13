@@ -25,6 +25,34 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+# Lifespan context manager for startup/shutdown
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown"""
+    # Startup
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Environment: {settings.environment}")
+    logger.info(f"Voice Language: {settings.voice_language}")
+
+    # TODO: Initialize database connection
+    # TODO: Initialize Redis connection
+    # TODO: Warm up models/services
+
+    logger.info("Application startup complete")
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down application")
+
+    # TODO: Close database connections
+    # TODO: Close Redis connections
+    # TODO: Cleanup resources
+
+    logger.info("Application shutdown complete")
+
 # Create FastAPI application
 app = FastAPI(
     title=settings.app_name,
@@ -32,6 +60,7 @@ app = FastAPI(
     description="Voice AI Bot API powered by Pipecat",
     docs_url="/docs" if settings.enable_docs else None,
     redoc_url="/redoc" if settings.enable_docs else None,
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -66,32 +95,6 @@ async def health_check():
         "version": settings.app_version,
         "environment": settings.environment
     }
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Run on application startup"""
-    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-    logger.info(f"Environment: {settings.environment}")
-    logger.info(f"Voice Language: {settings.voice_language}")
-
-    # TODO: Initialize database connection
-    # TODO: Initialize Redis connection
-    # TODO: Warm up models/services
-
-    logger.info("Application startup complete")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Run on application shutdown"""
-    logger.info("Shutting down application")
-
-    # TODO: Close database connections
-    # TODO: Close Redis connections
-    # TODO: Cleanup resources
-
-    logger.info("Application shutdown complete")
 
 
 if __name__ == "__main__":
