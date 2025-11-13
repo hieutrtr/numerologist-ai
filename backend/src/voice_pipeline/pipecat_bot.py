@@ -189,6 +189,7 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
             endpoint=settings.azure_openai_endpoint,
             model=settings.azure_openai_model_deployment_name,
             api_version=settings.azure_openai_api_version,
+            run_in_parallel=False,  # Enable sequential function calling
         )
 
         # Import numerology function handlers
@@ -201,9 +202,9 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
 
         # Register function handlers with LLM service
         llm.register_function("calculate_life_path", handle_calculate_life_path, cancel_on_interruption=False)
-        llm.register_function("calculate_expression_number", handle_calculate_expression, cancel_on_interruption=False)
-        llm.register_function("calculate_soul_urge_number", handle_calculate_soul_urge, cancel_on_interruption=False)
-        llm.register_function("get_numerology_interpretation", handle_get_interpretation, cancel_on_interruption=False)
+        # llm.register_function("calculate_expression_number", handle_calculate_expression, cancel_on_interruption=False)
+        # llm.register_function("calculate_soul_urge_number", handle_calculate_soul_urge, cancel_on_interruption=False)
+        # llm.register_function("get_numerology_interpretation", handle_get_interpretation, cancel_on_interruption=False)
 
         logger.info("Registered 4 numerology function handlers with LLM service")
 
@@ -253,9 +254,9 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
         llm_context = OpenAILLMContext(messages=messages, tools=numerology_tools)
         logger.info(f"Registered numerology tools with LLM context")
 
-        # Create message aggregators for conversation history
-        user_aggregator = LLMUserContextAggregator(llm_context)
-        assistant_aggregator = LLMAssistantContextAggregator(llm_context)
+        # Create context aggregator using the LLM service
+        # This ensures proper function call result handling
+        context_aggregator = llm.create_context_aggregator(llm_context)
 
         # Build complete pipeline
         # Order is critical: input → stt → user_agg → llm → tts → output → assistant_agg
@@ -263,11 +264,11 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
         pipeline = Pipeline([
             transport.input(),              # 1. Audio from user (WebRTC)
             stt,                            # 2. Speech-to-text (Deepgram)
-            user_aggregator,                # 3. Collect user message
+            context_aggregator.user(),      # 3. Collect user message (using context aggregator)
             llm,                            # 4. Generate response (Azure OpenAI)
             tts,                            # 5. Text-to-speech (ElevenLabs)
             transport.output(),             # 6. Audio to user (WebRTC)
-            assistant_aggregator,           # 7. Store assistant message
+            context_aggregator.assistant(), # 7. Store assistant message (using context aggregator)
         ])
 
         # Create and run pipeline task
