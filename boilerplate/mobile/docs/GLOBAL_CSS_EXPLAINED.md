@@ -588,5 +588,20 @@ React Native renders with styles
 
 ---
 
+## Version Information
+
+This guide is compatible with:
+
+- **Expo**: ~54.0.22 (SDK 54)
+- **React**: 19.1.0
+- **React Native**: 0.81.5
+- **NativeWind**: ^4.2.1 (v4)
+- **Tailwind CSS**: ^3.4.18 (v3.4)
+- **React Native Reanimated**: ~3.17.4
+
+All versions verified working together in production.
+
+---
+
 *Last Updated: November 2024*
-*NativeWind v4 + Tailwind CSS v3*
+*Stack: Expo SDK 54 + React 19 + NativeWind v4.2 + Tailwind CSS v3.4*
