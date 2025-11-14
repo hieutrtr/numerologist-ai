@@ -582,5 +582,24 @@ plugins: [
 
 ---
 
+## Version Information
+
+This guide is based on the following stack:
+
+| Package | Version | Notes |
+|---------|---------|-------|
+| **Expo** | ~54.0.22 | SDK 54 (latest stable) |
+| **React** | 19.1.0 | React 19 |
+| **React Native** | 0.81.5 | Latest stable |
+| **NativeWind** | ^4.2.1 | v4 (className support) |
+| **Tailwind CSS** | ^3.4.18 | v3.4 (latest) |
+| **React Native Reanimated** | ~3.17.4 | For smooth animations |
+| **PostCSS** | ^8.5.6 | CSS processor |
+| **Autoprefixer** | ^10.4.21 | Vendor prefixes |
+
+**Compatibility**: All versions tested and verified working together in production.
+
+---
+
 *Last Updated: November 2024*
-*Your Current Stack: Expo + NativeWind v4 + Tailwind v3*
+*Stack: Expo SDK 54 + React 19 + React Native 0.81 + NativeWind v4.2 + Tailwind v3.4*
