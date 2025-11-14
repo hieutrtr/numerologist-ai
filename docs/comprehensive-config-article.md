@@ -116,15 +116,17 @@ Let's understand each one.
 ```json
 {
   "dependencies": {
-    "expo": "~51.0.0",
-    "react-native": "0.74.0",
+    "expo": "~54.0.22",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
     "nativewind": "^4.2.1",
     "tailwindcss": "^3.4.18",
-    "react-native-reanimated": "~3.10.0"
+    "react-native-reanimated": "~3.17.4"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6"
+    "postcss": "^8.5.6",
+    "typescript": "~5.9.2"
   }
 }
 ```
@@ -1014,9 +1016,12 @@ npm list react-native-reanimated
 ```
 
 **Expected** (as of Nov 2024):
+- `expo@~54.0.22`
+- `react@19.1.0`
+- `react-native@0.81.5`
 - `nativewind@^4.2.1`
 - `tailwindcss@^3.4.18`
-- `react-native-reanimated@~3.10.0`
+- `react-native-reanimated@~3.17.4`
 
 #### 4. Validate `tailwind.config.js` Content Array
 
@@ -1318,4 +1323,4 @@ With this knowledge, you can:
 
 *Written for developers building with AI tools*
 *Last updated: November 2024*
-*NativeWind v4 + Tailwind CSS v3 + Expo SDK 51*
+*NativeWind v4.2 + Tailwind CSS v3.4 + Expo SDK 54 + React Native 0.81 + React 19*
