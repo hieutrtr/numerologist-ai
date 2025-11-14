@@ -78,6 +78,12 @@ mobile/
 ├── app.json                          # Expo configuration
 ├── package.json                      # Dependencies
 ├── tsconfig.json                     # TypeScript config
+├── babel.config.js                   # Babel transforms (NativeWind)
+├── metro.config.js                   # Metro bundler (CSS processing)
+├── tailwind.config.js                # Tailwind design system
+├── postcss.config.js                 # PostCSS plugins
+├── global.css                        # Tailwind entry point
+├── nativewind-env.d.ts              # TypeScript types for className
 └── src/
     ├── components/
     │   ├── VoiceVisualizer.tsx       # Voice activity animation
@@ -92,6 +98,55 @@ mobile/
     ├── store/                        # State management (optional)
     └── utils/                        # Utilities
 ```
+
+## Styling System
+
+This boilerplate uses **NativeWind v4** - Tailwind CSS for React Native.
+
+### Why NativeWind?
+
+- ✅ **Familiar**: Use Tailwind utility classes
+- ✅ **Fast**: Write styles faster than StyleSheet
+- ✅ **Type-safe**: Full TypeScript autocomplete
+- ✅ **Design system**: Centralized in `tailwind.config.js`
+- ✅ **Tree-shaking**: Only used classes bundled
+
+### Usage Example
+
+```tsx
+import { View, Text } from 'react-native';
+
+export default function MyComponent() {
+  return (
+    <View className="bg-primary p-4 rounded-lg">
+      <Text className="text-white text-lg font-bold">
+        Hello World
+      </Text>
+    </View>
+  );
+}
+```
+
+### Available Utilities
+
+**Colors**: `bg-primary`, `text-secondary`, `border-error`
+**Spacing**: `p-4`, `m-2`, `px-lg`, `mt-md`
+**Typography**: `text-lg`, `font-bold`, `text-center`
+**Layout**: `flex-1`, `flex-row`, `items-center`, `justify-between`
+**Size**: `w-full`, `h-32`, `min-h-screen`
+
+### Customization
+
+All design tokens in `tailwind.config.js`:
+- Colors (primary, secondary, etc.)
+- Spacing (xs, sm, md, lg, xl)
+- Typography (text sizes and weights)
+
+**Learn More**: See `docs/FRONTEND_CONFIG_EXPLAINED.md` for:
+- How Babel, Metro, Tailwind work together
+- Build pipeline explanation
+- Adding custom colors/spacing/fonts
+- Debugging styling issues
 
 ## Core Components
 
@@ -181,9 +236,32 @@ apiClient.setAuthToken(userToken);
 
 ### Customize UI Colors
 
-Edit component styles in:
+**Option 1: Tailwind (Recommended)**
+
+Edit `tailwind.config.js`:
+```javascript
+colors: {
+  primary: {
+    DEFAULT: '#FF6B6B',  // Your brand color
+    dark: '#CC5555',
+    light: '#FFE5E5',
+  }
+}
+```
+
+Then use in components:
+```tsx
+<View className="bg-primary" />
+<Text className="text-primary-dark" />
+```
+
+**Option 2: StyleSheet**
+
+Edit component styles directly:
 - `src/screens/ConversationScreen.tsx`
 - `src/components/VoiceVisualizer.tsx`
+
+**Learn More**: See `docs/FRONTEND_CONFIG_EXPLAINED.md` for complete styling guide
 
 ### Add More Screens
 
