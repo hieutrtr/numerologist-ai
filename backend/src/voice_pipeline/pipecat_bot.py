@@ -33,6 +33,7 @@ Configuration:
     - AZURE_OPENAI_API_KEY: Language model service
     - AZURE_OPENAI_ENDPOINT: Azure OpenAI endpoint URL
     - ELEVENLABS_API_KEY: Text-to-speech service
+    - ELEVENLABS_MODEL: TTS model (default: eleven_turbo_v2_5 for multilingual support)
 
 References:
     - Pipecat Documentation: https://docs.pipecat.ai/
@@ -208,10 +209,12 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
 
         logger.info("Registered 4 numerology function handlers with LLM service")
 
-        # ElevenLabs: Text-to-Speech
+        # ElevenLabs: Text-to-Speech with model configuration
+        logger.info(f"Configuring ElevenLabs TTS with model: {settings.elevenlabs_model}")
         tts = ElevenLabsTTSService(
             api_key=settings.elevenlabs_api_key,
             voice_id=settings.elevenlabs_voice_id,
+            model=settings.elevenlabs_model,
         )
 
         # Initialize conversation with language-aware system prompt

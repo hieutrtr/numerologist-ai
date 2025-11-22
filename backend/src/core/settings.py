@@ -352,6 +352,19 @@ class Settings(BaseSettings):
     Environment variable: ELEVENLABS_VOICE_ID
     """
 
+    elevenlabs_model: str = "eleven_flash_v2_5"
+    """
+    ElevenLabs TTS model for voice synthesis.
+
+    Available models:
+    - eleven_turbo_v2_5: 32 languages, 300ms latency, supports Vietnamese (recommended for multilingual)
+    - eleven_flash_v2_5: Newest model, recommended replacement for turbo (default by Pipecat)
+    - eleven_turbo_v2: English only, ultra-low latency (<75ms)
+    - eleven_multilingual_v2: 29 languages, highest quality but slower
+
+    Environment variable: ELEVENLABS_MODEL
+    """
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
