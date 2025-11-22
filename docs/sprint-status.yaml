@@ -107,6 +107,12 @@ development_status:
   5-4-conversation-detail-view: backlog
   5-5-load-conversation-context-for-ai: backlog
   5-6-test-context-retention-end-to-end: backlog
+  5-7-user-observations-database-schema: backlog  # NEW - Observation consolidation
+  5-8-observation-extraction-service: backlog      # NEW - Observation consolidation
+  5-9-observations-api-endpoints: backlog          # NEW - Observation consolidation
+  5-10-gpt-observation-extraction-prompts: backlog # NEW - Observation consolidation
+  5-11-integration-with-voice-pipeline: backlog    # NEW - Observation consolidation
+  5-12-test-observations-end-to-end: backlog       # NEW - Observation consolidation
   epic-5-retrospective: optional
 
   # ============================================================================

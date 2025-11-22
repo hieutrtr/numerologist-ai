@@ -2455,6 +2455,240 @@ AI: "As we discussed, Life Path 7 in relationships..." [recalls]
 
 ---
 
+### Story 5.7: User Observations Database Schema
+
+**As a** backend developer,
+**I want** a database table to store AI-observed user patterns,
+**So that** we can track user concerns for better personalization.
+
+**Acceptance Criteria:**
+1. `UserObservation` model created in `backend/src/models/user_observation.py`
+2. Fields: `id`, `user_id`, `conversation_id`, `observation_type` (intent/wish/struggle/issue/goal), `content`, `confidence` (0.0-1.0), `extracted_at`, `metadata` (JSON)
+3. Foreign keys to User and Conversation tables
+4. Indexes on (user_id, observation_type) and conversation_id
+5. Alembic migration created and applied
+6. Model relationships updated in User and Conversation models
+7. Can query observations by user and type
+
+**Technical Notes:**
+```python
+# backend/src/models/user_observation.py
+class UserObservation(SQLModel, table=True):
+    __tablename__ = "user_observation"
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    conversation_id: UUID = Field(foreign_key="conversation.id", index=True)
+    observation_type: str = Field(index=True)  # "intent", "wish", "struggle", "issue", "goal"
+    content: str = Field(sa_column=Column(Text))
+    confidence: float = Field(default=0.0)
+    extracted_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: dict = Field(default_factory=dict, sa_column=Column(JSON))
+```
+
+**Prerequisites:** Story 5.1 complete (Conversation model exists)
+
+---
+
+### Story 5.8: Observation Extraction Service
+
+**As a** backend developer,
+**I want** a service that extracts user observations from conversations,
+**So that** we can automatically identify user patterns.
+
+**Acceptance Criteria:**
+1. `ObservationService` created in `backend/src/services/observation_service.py`
+2. `extract_observations()` method uses GPT to identify patterns from conversation
+3. Extracts: intents, wishes, struggles, issues, goals with confidence scores
+4. Runs asynchronously during conversation (non-blocking)
+5. Saves observations to database
+6. Handles extraction errors gracefully
+7. Unit tests for service methods
+8. Extraction accuracy >80% on test conversations
+
+**Technical Notes:**
+```python
+# backend/src/services/observation_service.py
+class ObservationService:
+    async def extract_observations(
+        self,
+        conversation_id: str,
+        user_id: str,
+        user_message: str,
+        assistant_response: str
+    ) -> List[UserObservation]:
+        # Call GPT for extraction
+        prompt = self._build_extraction_prompt(user_message, assistant_response)
+        observations = await self._call_gpt_for_extraction(prompt)
+
+        # Save to database
+        return await self._save_observations(observations, conversation_id, user_id)
+```
+
+**Wiring Up:**
+```python
+# In pipecat_bot.py, add async extraction:
+asyncio.create_task(
+    observation_service.extract_observations(
+        conversation_id, user_id, user_message, assistant_response
+    )
+)
+```
+
+**Prerequisites:** Story 5.7 complete (database schema exists)
+
+---
+
+### Story 5.9: Observations API Endpoints
+
+**As a** user,
+**I want** to access my observed patterns via API,
+**So that** I can understand my tracked concerns.
+
+**Acceptance Criteria:**
+1. Router created in `backend/src/api/v1/endpoints/observations.py`
+2. `GET /api/v1/observations` - List user's observations (paginated)
+3. Query parameters: `type` (filter by type), `limit` (default 20)
+4. `GET /api/v1/observations/summary` - Aggregated insights
+5. Returns observations with type, content, confidence, date
+6. Requires authentication
+7. Response schemas in `backend/src/schemas/observation.py`
+8. API documentation updated
+
+**Technical Notes:**
+```python
+@router.get("/observations", response_model=List[ObservationResponse])
+async def get_user_observations(
+    observation_type: Optional[str] = None,
+    limit: int = Query(default=20, le=100),
+    current_user: User = Depends(get_current_user),
+    observation_service: ObservationService = Depends()
+):
+    return await observation_service.get_user_observations(
+        user_id=current_user.id,
+        observation_type=observation_type,
+        limit=limit
+    )
+```
+
+**Prerequisites:** Story 5.8 complete (service exists)
+
+---
+
+### Story 5.10: GPT Observation Extraction Prompts
+
+**As a** backend developer,
+**I want** optimized prompts for extracting observations,
+**So that** we get accurate pattern identification.
+
+**Acceptance Criteria:**
+1. Extraction prompts created in `backend/src/voice_pipeline/observation_prompts.py`
+2. Prompt instructs GPT to identify user patterns from conversation
+3. Returns structured JSON with type, content, confidence
+4. Handles multiple observations per exchange
+5. Filters out low-confidence (<0.5) observations
+6. Prompts tested for accuracy and consistency
+7. System prompt updated to prime observation awareness
+8. 80%+ accuracy in categorizing observation types
+
+**Technical Notes:**
+```python
+EXTRACTION_PROMPT = """
+Analyze this conversation exchange and identify user patterns:
+
+User: {user_message}
+Assistant: {assistant_response}
+
+Extract any:
+- INTENT: What the user is trying to achieve
+- WISH: What they hope for
+- STRUGGLE: Challenges they face
+- ISSUE: Specific problems mentioned
+- GOAL: What they want to accomplish
+
+Return as JSON:
+[
+  {"type": "intent|wish|struggle|issue|goal", "content": "...", "confidence": 0.0-1.0},
+  ...
+]
+"""
+```
+
+**Prerequisites:** Story 5.8 complete (extraction service needs prompts)
+
+---
+
+### Story 5.11: Integration with Voice Pipeline
+
+**As a** backend developer,
+**I want** observation extraction integrated into the voice pipeline,
+**So that** observations are captured during natural conversation.
+
+**Acceptance Criteria:**
+1. Pipecat bot modified to trigger observation extraction
+2. Extraction runs after each meaningful exchange
+3. Non-blocking async processing (doesn't affect latency)
+4. Handles extraction failures without disrupting conversation
+5. Logs extraction events for monitoring
+6. Voice latency remains <3 seconds
+7. End-to-end test: conversation → observations saved
+
+**Wiring Up:**
+```python
+# In pipecat_bot.py:
+@transport.event_handler("on_exchange_complete")
+async def handle_exchange(user_msg: str, assistant_msg: str):
+    # Fire and forget - don't await
+    asyncio.create_task(
+        observation_service.extract_observations(
+            conversation_id=self.conversation_id,
+            user_id=self.user_id,
+            user_message=user_msg,
+            assistant_response=assistant_msg
+        )
+    )
+```
+
+**Prerequisites:** Stories 5.8 and 5.10 complete
+
+---
+
+### Story 5.12: Test Observations End-to-End
+
+**As a** developer,
+**I want** to validate the complete observations pipeline,
+**So that** I know user patterns are being tracked correctly.
+
+**Acceptance Criteria:**
+1. Have conversation expressing various concerns
+2. Check database for extracted observations
+3. Call API to retrieve observations
+4. Verify observation types are correctly categorized
+5. Confidence scores are reasonable (>0.5)
+6. No impact on voice conversation latency
+7. Observations appear within 5 seconds of exchange
+
+**Manual Test Script:**
+```
+Conversation:
+User: "I wish I could understand my career path better"
+→ Observation: type="wish", content="understand career path better"
+
+User: "I'm struggling with making decisions"
+→ Observation: type="struggle", content="making decisions"
+
+User: "My goal is to find my life purpose"
+→ Observation: type="goal", content="find life purpose"
+
+Verify via API:
+GET /api/v1/observations
+→ Returns all extracted observations
+```
+
+**Prerequisites:** All previous stories in Epic 5 complete
+
+---
+
 ## Epic 5 Summary
 
 **What's Working After Epic 5:**
@@ -2463,13 +2697,17 @@ AI: "As we discussed, Life Path 7 in relationships..." [recalls]
 - ✅ Frontend: History screen with conversation list
 - ✅ Detail View: Full conversation transcripts
 - ✅ Context: AI remembers and references past conversations
+- ✅ Observations: AI extracts and stores user patterns (intents, wishes, struggles, issues, goals)
+- ✅ Insights API: Endpoints to retrieve user observations for personalization
+- ✅ Non-blocking: Observation extraction doesn't impact voice latency
 
 **Demo:**
-1. Have conversation about Life Path number
-2. End conversation
+1. Have conversation expressing concerns and goals
+2. AI extracts observations (wishes, struggles, goals) in background
 3. Go to History tab → See conversation listed
-4. Tap to view full transcript
+4. Call API → See extracted observations with confidence scores
 5. Start new conversation → AI references previous discussion
+6. Over time → AI understands user patterns for deeper personalization
 
 **Next Epic:** Voice UX Polish & Visual Feedback
 
