@@ -1,0 +1,1435 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+  "elements": [
+    {
+      "id": "frontend-box",
+      "type": "rectangle",
+      "x": 60,
+      "y": 200,
+      "width": 280,
+      "height": 240,
+      "angle": 0,
+      "strokeColor": "#2e7d32",
+      "backgroundColor": "#e8f5e9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 12
+      },
+      "groupIds": [
+        "frontend-group"
+      ],
+      "seed": 2001,
+      "versionNonce": 1261686983,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "frontend-text"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-frontend-to-backend"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-frontend"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-frontend-to-daily"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-daily-to-frontend"
+        }
+      ],
+      "version": 2,
+      "index": "a0",
+      "frameId": null,
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "frontend-text",
+      "type": "text",
+      "x": 80,
+      "y": 220,
+      "width": 240,
+      "height": 200,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "🌐 Frontend Application\n━━━━━━━━━━\n⚛️ React / Next.js\n━━━━━━━━━━\nComponents:\n• UI Components\n• Voice Call Interface\n• Daily.co Client SDK\n• WebRTC Media Streams\n• Numerology Dashboard\n• User Management",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "frontend-box",
+      "groupIds": [
+        "frontend-group"
+      ],
+      "seed": 2002,
+      "versionNonce": 256099113,
+      "isDeleted": false,
+      "version": 2,
+      "index": "a1",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "originalText": "🌐 Frontend Application\n━━━━━━━━━━\n⚛️ React / Next.js\n━━━━━━━━━━\nComponents:\n• UI Components\n• Voice Call Interface\n• Daily.co Client SDK\n• WebRTC Media Streams\n• Numerology Dashboard\n• User Management",
+      "autoResize": true,
+      "lineHeight": 1.298701298701299
+    },
+    {
+      "id": "backend-box",
+      "type": "rectangle",
+      "x": 480,
+      "y": 200,
+      "width": 320,
+      "height": 240,
+      "angle": 0,
+      "strokeColor": "#1976d2",
+      "backgroundColor": "#e3f2fd",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 12
+      },
+      "groupIds": [
+        "backend-group"
+      ],
+      "seed": 2003,
+      "versionNonce": 1244405735,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "backend-text"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-frontend-to-backend"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-frontend"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-pipeline"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-db"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-daily-api"
+        }
+      ],
+      "version": 2,
+      "index": "a2",
+      "frameId": null,
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "backend-text",
+      "type": "text",
+      "x": 500,
+      "y": 220,
+      "width": 280,
+      "height": 200,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "🚀 Backend API Server\n━━━━━━━━━━\n⚡ FastAPI (Python)\n━━━━━━━━━━\nEndpoints:\n• /api/v1/conversations\n• /api/v1/voice/start-call\n• /api/v1/numerology/*\nServices:\n• daily_service.py (Room mgmt)\n• voice_service.py (Orchestration)",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "backend-box",
+      "groupIds": [
+        "backend-group"
+      ],
+      "seed": 2004,
+      "versionNonce": 1444115977,
+      "isDeleted": false,
+      "version": 2,
+      "index": "a3",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "originalText": "🚀 Backend API Server\n━━━━━━━━━━\n⚡ FastAPI (Python)\n━━━━━━━━━━\nEndpoints:\n• /api/v1/conversations\n• /api/v1/voice/start-call\n• /api/v1/numerology/*\nServices:\n• daily_service.py (Room mgmt)\n• voice_service.py (Orchestration)",
+      "autoResize": true,
+      "lineHeight": 1.298701298701299
+    },
+    {
+      "id": "pipeline-box",
+      "type": "rectangle",
+      "x": 940,
+      "y": 200,
+      "width": 360,
+      "height": 240,
+      "angle": 0,
+      "strokeColor": "#7b1fa2",
+      "backgroundColor": "#f3e5f5",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 12
+      },
+      "groupIds": [
+        "pipeline-group"
+      ],
+      "seed": 2005,
+      "versionNonce": 1477717255,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "pipeline-text"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-pipeline"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-pipeline-to-services"
+        },
+        {
+          "id": "arrow-pipeline-to-daily",
+          "type": "arrow"
+        }
+      ],
+      "version": 4,
+      "index": "a4",
+      "frameId": null,
+      "updated": 1763801361636,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "pipeline-text",
+      "type": "text",
+      "x": 1007.7089538574219,
+      "y": 220,
+      "width": 224.58209228515625,
+      "height": 200.00000000000003,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "🎙️ Pipecat Voice Pipeline\n━━━━━━━━━━\n🔄 Async Task (asyncio)\n━━━━━━━━━━\npipecat_bot.py:\n• DailyTransport (WebRTC)\n• Silero VAD\n• Deepgram STT → LLM → TTS\n• Numerology Functions\n• Context Aggregators\nRuns as: asyncio.create_task()",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "pipeline-box",
+      "groupIds": [
+        "pipeline-group"
+      ],
+      "seed": 2006,
+      "versionNonce": 1593771465,
+      "isDeleted": false,
+      "version": 3,
+      "index": "a5",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801361638,
+      "link": null,
+      "locked": false,
+      "originalText": "🎙️ Pipecat Voice Pipeline\n━━━━━━━━━━\n🔄 Async Task (asyncio)\n━━━━━━━━━━\npipecat_bot.py:\n• DailyTransport (WebRTC)\n• Silero VAD\n• Deepgram STT → LLM → TTS\n• Numerology Functions\n• Context Aggregators\nRuns as: asyncio.create_task()",
+      "autoResize": true,
+      "lineHeight": 1.298701298701299
+    },
+    {
+      "id": "daily-box",
+      "type": "rectangle",
+      "x": 260,
+      "y": 520,
+      "width": 280,
+      "height": 160,
+      "angle": 0,
+      "strokeColor": "#f57c00",
+      "backgroundColor": "#fff3e0",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 12
+      },
+      "groupIds": [
+        "daily-group"
+      ],
+      "seed": 2007,
+      "versionNonce": 72764137,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "daily-text"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-frontend-to-daily"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-daily-to-frontend"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-daily-api"
+        },
+        {
+          "id": "arrow-pipeline-to-daily",
+          "type": "arrow"
+        }
+      ],
+      "version": 31,
+      "index": "a6",
+      "frameId": null,
+      "updated": 1763801361636,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "daily-text",
+      "type": "text",
+      "x": 306.10174560546875,
+      "y": 540,
+      "width": 187.7965087890625,
+      "height": 120,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "📡 Daily.co Infrastructure\n━━━━━━━━━━\nWebRTC Rooms\n• Room Creation API\n• Meeting Tokens (JWT)\n• WebRTC Signaling\n• TURN/STUN Servers\n• Media Relay",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "daily-box",
+      "groupIds": [
+        "daily-group"
+      ],
+      "seed": 2008,
+      "versionNonce": 1261892647,
+      "isDeleted": false,
+      "version": 30,
+      "index": "a7",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801361637,
+      "link": null,
+      "locked": false,
+      "originalText": "📡 Daily.co Infrastructure\n━━━━━━━━━━\nWebRTC Rooms\n• Room Creation API\n• Meeting Tokens (JWT)\n• WebRTC Signaling\n• TURN/STUN Servers\n• Media Relay",
+      "autoResize": true,
+      "lineHeight": 1.0714285714285714
+    },
+    {
+      "id": "services-box",
+      "type": "rectangle",
+      "x": 940,
+      "y": 520,
+      "width": 360,
+      "height": 160,
+      "angle": 0,
+      "strokeColor": "#004d40",
+      "backgroundColor": "#e0f2f1",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 12
+      },
+      "groupIds": [
+        "services-group"
+      ],
+      "seed": 2009,
+      "versionNonce": 1005434183,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "services-text"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-pipeline-to-services"
+        }
+      ],
+      "version": 2,
+      "index": "a8",
+      "frameId": null,
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "services-text",
+      "type": "text",
+      "x": 960,
+      "y": 540,
+      "width": 320,
+      "height": 120,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "☁️ External AI Services\n━━━━━━━━━━\n🗣️ Deepgram (Speech-to-Text)\n🧠 Azure OpenAI (GPT-5-mini)\n🔊 ElevenLabs (Text-to-Speech)\n━━━━━━━━━━\nAll via API Keys in .env",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "services-box",
+      "groupIds": [
+        "services-group"
+      ],
+      "seed": 2010,
+      "versionNonce": 183002793,
+      "isDeleted": false,
+      "version": 2,
+      "index": "a9",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "originalText": "☁️ External AI Services\n━━━━━━━━━━\n🗣️ Deepgram (Speech-to-Text)\n🧠 Azure OpenAI (GPT-5-mini)\n🔊 ElevenLabs (Text-to-Speech)\n━━━━━━━━━━\nAll via API Keys in .env",
+      "autoResize": true,
+      "lineHeight": 1.2244897959183674
+    },
+    {
+      "id": "db-box",
+      "type": "rectangle",
+      "x": 600,
+      "y": 520,
+      "width": 280,
+      "height": 160,
+      "angle": 0,
+      "strokeColor": "#388e3c",
+      "backgroundColor": "#e8f5e9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 12
+      },
+      "groupIds": [
+        "db-group"
+      ],
+      "seed": 2011,
+      "versionNonce": 1127576679,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "db-text"
+        },
+        {
+          "type": "arrow",
+          "id": "arrow-backend-to-db"
+        }
+      ],
+      "version": 2,
+      "index": "aA",
+      "frameId": null,
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "db-text",
+      "type": "text",
+      "x": 620,
+      "y": 540,
+      "width": 240,
+      "height": 120,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "🗄️ Database\n━━━━━━━━━━\nPostgreSQL / SQLite\n• Users\n• Conversations\n• Numerology Data\n• Voice Sessions",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "db-box",
+      "groupIds": [
+        "db-group"
+      ],
+      "seed": 2012,
+      "versionNonce": 1280813449,
+      "isDeleted": false,
+      "version": 2,
+      "index": "aB",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "originalText": "🗄️ Database\n━━━━━━━━━━\nPostgreSQL / SQLite\n• Users\n• Conversations\n• Numerology Data\n• Voice Sessions",
+      "autoResize": true,
+      "lineHeight": 1.2244897959183674
+    },
+    {
+      "id": "arrow-frontend-to-backend",
+      "type": "arrow",
+      "x": 340,
+      "y": 280,
+      "width": 140,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#1976d2",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "frontend-box",
+        "focus": 0.3,
+        "gap": 10
+      },
+      "endBinding": {
+        "elementId": "backend-box",
+        "focus": 0.3,
+        "gap": 10
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          140,
+          0
+        ]
+      ],
+      "seed": 2013,
+      "versionNonce": 91770759,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 2,
+      "index": "aC",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "arrow-backend-to-frontend",
+      "type": "arrow",
+      "x": 480,
+      "y": 360,
+      "width": 140,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#1976d2",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "backend-box",
+        "focus": -0.3,
+        "gap": 10
+      },
+      "endBinding": {
+        "elementId": "frontend-box",
+        "focus": -0.3,
+        "gap": 10
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -140,
+          0
+        ]
+      ],
+      "seed": 2014,
+      "versionNonce": 1755025513,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 2,
+      "index": "aD",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "arrow-backend-to-pipeline",
+      "type": "arrow",
+      "x": 807.943578329772,
+      "y": 319.99999999999994,
+      "width": 127.97607051709747,
+      "height": 1.0431803648419304,
+      "angle": 0,
+      "strokeColor": "#7b1fa2",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "label-spawn-task",
+        "focus": 1.6554101215728656,
+        "gap": 15.663885325497715
+      },
+      "endBinding": {
+        "elementId": "pipeline-box",
+        "focus": -0.020941344902923056,
+        "gap": 4.08035115313055
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          127.97607051709747,
+          1.0431803648419304
+        ]
+      ],
+      "seed": 2015,
+      "versionNonce": 1953701319,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 27,
+      "index": "aE",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801401217,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "arrow-frontend-to-daily",
+      "type": "arrow",
+      "x": 214.9825922830129,
+      "y": 442.3765839248109,
+      "width": 136.30657330542542,
+      "height": 76.65117998028131,
+      "angle": 0,
+      "strokeColor": "#f57c00",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "frontend-box",
+        "focus": 0.5734024590215131,
+        "gap": 2.376583924810916
+      },
+      "endBinding": {
+        "elementId": "daily-box",
+        "focus": 0.337558207809776,
+        "gap": 1
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          136.30657330542542,
+          76.65117998028131
+        ]
+      ],
+      "seed": 2016,
+      "versionNonce": 782708873,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 48,
+      "index": "aF",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801380098,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "arrow-daily-to-frontend",
+      "type": "arrow",
+      "x": 259.13289445752923,
+      "y": 559.4326241500294,
+      "width": 178.36408759852648,
+      "height": 116.70952479102402,
+      "angle": 0,
+      "strokeColor": "#f57c00",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "daily-box",
+        "focus": -0.30072632935035004,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "frontend-box",
+        "focus": 0.9486470811857335,
+        "gap": 4.172721459367608
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -178.36408759852648,
+          -116.70952479102402
+        ]
+      ],
+      "seed": 2017,
+      "versionNonce": 512582825,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 183,
+      "index": "aG",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801361638,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "arrow-pipeline-to-daily",
+      "type": "arrow",
+      "x": 1304.5223636704359,
+      "y": 407.0170955787577,
+      "width": 944.6223636704359,
+      "height": 324.2269698998613,
+      "angle": 0,
+      "strokeColor": "#7b1fa2",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "pipeline-box",
+        "fixedPoint": [
+          1.0125621213067664,
+          0.862571231578157
+        ],
+        "focus": 0,
+        "gap": 0
+      },
+      "endBinding": {
+        "elementId": "daily-box",
+        "fixedPoint": [
+          0.49964285714285706,
+          1.03125
+        ],
+        "focus": 0,
+        "gap": 0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          324.2269698998613
+        ],
+        [
+          -904.6223636704359,
+          324.2269698998613
+        ],
+        [
+          -904.6223636704359,
+          277.9829044212423
+        ]
+      ],
+      "elbowed": true,
+      "seed": 2018,
+      "versionNonce": 133594055,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 576,
+      "index": "aH",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801361638,
+      "link": null,
+      "locked": false,
+      "fixedSegments": [
+        {
+          "index": 2,
+          "start": [
+            40,
+            0
+          ],
+          "end": [
+            40,
+            324.2269698998613
+          ]
+        },
+        {
+          "index": 3,
+          "start": [
+            40,
+            324.2269698998613
+          ],
+          "end": [
+            -904.6223636704359,
+            324.2269698998613
+          ]
+        }
+      ],
+      "startIsSpecial": false,
+      "endIsSpecial": false
+    },
+    {
+      "id": "arrow-pipeline-to-services",
+      "type": "arrow",
+      "x": 1120,
+      "y": 445.6468391559199,
+      "width": 0,
+      "height": 70.07229739668958,
+      "angle": 0,
+      "strokeColor": "#004d40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "pipeline-box",
+        "focus": 0,
+        "gap": 10
+      },
+      "endBinding": {
+        "elementId": "services-box",
+        "focus": 0,
+        "gap": 10
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          70.07229739668958
+        ]
+      ],
+      "seed": 2019,
+      "versionNonce": 320088231,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 3,
+      "index": "aI",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801361638,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "arrow-backend-to-db",
+      "type": "arrow",
+      "x": 640,
+      "y": 440,
+      "width": 0,
+      "height": 80,
+      "angle": 0,
+      "strokeColor": "#388e3c",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "backend-box",
+        "focus": 0,
+        "gap": 10
+      },
+      "endBinding": {
+        "elementId": "db-box",
+        "focus": 0,
+        "gap": 10
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          80
+        ]
+      ],
+      "seed": 2020,
+      "versionNonce": 1797659913,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 2,
+      "index": "aJ",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "arrow-backend-to-daily-api",
+      "type": "arrow",
+      "x": 525.1110310483047,
+      "y": 446.07450107570804,
+      "width": 1.1356181572280093,
+      "height": 70.86690209970044,
+      "angle": 0,
+      "strokeColor": "#f57c00",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "dashed",
+      "roughness": 0,
+      "opacity": 100,
+      "startBinding": {
+        "elementId": "backend-box",
+        "focus": 0.6970516600201363,
+        "gap": 6.074501075708042
+      },
+      "endBinding": {
+        "elementId": "daily-box",
+        "focus": 0.8680826320048848,
+        "gap": 3.0585968245915183
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -1.1356181572280093,
+          70.86690209970044
+        ]
+      ],
+      "seed": 2021,
+      "versionNonce": 1955858217,
+      "isDeleted": false,
+      "lastCommittedPoint": null,
+      "version": 101,
+      "index": "aK",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801368001,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "label-rest-api",
+      "type": "text",
+      "x": 360,
+      "y": 240,
+      "width": 100,
+      "height": 30,
+      "angle": 0,
+      "strokeColor": "#0066cc",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "REST API\nHTTPS/JSON",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "seed": 2022,
+      "versionNonce": 474977257,
+      "isDeleted": false,
+      "version": 2,
+      "index": "aL",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "containerId": null,
+      "originalText": "REST API\nHTTPS/JSON",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "label-spawn-task",
+      "type": "text",
+      "x": 820,
+      "y": 280,
+      "width": 100,
+      "height": 30,
+      "angle": 0,
+      "strokeColor": "#7b1fa2",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "Spawn Task\nasyncio",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "seed": 2023,
+      "versionNonce": 679154567,
+      "isDeleted": false,
+      "version": 3,
+      "index": "aM",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [
+        {
+          "id": "arrow-backend-to-pipeline",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1763801400670,
+      "link": null,
+      "locked": false,
+      "containerId": null,
+      "originalText": "Spawn Task\nasyncio",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "label-webrtc",
+      "type": "text",
+      "x": 142.0863607296838,
+      "y": 473.74091781094864,
+      "width": 100,
+      "height": 30,
+      "angle": 0,
+      "strokeColor": "#f57c00",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "WebRTC\nMedia",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "seed": 2024,
+      "versionNonce": 859646217,
+      "isDeleted": false,
+      "version": 9,
+      "index": "aN",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801289569,
+      "link": null,
+      "locked": false,
+      "containerId": null,
+      "originalText": "WebRTC\nMedia",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "label-room-api",
+      "type": "text",
+      "x": 427.4818356218972,
+      "y": 457.76832424549366,
+      "width": 100,
+      "height": 30,
+      "angle": 0,
+      "strokeColor": "#f57c00",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "Room API\ncreate/token",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "seed": 2025,
+      "versionNonce": 69396423,
+      "isDeleted": false,
+      "version": 116,
+      "index": "aO",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801368878,
+      "link": null,
+      "locked": false,
+      "containerId": null,
+      "originalText": "Room API\ncreate/token",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "label-bot-joins",
+      "type": "text",
+      "x": 1262.308474692966,
+      "y": 461.2227534328458,
+      "width": 100,
+      "height": 30,
+      "angle": 0,
+      "strokeColor": "#7b1fa2",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "Bot Joins\nRoom",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "seed": 2026,
+      "versionNonce": 561173513,
+      "isDeleted": false,
+      "version": 184,
+      "index": "aP",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801349514,
+      "link": null,
+      "locked": false,
+      "containerId": null,
+      "originalText": "Bot Joins\nRoom",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "x": 440,
+      "y": 60,
+      "width": 480,
+      "height": 40,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "🏗️ Numerology AI - System Architecture Overview",
+      "fontSize": 24,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "seed": 2027,
+      "versionNonce": 1874681191,
+      "isDeleted": false,
+      "version": 2,
+      "index": "aQ",
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "containerId": null,
+      "originalText": "🏗️ Numerology AI - System Architecture Overview",
+      "autoResize": true,
+      "lineHeight": 1.6666666666666667
+    },
+    {
+      "id": "flow-box",
+      "type": "rectangle",
+      "x": 60,
+      "y": 760,
+      "width": 1240,
+      "height": 200,
+      "angle": 0,
+      "strokeColor": "#263238",
+      "backgroundColor": "#eceff1",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 8
+      },
+      "groupIds": [
+        "flow-group"
+      ],
+      "seed": 2028,
+      "versionNonce": 2069811337,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "flow-text"
+        }
+      ],
+      "version": 2,
+      "index": "aR",
+      "frameId": null,
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "flow-text",
+      "type": "text",
+      "x": 80,
+      "y": 780,
+      "width": 1200,
+      "height": 160,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "📋 Voice Call Flow:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n1️⃣ User clicks 'Start Voice Call' in Frontend\n2️⃣ Frontend sends request to Backend API (/api/v1/voice/start-call)\n3️⃣ Backend calls Daily.co API to create room + generate JWT token\n4️⃣ Backend spawns Pipecat bot as async task: asyncio.create_task(pipecat_bot.run_bot())\n5️⃣ Bot joins Daily.co room with token\n6️⃣ Frontend joins same room using Daily.co Client SDK\n7️⃣ WebRTC connection established between User ↔ Daily.co ↔ Bot\n8️⃣ Voice pipeline processes audio: User speech → STT → LLM → TTS → User speakers",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "middle",
+      "containerId": "flow-box",
+      "groupIds": [
+        "flow-group"
+      ],
+      "seed": 2029,
+      "versionNonce": 186325127,
+      "isDeleted": false,
+      "version": 2,
+      "index": "aS",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "originalText": "📋 Voice Call Flow:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n1️⃣ User clicks 'Start Voice Call' in Frontend\n2️⃣ Frontend sends request to Backend API (/api/v1/voice/start-call)\n3️⃣ Backend calls Daily.co API to create room + generate JWT token\n4️⃣ Backend spawns Pipecat bot as async task: asyncio.create_task(pipecat_bot.run_bot())\n5️⃣ Bot joins Daily.co room with token\n6️⃣ Frontend joins same room using Daily.co Client SDK\n7️⃣ WebRTC connection established between User ↔ Daily.co ↔ Bot\n8️⃣ Voice pipeline processes audio: User speech → STT → LLM → TTS → User speakers",
+      "autoResize": true,
+      "lineHeight": 1.1428571428571428
+    },
+    {
+      "id": "note-box",
+      "type": "rectangle",
+      "x": 1380,
+      "y": 200,
+      "width": 260,
+      "height": 480,
+      "angle": 0,
+      "strokeColor": "#616161",
+      "backgroundColor": "#f5f5f5",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "dotted",
+      "roughness": 0,
+      "opacity": 100,
+      "roundness": {
+        "type": 3,
+        "value": 8
+      },
+      "groupIds": [
+        "note-group"
+      ],
+      "seed": 2030,
+      "versionNonce": 438687593,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "note-text"
+        }
+      ],
+      "version": 2,
+      "index": "aT",
+      "frameId": null,
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "note-text",
+      "type": "text",
+      "x": 1400,
+      "y": 220,
+      "width": 220,
+      "height": 440,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "text": "📌 Key Points:\n━━━━━━━━━━\n\n✅ Frontend & Bot\nboth connect to same\nDaily.co room\n\n✅ Backend orchestrates\nbut doesn't handle\nmedia streams\n\n✅ Voice Pipeline runs\nas background task\n\n✅ WebRTC handles all\nreal-time audio\n\n✅ Bot appears as\nanother participant\nin the call\n\n━━━━━━━━━━\n📁 Key Files:\n• pipecat_bot.py\n• daily_service.py\n• voice_service.py\n• function_handlers.py\n\n━━━━━━━━━━\n⚙️ Environment:\n• DAILY_API_KEY\n• DEEPGRAM_API_KEY\n• AZURE_OPENAI_*\n• ELEVENLABS_API_KEY",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": "note-box",
+      "groupIds": [
+        "note-group"
+      ],
+      "seed": 2031,
+      "versionNonce": 1700032423,
+      "isDeleted": false,
+      "version": 2,
+      "index": "aU",
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1763801248859,
+      "link": null,
+      "locked": false,
+      "originalText": "📌 Key Points:\n━━━━━━━━━━\n\n✅ Frontend & Bot\nboth connect to same\nDaily.co room\n\n✅ Backend orchestrates\nbut doesn't handle\nmedia streams\n\n✅ Voice Pipeline runs\nas background task\n\n✅ WebRTC handles all\nreal-time audio\n\n✅ Bot appears as\nanother participant\nin the call\n\n━━━━━━━━━━\n📁 Key Files:\n• pipecat_bot.py\n• daily_service.py\n• voice_service.py\n• function_handlers.py\n\n━━━━━━━━━━\n⚙️ Environment:\n• DAILY_API_KEY\n• DEEPGRAM_API_KEY\n• AZURE_OPENAI_*\n• ELEVENLABS_API_KEY",
+      "autoResize": true,
+      "lineHeight": 0.995475113122172
+    }
+  ],
+  "appState": {
+    "gridSize": 20,
+    "gridStep": 5,
+    "gridModeEnabled": false,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
