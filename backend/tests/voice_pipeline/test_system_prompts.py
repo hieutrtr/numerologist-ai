@@ -133,7 +133,7 @@ class TestGetNumerologySystemPrompt:
             assert "previous conversations" not in result.lower()
 
     def test_includes_conversation_history_when_provided(self):
-        """Test that conversation history is appended to system prompt."""
+        """Test that conversation history is appended to system prompt with enhanced guidance."""
         mock_user = Mock()
         mock_user.full_name = "Test User"
         mock_user.birth_date = datetime(1990, 5, 15)
@@ -148,7 +148,10 @@ class TestGetNumerologySystemPrompt:
             assert "Hello Test User" in result
             assert "Previous conversations with this user:" in result
             assert "Life Path Number" in result
-            assert "As we discussed last time" in result
+            # Check for Vietnamese enhanced conversation history guidance
+            assert "Tận dụng lịch sử trò chuyện" in result
+            assert "Khi chào hỏi:" in result
+            assert "Lần trước chúng ta đã nói về" in result
 
     def test_handles_none_full_name(self):
         """Test that function handles None full_name gracefully."""

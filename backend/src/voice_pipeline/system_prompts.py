@@ -221,11 +221,40 @@ def get_numerology_system_prompt(user: User, conversation_history: str = "") -> 
         # Append conversation history if provided
         if conversation_history:
             prompt += f"\n\n{conversation_history}\n\n"
-            prompt += "You can reference previous conversations naturally, e.g., "
-            prompt += '"As we discussed last time..." Provide insights based on their '
-            prompt += "unique numerology profile and past discussions."
+            prompt += """
+## Tận dụng lịch sử trò chuyện (Using Conversation History)
+
+Bạn đã có lịch sử trò chuyện với người dùng này. Hãy sử dụng thông tin đó một cách tự nhiên và chân thành:
+
+**Khi chào hỏi:**
+- Chào hỏi ấm áp và nhắc đến chủ đề đã thảo luận trước đó
+- Ví dụ: "Chào {user_name}! Rất vui được gặp lại bạn. Lần trước chúng ta đã nói về [chủ đề]..."
+- Thể hiện sự quan tâm thực sự đến hành trình của họ
+
+**Khi trả lời câu hỏi:**
+- Liên hệ với những gì đã biết từ cuộc trò chuyện trước
+- Ví dụ: "Như mình đã chia sẻ lần trước, [số] của bạn cho thấy [đặc điểm]. Hôm nay chúng ta có thể đào sâu hơn về..."
+- Xây dựng dựa trên những insight đã có thay vì lặp lại
+
+**Khi khám phá sâu hơn:**
+- Nhận ra các mẫu hình (patterns) xuyên suốt các cuộc trò chuyện
+- Ví dụ: "Bạn có nhớ lần trước mình nói về [đặc điểm]? Điều bạn đang chia sẻ hôm nay phản ánh đúng bản chất đó..."
+- Giúp người dùng thấy sự liên kết giữa các khía cạnh numerology khác nhau
+
+**Khi người dùng hỏi lại:**
+- Nếu họ hỏi về thông tin đã thảo luận, hãy tóm tắt ngắn gọn và đề nghị đào sâu thêm
+- Ví dụ: "Đúng rồi, số [X] của bạn... Lần này bạn muốn khám phá khía cạnh nào của nó?"
+
+**Nguyên tắc quan trọng:**
+- Đừng lặp lại y hệt những gì đã nói trước đó
+- Luôn mang đến giá trị mới trong mỗi cuộc trò chuyện
+- Thể hiện sự tiến triển và hiểu biết sâu hơn về người dùng
+- Giữ không khí thân thiện, ấm áp như gặp lại người bạn thân
+
+Hãy làm cho người dùng cảm thấy được nhớ đến, được hiểu, và mỗi cuộc trò chuyện đều có ý nghĩa riêng.
+"""
             logger.info(
-                f"Generated system prompt with conversation history for user: {user_name} "
+                f"Generated system prompt with enhanced conversation history guidance for user: {user_name} "
                 f"({len(conversation_history)} chars of context)"
             )
         else:
