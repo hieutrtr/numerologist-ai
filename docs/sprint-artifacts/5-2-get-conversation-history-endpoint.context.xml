@@ -1,0 +1,269 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.2</storyId>
+    <title>Get Conversation History Endpoint</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-23</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-2-get-conversation-history-endpoint.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to view my past conversations</iWant>
+    <soThat>I can see what we discussed before</soThat>
+    <tasks>
+      - Task 1: Implement GET /conversations endpoint (AC: #1-5)
+      - Task 2: Implement GET /conversations/{id} endpoint (AC: #6)
+      - Task 3: Write unit and integration tests (AC: #7)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Endpoint: `GET /api/v1/conversations` (requires auth)
+    2. Returns list of user's conversations with summary
+    3. Each conversation shows: id, started_at, ended_at, duration, main_topic
+    4. Paginated (20 per page)
+    5. Ordered by most recent first
+    6. Endpoint: `GET /api/v1/conversations/{id}` returns full conversation with all messages
+    7. Can test with Postman - see conversation list
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>API Contracts - Conversation Endpoints</section>
+        <snippet>API endpoint patterns for conversations: GET /api/v1/conversations (list), GET /api/v1/conversations/{id} (detail). Each conversation shows id, started_at, ended_at, duration_seconds, main_topic with pagination support.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>API Response Patterns</section>
+        <snippet>All API endpoints return consistent APIResponse structure with success boolean, optional data payload, and error details. Use proper HTTP status codes (200 OK, 404 Not Found, 403 Forbidden).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Database Performance</section>
+        <snippet>Implement pagination using OFFSET/LIMIT pattern. Index on user_id and started_at for fast conversation retrieval. Use eager loading to avoid N+1 queries.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Authentication & Authorization</section>
+        <snippet>JWT token strategy with Depends(get_current_user) for authentication. Verify user ownership before returning data. Access token: 15 minutes lifetime.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 5: Conversation History & Context Retention</title>
+        <section>Story 5.2</section>
+        <snippet>User story for viewing past conversations. Returns paginated list (20 per page) ordered by most recent first. Includes conversation summary with id, timing, and main topic fields.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Flow 3: Reviewing Past Readings</section>
+        <snippet>History screen shows conversations in reverse chronological order with cards displaying date, first question, preview of insights, and life path number if calculated.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>backend/src/models/conversation.py</path>
+        <kind>model</kind>
+        <symbol>Conversation</symbol>
+        <lines>19-142</lines>
+        <reason>Main database model for conversations. Contains all fields needed for list/detail views: id, user_id, daily_room_id, started_at, ended_at, duration_seconds, created_at, updated_at. Includes user and messages relationships.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/models/conversation_message.py</path>
+        <kind>model</kind>
+        <symbol>ConversationMessage</symbol>
+        <lines>1-120</lines>
+        <reason>Message model referenced in AC #6 for full conversation detail. Used to fetch messages associated with a conversation. Note: field name is message_metadata not metadata.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>endpoint</kind>
+        <symbol>start_conversation</symbol>
+        <lines>53-221</lines>
+        <reason>Existing conversation endpoint in same router. Shows pattern for FastAPI endpoints with authentication, database sessions, and error handling.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>endpoint</kind>
+        <symbol>end_conversation</symbol>
+        <lines>224-311</lines>
+        <reason>Shows authorization pattern - verifying conversation ownership before allowing operations. Includes proper error handling and logging.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>endpoint</kind>
+        <symbol>get_conversation_messages</symbol>
+        <lines>313-473</lines>
+        <reason>Reference implementation for Story 5.1. Demonstrates pagination pattern (LIMIT/OFFSET), authorization checking, response schema pattern, and efficient COUNT query using func.count().</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>schema</kind>
+        <symbol>MessageResponse</symbol>
+        <lines>31-41</lines>
+        <reason>Response schema pattern for message data. Shows Pydantic BaseModel usage with Config.from_attributes=True.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>schema</kind>
+        <symbol>ConversationMessagesResponse</symbol>
+        <lines>43-51</lines>
+        <reason>Pagination response schema pattern. Includes total, page, limit, has_more fields for proper pagination metadata.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/deps.py</path>
+        <kind>dependency</kind>
+        <symbol>get_current_user</symbol>
+        <lines>1-50</lines>
+        <reason>Authentication dependency used in all protected endpoints via Depends(get_current_user). Validates JWT token and returns User object.</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/database.py</path>
+        <kind>dependency</kind>
+        <symbol>get_session</symbol>
+        <lines>1-50</lines>
+        <reason>Database session dependency used via Depends(get_session). Provides SQLModel session for database operations.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <python>
+        <package name="fastapi" version=">=0.109.0">Web framework for API endpoints</package>
+        <package name="sqlmodel" version=">=0.0.14">ORM for database queries</package>
+        <package name="pydantic" version=">=2.5.0">Data validation and response schemas</package>
+        <package name="python-jose" version=">=3.3.0">JWT token handling</package>
+        <package name="uvicorn" version=">=0.27.0">ASGI server</package>
+      </python>
+      <python-dev>
+        <package name="pytest" version=">=7.4.0">Testing framework</package>
+        <package name="pytest-asyncio" version=">=0.23.0">Async test support</package>
+        <package name="httpx" version=">=0.27.0">HTTP client for API testing</package>
+      </python-dev>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Use FastAPI router pattern for API endpoints (extend existing conversations.py router)
+    - Implement authentication using Depends(get_current_user) on all endpoints
+    - Verify conversation ownership before returning data (check conversation.user_id == current_user.id)
+    - Use SQLModel for database queries with proper type hints
+    - Follow pagination pattern: OFFSET/OFFSET with page and limit parameters
+    - Use func.count() for efficient COUNT queries (not len(.all()))
+    - Return consistent APIResponse structure with success/error fields
+    - Use proper HTTP status codes: 200 OK, 404 Not Found, 403 Forbidden, 422 Unprocessable Entity
+    - Order conversations by started_at descending (most recent first)
+    - Include comprehensive logging for security events and errors
+    - Handle all exceptions gracefully with proper error messages
+    - Follow snake_case naming for functions, PascalCase for classes
+    - Use UUID type for conversation_id parameter
+    - Validate pagination parameters (page >= 1, limit between 1 and 100)
+    - Avoid import path errors: use "src.models" not "backend.src.models"
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GET /api/v1/conversations</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        async def list_conversations(
+            current_user: User = Depends(get_current_user),
+            session: Session = Depends(get_session),
+            page: int = Query(1, ge=1),
+            limit: int = Query(20, ge=1, le=100)
+        ) -> ConversationListResponse
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py</path>
+    </interface>
+    <interface>
+      <name>GET /api/v1/conversations/{conversation_id}</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        async def get_conversation(
+            conversation_id: UUID,
+            current_user: User = Depends(get_current_user),
+            session: Session = Depends(get_session)
+        ) -> ConversationDetailResponse
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py</path>
+    </interface>
+    <interface>
+      <name>ConversationListResponse</name>
+      <kind>Pydantic schema</kind>
+      <signature>
+        class ConversationListResponse(BaseModel):
+            conversations: List[ConversationSummary]
+            total: int
+            page: int
+            limit: int
+            has_more: bool
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py</path>
+    </interface>
+    <interface>
+      <name>ConversationSummary</name>
+      <kind>Pydantic schema</kind>
+      <signature>
+        class ConversationSummary(BaseModel):
+            id: str
+            started_at: str
+            ended_at: Optional[str]
+            duration: Optional[int]
+            main_topic: Optional[str]
+
+            class Config:
+                from_attributes = True
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py</path>
+    </interface>
+    <interface>
+      <name>ConversationDetailResponse</name>
+      <kind>Pydantic schema</kind>
+      <signature>
+        class ConversationDetailResponse(BaseModel):
+            conversation: ConversationSummary
+            messages: List[MessageResponse]
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for unit and integration tests. Follow pytest-asyncio patterns for async endpoint testing. Use httpx TestClient for API testing with FastAPI. Create test fixtures for users and conversations. Test authentication (valid JWT required), authorization (user ownership validation), pagination (page boundaries, limits), ordering (most recent first), and error cases (404, 403, 422). Use GIVEN-WHEN-THEN pattern for test structure. Achieve comprehensive coverage of acceptance criteria.
+    </standards>
+    <locations>
+      backend/tests/api/test_conversations.py
+      backend/tests/models/test_conversation.py (if needed)
+    </locations>
+    <ideas>
+      - AC#1: Test GET /conversations requires authentication (401 without token)
+      - AC#2-3: Test list returns conversations with all required fields (id, started_at, ended_at, duration, main_topic)
+      - AC#4: Test pagination with multiple pages (page 1, page 2, verify limit enforcement)
+      - AC#4: Test has_more flag calculation
+      - AC#5: Test ordering by started_at descending (most recent first)
+      - AC#5: Create 3 conversations with different timestamps, verify order
+      - AC#6: Test GET /conversations/{id} returns full conversation with messages
+      - AC#6: Test detail endpoint requires authentication
+      - AC#6: Test authorization - user cannot access other user's conversations (403)
+      - AC#6: Test 404 when conversation not found
+      - AC#7: Integration test with Postman-like scenario (create conversations, list them, get details)
+      - Edge case: Test empty conversation list (new user, no conversations)
+      - Edge case: Test single conversation
+      - Edge case: Test conversation without messages
+      - Edge case: Test pagination boundary (exactly 20 items, 21 items)
+      - Validation: Test invalid page numbers (0, negative)
+      - Validation: Test invalid limits (0, >100)
+      - Performance: Verify COUNT query uses func.count() not len(.all())
+    </ideas>
+  </tests>
+</story-context>
