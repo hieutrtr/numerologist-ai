@@ -78,7 +78,7 @@ export default function ConversationDetailScreen() {
             {error || 'Conversation not found'}
           </Text>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => router.push('/(tabs)/history')}
             className="mt-lg px-xl py-md bg-primary/20 border border-primary/40 rounded-lg"
           >
             <Text className="text-body text-primary font-medium">Go Back</Text>
@@ -96,7 +96,7 @@ export default function ConversationDetailScreen() {
       <View className="px-lg py-md border-b border-background-light">
         <View className="flex-row items-center mb-sm">
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => router.push('/(tabs)/history')}
             className="mr-md p-sm"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
