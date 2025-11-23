@@ -106,6 +106,21 @@ export interface ConversationListResponse {
   has_more: boolean;
 }
 
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface ConversationDetail {
+  id: string;
+  started_at: string;
+  ended_at: string | null;
+  duration: number | null;
+  main_topic: string | null;
+  messages: ConversationMessage[];
+}
+
 // API functions
 export const fetchConversations = async (
   page: number = 1,
@@ -114,6 +129,13 @@ export const fetchConversations = async (
   const response = await apiClient.get('/api/v1/conversations', {
     params: { page, limit },
   });
+  return response.data;
+};
+
+export const fetchConversationDetail = async (
+  id: string
+): Promise<ConversationDetail> => {
+  const response = await apiClient.get(`/api/v1/conversations/${id}`);
   return response.data;
 };
 
