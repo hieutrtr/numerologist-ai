@@ -101,7 +101,7 @@ development_status:
   # EPIC 5: Conversation History & Context Retention
   # ============================================================================
   epic-5: backlog
-  5-1-conversation-message-model-saving: review
+  5-1-conversation-message-model-saving: done
   5-2-get-conversation-history-endpoint: backlog
   5-3-frontend-history-screen-ui: backlog
   5-4-conversation-detail-view: backlog
