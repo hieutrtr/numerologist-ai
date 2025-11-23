@@ -1,0 +1,204 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>1</storyId>
+    <title>Conversation Message Model & Saving</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-22</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/5-1-conversation-message-model-saving.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>to save conversation messages during the session</iWant>
+    <soThat>we have a record of what was discussed</soThat>
+    <tasks>
+      - Task 1: Create ConversationMessage model (AC: #1-2)
+        * Create model file with SQLModel structure
+        * Define fields with proper types and constraints
+        * Add foreign key relationship to Conversation model
+        * Update Conversation model with back-reference
+      - Task 2: Generate and run database migration (AC: #3)
+        * Generate Alembic migration with alembic revision --autogenerate
+        * Review migration file for correctness
+        * Apply migration with alembic upgrade head
+        * Verify table structure in PostgreSQL
+      - Task 3: Integrate message saving into voice pipeline (AC: #4, #7-8)
+        * Hook into pipecat bot message events
+        * Implement async save_user_message handler
+        * Implement async save_assistant_message handler
+        * Ensure non-blocking database operations
+        * Handle save errors gracefully without breaking conversation
+      - Task 4: Create service method for querying messages (AC: #5-6)
+        * Add get_conversation_messages method to conversation service
+        * Implement ordering by timestamp
+        * Add pagination support for large conversations
+        * Create response schema for message data
+      - Task 5: Write integration tests
+        * Test model creation and relationships
+        * Test message saving during conversation
+        * Test querying messages with ordering
+        * Test error handling for database failures
+        * Verify non-blocking operation doesn't impact latency
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">ConversationMessage model created in backend/src/models/conversation_message.py</criterion>
+    <criterion id="AC2">Fields: id, conversation_id, role (user/assistant), content, timestamp, metadata (JSON)</criterion>
+    <criterion id="AC3">Alembic migration creates table with proper foreign keys and indexes</criterion>
+    <criterion id="AC4">During conversation, each message saved to database asynchronously</criterion>
+    <criterion id="AC5">Messages linked to Conversation via foreign key relationship</criterion>
+    <criterion id="AC6">Can query messages for a conversation ordered by timestamp</criterion>
+    <criterion id="AC7">Non-blocking save operations (doesn't affect voice latency)</criterion>
+    <criterion id="AC8">Both user and assistant messages captured with accurate timestamps</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Database Models</section>
+        <snippet>SQLModel ORM patterns, PostgreSQL database, async operations throughout, snake_case naming conventions</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Voice Pipeline Patterns</section>
+        <snippet>Pipecat Bot Lifecycle pattern showing event handlers and async pipeline setup</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 5: Conversation History</title>
+        <section>Story 5.1</section>
+        <snippet>Save conversation messages during session with async non-blocking operations</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>backend/src/models/conversation.py</path>
+        <kind>model</kind>
+        <symbol>Conversation</symbol>
+        <lines>15-134</lines>
+        <reason>Parent model that messages will relate to via foreign key</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+        <kind>service</kind>
+        <symbol>run_bot</symbol>
+        <lines>-</lines>
+        <reason>Voice pipeline where message event handlers will be integrated</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/voice_pipeline/system_prompts.py</path>
+        <kind>service</kind>
+        <symbol>get_numerology_system_prompt</symbol>
+        <lines>-</lines>
+        <reason>Created in Story 4-5, provides context for message generation</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/core/database.py</path>
+        <kind>infrastructure</kind>
+        <symbol>get_session/get_async_session</symbol>
+        <lines>-</lines>
+        <reason>Database session management patterns for async operations</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/api/v1/endpoints/conversations.py</path>
+        <kind>controller</kind>
+        <symbol>ConversationsRouter</symbol>
+        <lines>-</lines>
+        <reason>API endpoints where message querying will be added</reason>
+      </artifact>
+      <artifact>
+        <path>backend/src/services/daily_service.py</path>
+        <kind>service</kind>
+        <symbol>DailyService</symbol>
+        <lines>-</lines>
+        <reason>Daily.co room management service for voice infrastructure</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <python>
+        <package>sqlmodel</package>
+        <package>fastapi</package>
+        <package>pipecat-ai</package>
+        <package>alembic</package>
+        <package>asyncio</package>
+        <package>pydantic</package>
+        <package>pytest</package>
+        <package>pytest-asyncio</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use SQLModel for ORM operations (consistent with existing models)</constraint>
+    <constraint>PostgreSQL as primary database with proper indexing</constraint>
+    <constraint>Async operations throughout for performance</constraint>
+    <constraint>Follow existing naming conventions: snake_case for tables/columns</constraint>
+    <constraint>Foreign key pattern: {table}_id (e.g., conversation_id)</constraint>
+    <constraint>Timestamps use datetime.utcnow() pattern</constraint>
+    <constraint>Must not block voice pipeline (use background tasks or async operations)</constraint>
+    <constraint>Maintain &lt;3 second voice latency requirement</constraint>
+    <constraint>Database saves should be fire-and-forget during conversation</constraint>
+    <constraint>Vietnamese prompts with English function names (from Story 4-5)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Conversation Model</name>
+      <kind>class interface</kind>
+      <signature>class Conversation(SQLModel, table=True): id: UUID, user_id: UUID, daily_room_id: str, started_at: datetime, ended_at: datetime</signature>
+      <path>backend/src/models/conversation.py</path>
+    </interface>
+    <interface>
+      <name>Database Session</name>
+      <kind>function signature</kind>
+      <signature>async def get_async_session() -> AsyncSession</signature>
+      <path>backend/src/core/database.py</path>
+    </interface>
+    <interface>
+      <name>Pipecat Event Handler</name>
+      <kind>decorator pattern</kind>
+      <signature>@transport.event_handler("on_user_message") async def handler(message: str)</signature>
+      <path>backend/src/voice_pipeline/pipecat_bot.py</path>
+    </interface>
+    <interface>
+      <name>GET /api/v1/conversations/{id}</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/v1/conversations/{id} -> ConversationResponse (with messages)</signature>
+      <path>backend/src/api/v1/endpoints/conversations.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest with pytest-asyncio for async tests. Follow existing test patterns in backend/tests/.
+      Create comprehensive test suite covering model validation, database operations, async behavior,
+      and integration with voice pipeline. Ensure non-blocking operations don't impact latency.
+      Test both happy path and error scenarios.
+    </standards>
+    <locations>
+      <location>backend/tests/models/test_conversation_message.py</location>
+      <location>backend/tests/voice_pipeline/test_message_saving.py</location>
+      <location>backend/tests/api/test_conversations_messages.py</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1,AC2">Test ConversationMessage model creation with all required fields</idea>
+      <idea ac="AC2">Validate role enum only accepts 'user' or 'assistant' values</idea>
+      <idea ac="AC3">Test migration creates proper foreign key constraints</idea>
+      <idea ac="AC4,AC7">Verify message saving is non-blocking using asyncio timing</idea>
+      <idea ac="AC5">Test foreign key relationship between Message and Conversation</idea>
+      <idea ac="AC6">Test querying messages returns correct order by timestamp</idea>
+      <idea ac="AC7">Benchmark latency impact of message saving during voice call</idea>
+      <idea ac="AC8">Test timestamp accuracy for both user and assistant messages</idea>
+      <idea ac="AC4">Test error handling when database is unavailable</idea>
+      <idea ac="AC6">Test pagination for conversations with many messages</idea>
+    </ideas>
+  </tests>
+</story-context>
