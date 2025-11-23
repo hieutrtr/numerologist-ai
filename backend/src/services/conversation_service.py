@@ -8,12 +8,14 @@ Provides business logic for conversation management including:
 """
 
 import logging
+import re
 from typing import List, Dict, Optional
 from uuid import UUID
 from datetime import datetime
 
 from sqlmodel import Session, select
 from src.models.conversation import Conversation
+from src.models.conversation_message import ConversationMessage, MessageRole
 from src.core.database import engine
 from src.core.redis import get_redis_client
 
@@ -182,8 +184,110 @@ async def invalidate_conversation_context_cache(user_id: UUID) -> None:
         # Non-critical error - cache will expire naturally
 
 
+async def generate_conversation_summary(conversation_id: UUID) -> Dict[str, Optional[str]]:
+    """
+    Generate conversation summary by analyzing messages.
+
+    Extracts main topic, key insights, and numbers discussed from the conversation
+    messages. Uses simple heuristic analysis to identify the primary discussion topic
+    and numerology numbers mentioned.
+
+    Args:
+        conversation_id: UUID of the conversation to summarize
+
+    Returns:
+        Dict with keys: main_topic, key_insights, numbers_discussed
+        Returns default values if conversation has no messages or on error
+
+    Example:
+        summary = await generate_conversation_summary(conversation.id)
+        # Returns: {
+        #   "main_topic": "Life Path Number",
+        #   "key_insights": "User resonates with leadership qualities of number 1",
+        #   "numbers_discussed": "1, 11, 22"
+        # }
+    """
+    try:
+        with Session(engine) as session:
+            # Query all messages for this conversation
+            statement = (
+                select(ConversationMessage)
+                .where(ConversationMessage.conversation_id == conversation_id)
+                .order_by(ConversationMessage.timestamp.asc())
+            )
+
+            messages = session.exec(statement).all()
+
+            if not messages:
+                logger.info(f"No messages found for conversation {conversation_id}")
+                return {
+                    "main_topic": "General discussion",
+                    "key_insights": None,
+                    "numbers_discussed": None
+                }
+
+            # Extract content from messages
+            user_messages = [msg.content for msg in messages if msg.role == MessageRole.USER]
+            assistant_messages = [msg.content for msg in messages if msg.role == MessageRole.ASSISTANT]
+
+            # Simple heuristic: Find most common numerology topics mentioned
+            all_content = " ".join(user_messages + assistant_messages).lower()
+
+            # Identify main topic based on keywords
+            topic_keywords = {
+                "Life Path Number": ["life path", "số đường đời", "life path number"],
+                "Expression Number": ["expression number", "số biểu hiện", "expression"],
+                "Soul Urge Number": ["soul urge", "số khát khao", "soul"],
+                "Birthday Number": ["birthday number", "sinh nhật", "birthday"],
+                "Personal Year": ["personal year", "năm cá nhân", "this year"]
+            }
+
+            detected_topic = "General numerology discussion"
+            for topic, keywords in topic_keywords.items():
+                if any(keyword in all_content for keyword in keywords):
+                    detected_topic = topic
+                    break
+
+            # Extract numbers mentioned (looking for numerology numbers 1-9, 11, 22, 33)
+            number_pattern = r'\b([1-9]|11|22|33)\b'
+            numbers_found = set(re.findall(number_pattern, all_content))
+            numbers_str = ", ".join(sorted(numbers_found, key=int)) if numbers_found else None
+
+            # Generate key insights from first assistant message (usually contains main insight)
+            key_insight = None
+            if assistant_messages:
+                # Take first substantial assistant message as key insight
+                first_message = assistant_messages[0]
+                # Truncate to 200 chars for database storage
+                key_insight = first_message[:200] if len(first_message) > 200 else first_message
+
+            logger.info(
+                f"Generated summary for conversation {conversation_id}: "
+                f"topic='{detected_topic}', numbers='{numbers_str}'"
+            )
+
+            return {
+                "main_topic": detected_topic,
+                "key_insights": key_insight,
+                "numbers_discussed": numbers_str
+            }
+
+    except Exception as e:
+        logger.error(
+            f"Error generating summary for conversation {conversation_id}: {e}",
+            exc_info=True
+        )
+        # Return default values on error
+        return {
+            "main_topic": "General discussion",
+            "key_insights": None,
+            "numbers_discussed": None
+        }
+
+
 __all__ = [
     "get_recent_conversations",
     "get_conversation_context_cached",
     "invalidate_conversation_context_cache",
+    "generate_conversation_summary",
 ]

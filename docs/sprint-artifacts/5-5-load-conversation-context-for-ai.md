@@ -1,6 +1,6 @@
 # Story 5.5: Load Conversation Context for AI
 
-Status: done
+Status: in-progress
 
 ## Story
 
@@ -53,6 +53,18 @@ So that it can reference past discussions.
   - [x] Test Redis caching (hit/miss scenarios)
   - [x] Manual end-to-end test: Start conversation → AI references past discussion
   - [x] Verify AI can say "As we discussed last time..."
+
+- [x] Task 6: Generate and Populate Conversation Summaries (AC: #1-2)
+  - [x] Create `generate_conversation_summary()` function in conversation_service.py
+  - [x] Implement topic detection using keyword analysis (life path, expression, soul urge, etc.)
+  - [x] Extract numerology numbers mentioned in conversation (1-9, 11, 22, 33)
+  - [x] Generate key insights from assistant messages (first message as summary)
+  - [x] Integrate summary generation into `end_conversation` endpoint
+  - [x] Populate main_topic, key_insights, numbers_discussed fields on conversation end
+  - [x] Invalidate Redis cache after saving summaries to ensure fresh context
+  - [ ] Write unit tests for summary generation logic (4-5 tests needed)
+  - [ ] Test with various conversation types (life path, expression, soul urge, general)
+  - [ ] Verify summaries appear in conversation history API responses
 
 ## Dev Notes
 
@@ -623,3 +635,20 @@ No security concerns identified:
   - Excellent code quality with professional patterns
   - Only advisory note: document manual E2E test results (LOW severity)
   - Status: review → done (approved for production)
+
+- 2025-11-23: CRITICAL Implementation Gap Identified and Fixed
+  - **Issue**: Fields main_topic, key_insights, numbers_discussed are read but never written
+  - **Discovery**: User opened conversation_service.py and noticed fields are only read, never populated
+  - **Impact**: Conversation context loading feature was non-functional (fields always NULL)
+  - **Resolution**: Added Task 6 - Generate and Populate Conversation Summaries
+    - Created generate_conversation_summary() function with heuristic analysis
+    - Integrated summary generation into end_conversation endpoint
+    - Implemented topic detection (Life Path, Expression, Soul Urge, etc.)
+    - Implemented number extraction (1-9, 11, 22, 33)
+    - Added cache invalidation after summary save
+    - Updated API responses to return actual main_topic values
+  - **Files Modified**:
+    - backend/src/services/conversation_service.py (+107 lines)
+    - backend/src/api/v1/endpoints/conversations.py (+24 lines, 2 comment updates)
+  - **Status**: done → in-progress → implementing fix
+  - **Workflow**: Sprint Change Proposal created via correct-course workflow

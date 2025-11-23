@@ -157,7 +157,7 @@ async def list_conversations(
                 started_at=conv.started_at.isoformat(),
                 ended_at=conv.ended_at.isoformat() if conv.ended_at else None,
                 duration=conv.duration_seconds,
-                main_topic=None  # Will be implemented in future story
+                main_topic=conv.main_topic  # Populated by end_conversation
             )
             for conv in conversations
         ]
@@ -281,7 +281,7 @@ async def get_conversation(
             started_at=conversation.started_at.isoformat(),
             ended_at=conversation.ended_at.isoformat() if conversation.ended_at else None,
             duration=conversation.duration_seconds,
-            main_topic=None  # Will be implemented in future story
+            main_topic=conversation.main_topic  # Populated by end_conversation
         )
 
         message_responses = [
@@ -514,8 +514,29 @@ async def end_conversation(
         # Step 5: Update conversation with ended_at and calculate duration
         conversation.ended_at = datetime.now(timezone.utc)
         conversation.calculate_duration()  # Uses helper method from model
+
+        # Step 5b: Generate and save conversation summary
+        from src.services.conversation_service import generate_conversation_summary, invalidate_conversation_context_cache
+
+        logger.info(f"Generating conversation summary for {conversation_id}")
+        summary = await generate_conversation_summary(conversation_id)
+
+        # Populate summary fields
+        conversation.main_topic = summary["main_topic"]
+        conversation.key_insights = summary["key_insights"]
+        conversation.numbers_discussed = summary["numbers_discussed"]
+
+        logger.info(
+            f"Conversation summary generated: topic='{summary['main_topic']}', "
+            f"numbers='{summary['numbers_discussed']}'"
+        )
+
         session.commit()
         session.refresh(conversation)
+
+        # Invalidate cached conversation context for this user
+        await invalidate_conversation_context_cache(current_user.id)
+        logger.info(f"Invalidated conversation context cache for user {current_user.id}")
 
         logger.info(
             f"Conversation {conversation_id} ended successfully. "
