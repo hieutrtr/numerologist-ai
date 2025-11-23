@@ -303,8 +303,24 @@ async def run_bot(
         if settings.voice_language == "vi" and user is not None:
             # Vietnamese with user context: use specialized numerology system prompt
             from src.voice_pipeline.system_prompts import get_numerology_system_prompt
-            system_prompt = get_numerology_system_prompt(user)
-            logger.info(f"Generated Vietnamese numerology system prompt for user: {user.full_name}")
+            from src.services.conversation_service import get_conversation_context_cached
+
+            # Load conversation history context (cached in Redis)
+            conversation_context = await get_conversation_context_cached(user.id)
+
+            # Generate system prompt WITH conversation history
+            system_prompt = get_numerology_system_prompt(user, conversation_history=conversation_context)
+
+            if conversation_context:
+                logger.info(
+                    f"Generated Vietnamese numerology system prompt with conversation history "
+                    f"for user: {user.full_name} ({len(conversation_context)} chars of context)"
+                )
+            else:
+                logger.info(
+                    f"Generated Vietnamese numerology system prompt for user: {user.full_name} "
+                    f"(no conversation history)"
+                )
         else:
             # Generic language-specific greetings (for non-Vietnamese or no user context)
             generic_prompts = {

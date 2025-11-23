@@ -87,6 +87,20 @@ class Conversation(SQLModel, table=True):
         description="Total conversation duration in seconds (calculated when ended_at is set)"
     )
 
+    # Conversation content summary fields (for AI context retrieval)
+    main_topic: Optional[str] = Field(
+        default=None,
+        description="Primary topic or theme discussed in the conversation"
+    )
+    key_insights: Optional[str] = Field(
+        default=None,
+        description="Key insights or takeaways from the conversation"
+    )
+    numbers_discussed: Optional[str] = Field(
+        default=None,
+        description="Numerology numbers calculated or discussed (JSON array as string)"
+    )
+
     # Audit fields
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),

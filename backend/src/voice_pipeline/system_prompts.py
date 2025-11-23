@@ -23,6 +23,15 @@ Integration with Pipecat bot (Story 4.4 function handlers + Story 4.3 tool defin
 
 import logging
 from pathlib import Path
+from typing import List, Dict
+from datetime import datetime
+
+try:
+    import tiktoken
+except ImportError:
+    tiktoken = None
+    logging.warning("tiktoken not available - token counting will be estimated")
+
 from src.models.user import User
 
 # Configure logger
@@ -32,9 +41,140 @@ logger = logging.getLogger(__name__)
 PROMPT_TEMPLATE_PATH = Path(__file__).parent / "prompts" / "aria_system_prompt.md"
 
 
-def get_numerology_system_prompt(user: User) -> str:
+def count_tokens(text: str, model: str = "gpt-4") -> int:
     """
-    Generate a Vietnamese system prompt for the numerology voice AI bot.
+    Count tokens in text using tiktoken.
+
+    Provides accurate token counting for OpenAI models to ensure
+    context stays within model limits.
+
+    Args:
+        text: Text content to count tokens for
+        model: Model name for encoding (default: "gpt-4")
+
+    Returns:
+        int: Number of tokens in the text
+
+    Note:
+        If tiktoken is not available, estimates tokens as ~4 chars per token
+    """
+    if tiktoken is None:
+        # Fallback estimation: roughly 4 characters per token
+        estimated = len(text) // 4
+        logger.debug(f"Estimated {estimated} tokens (tiktoken unavailable)")
+        return estimated
+
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+        token_count = len(encoding.encode(text))
+        logger.debug(f"Counted {token_count} tokens in text ({len(text)} chars)")
+        return token_count
+    except Exception as e:
+        logger.warning(f"Error counting tokens: {e} - falling back to estimation")
+        return len(text) // 4
+
+
+def format_conversation_history(
+    conversations: List[Dict],
+    max_tokens: int = 500
+) -> str:
+    """
+    Format conversation summaries for system prompt with token limits.
+
+    Creates a concise summary of past conversations optimized for LLM context.
+    If the formatted context exceeds max_tokens, progressively reduces the
+    number of conversations until it fits.
+
+    Args:
+        conversations: List of conversation dicts with keys:
+            - date: ISO 8601 timestamp string
+            - topic: Main topic discussed
+            - insights: Key insights (truncated to 100 chars)
+            - numbers: Numbers discussed (comma-separated)
+        max_tokens: Maximum tokens allowed for context (default: 500)
+
+    Returns:
+        Formatted conversation history string ready for system prompt.
+        Returns empty string if no conversations provided.
+
+    Example:
+        conversations = [
+            {
+                "date": "2025-11-23T10:30:00Z",
+                "topic": "Life Path Number",
+                "insights": "User resonates with leadership",
+                "numbers": "1, 11"
+            }
+        ]
+        context = format_conversation_history(conversations)
+        # Returns: "Previous conversations with this user:\\n1. Nov 23: Life Path Number..."
+    """
+    if not conversations:
+        return ""
+
+    def _format_conversations(convs: List[Dict]) -> str:
+        """Inner function to format a specific number of conversations."""
+        parts = ["Previous conversations with this user:"]
+
+        for i, conv in enumerate(convs, 1):
+            try:
+                # Parse and format date
+                date_obj = datetime.fromisoformat(conv["date"].replace("Z", "+00:00"))
+                date_str = date_obj.strftime("%b %d")
+            except (ValueError, KeyError):
+                date_str = "Recent"
+
+            topic = conv.get("topic", "General discussion")
+            insights = conv.get("insights", "")[:100]  # Truncate to 100 chars
+            numbers = conv.get("numbers", "")
+
+            # Build conversation entry
+            entry = f"{i}. {date_str}: {topic}."
+            if numbers:
+                entry += f" Discussed numbers: {numbers}."
+            if insights:
+                entry += f" Key insight: {insights}"
+
+            parts.append(entry)
+
+        return "\n".join(parts)
+
+    # Try formatting all conversations
+    context = _format_conversations(conversations)
+    token_count = count_tokens(context)
+
+    # If within limit, return as-is
+    if token_count <= max_tokens:
+        logger.debug(
+            f"Formatted {len(conversations)} conversations "
+            f"({token_count} tokens, under {max_tokens} limit)"
+        )
+        return context
+
+    # Progressively reduce conversations until under limit
+    for reduced_count in range(len(conversations) - 1, 0, -1):
+        context = _format_conversations(conversations[:reduced_count])
+        token_count = count_tokens(context)
+
+        if token_count <= max_tokens:
+            logger.info(
+                f"Reduced to {reduced_count} conversations to fit token limit "
+                f"({token_count} tokens)"
+            )
+            return context
+
+    # If even 1 conversation is too long, return minimal context
+    minimal = f"User has {len(conversations)} previous conversations about numerology."
+    logger.warning(
+        f"Could not fit any full conversations in {max_tokens} tokens - "
+        f"returning minimal context"
+    )
+    return minimal
+
+
+def get_numerology_system_prompt(user: User, conversation_history: str = "") -> str:
+    """
+    Generate a Vietnamese system prompt for the numerology voice AI bot with conversation context.
 
     This function creates a personalized system prompt that:
     1. Defines the AI's role as a master Pythagorean numerologist (Aria)
@@ -43,15 +183,18 @@ def get_numerology_system_prompt(user: User) -> str:
     4. Sets conversational style (natural, warm, knowledgeable)
     5. Establishes boundaries (no medical, legal, financial advice)
     6. Personalizes with user's name and birth date
+    7. **NEW:** Includes previous conversation context for continuity
 
     The prompt is loaded from a markdown template file and personalized with user data.
     Function names remain in English (required for OpenAI function calling reliability).
 
     Args:
         user (User): User object containing full_name and birth_date for personalization
+        conversation_history (str): Formatted conversation history context from previous sessions.
+                                   If provided, enables AI to reference past discussions naturally.
 
     Returns:
-        str: Complete Vietnamese system prompt for Pipecat LLM context
+        str: Complete Vietnamese system prompt for Pipecat LLM context with conversation history
 
     Raises:
         No exceptions - handles missing data gracefully with fallbacks
@@ -75,7 +218,19 @@ def get_numerology_system_prompt(user: User) -> str:
             birth_date_formatted=birth_date_formatted
         )
 
-        logger.info(f"Generated structured Vietnamese system prompt for user: {user_name}")
+        # Append conversation history if provided
+        if conversation_history:
+            prompt += f"\n\n{conversation_history}\n\n"
+            prompt += "You can reference previous conversations naturally, e.g., "
+            prompt += '"As we discussed last time..." Provide insights based on their '
+            prompt += "unique numerology profile and past discussions."
+            logger.info(
+                f"Generated system prompt with conversation history for user: {user_name} "
+                f"({len(conversation_history)} chars of context)"
+            )
+        else:
+            logger.info(f"Generated system prompt (no conversation history) for user: {user_name}")
+
         return prompt
 
     except FileNotFoundError:
