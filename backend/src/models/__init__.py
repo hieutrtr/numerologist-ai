@@ -9,6 +9,7 @@ for automatic migration generation.
 from src.models.user import User
 from src.models.oauth_account import OAuthAccount
 from src.models.conversation import Conversation
+from src.models.conversation_message import ConversationMessage
 
 # Export all models
-__all__ = ["User", "OAuthAccount", "Conversation"]
+__all__ = ["User", "OAuthAccount", "Conversation", "ConversationMessage"]

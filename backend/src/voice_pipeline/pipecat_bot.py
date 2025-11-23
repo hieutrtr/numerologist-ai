@@ -44,7 +44,10 @@ References:
 """
 
 import logging
+import asyncio
 from typing import Optional
+from uuid import UUID
+from datetime import datetime, timezone
 
 # Pipecat core components
 from pipecat.pipeline.pipeline import Pipeline
@@ -74,6 +77,9 @@ from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 # Application settings and models
 from src.core.settings import settings
 from src.models.user import User
+from src.models.conversation_message import ConversationMessage, MessageRole
+from src.core.database import engine
+from sqlmodel import Session
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -89,16 +95,83 @@ class PipecatBotError(Exception):
     pass
 
 
-async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Optional[PipelineTask]:
+async def _save_message_async(
+    conversation_id: UUID,
+    role: MessageRole,
+    content: str,
+    metadata: Optional[dict] = None
+) -> None:
     """
-    Run a Pipecat voice AI bot in a Daily.co room.
+    Save a conversation message to the database asynchronously (non-blocking).
+
+    This function runs database operations in a thread pool to avoid blocking
+    the voice pipeline. Errors are logged but don't propagate to prevent
+    breaking the conversation flow.
+
+    Args:
+        conversation_id: UUID of the conversation this message belongs to
+        role: Message sender role (user or assistant)
+        content: Full text content of the message
+        metadata: Optional dict with additional data (function calls, etc.)
+
+    Notes:
+        - Uses asyncio.to_thread for non-blocking execution
+        - Errors are logged but swallowed to maintain voice pipeline stability
+        - Creates new database session for each save (thread-safe)
+    """
+    def _db_save():
+        """Inner function that performs the actual database save."""
+        try:
+            with Session(engine) as session:
+                message = ConversationMessage(
+                    conversation_id=conversation_id,
+                    role=role,
+                    content=content,
+                    timestamp=datetime.now(timezone.utc),
+                    message_metadata=metadata or {}
+                )
+                session.add(message)
+                session.commit()
+                logger.debug(
+                    f"Saved {role.value} message to conversation {conversation_id}: "
+                    f"{content[:50]}..." if len(content) > 50 else content
+                )
+        except Exception as e:
+            # Log error but don't propagate - voice pipeline must continue
+            logger.error(
+                f"Failed to save {role.value} message to database: {e}",
+                exc_info=True,
+                extra={
+                    "conversation_id": str(conversation_id),
+                    "role": role.value,
+                    "content_length": len(content)
+                }
+            )
+
+    # Run database save in thread pool (non-blocking)
+    try:
+        await asyncio.to_thread(_db_save)
+    except Exception as e:
+        # This should rarely happen (thread pool errors)
+        logger.error(f"Thread pool error saving message: {e}", exc_info=True)
+
+
+async def run_bot(
+    room_url: str,
+    token: str,
+    conversation_id: Optional[UUID] = None,
+    user: Optional[User] = None
+) -> Optional[PipelineTask]:
+    """
+    Run a Pipecat voice AI bot in a Daily.co room with conversation message saving.
 
     This function creates and executes a complete voice conversation pipeline:
     1. Connects to Daily.co room via DailyTransport
     2. Initializes speech services (Deepgram STT, Azure OpenAI LLM, ElevenLabs TTS)
     3. Builds Pipecat pipeline with proper component ordering
     4. Initializes system prompt based on user context and language
-    5. Runs pipeline asynchronously until room closes or bot is stopped
+    5. Saves all messages (user and assistant) to database asynchronously
+    6. Runs pipeline asynchronously until room closes or bot is stopped
 
     The bot responds to user speech with a numerology-expert system prompt generated
     from the User object. For Vietnamese language (vi), uses specialized system prompt
@@ -108,6 +181,8 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
     Args:
         room_url: Full URL to the Daily.co room (e.g., "https://domain.daily.co/room-name")
         token: JWT meeting token for secure room access
+        conversation_id: Optional UUID of the conversation for message saving.
+                        If provided, all messages will be saved to database.
         user: Optional User object for personalization. If provided and language is Vietnamese,
               generates personalized numerology system prompt. If None, uses generic greeting.
 
@@ -121,10 +196,17 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
 
     Example:
         >>> from src.models.user import User
+        >>> from uuid import UUID
         >>> room_info = await daily_service.create_room("conv-123")
+        >>> conv_id = UUID("...")  # Conversation ID from database
         >>> user = User(id=..., full_name="Nguyễn Văn A", birth_date=date(1990, 5, 15), ...)
-        >>> task = await run_bot(room_info["room_url"], room_info["meeting_token"], user)
-        >>> # Bot now running in background, handles voice interactions with Vietnamese system prompt
+        >>> task = await run_bot(
+        ...     room_info["room_url"],
+        ...     room_info["meeting_token"],
+        ...     conversation_id=conv_id,
+        ...     user=user
+        ... )
+        >>> # Bot now running in background, handles voice interactions and saves messages
         >>> # To stop: await task.cancel()
 
     Notes:
@@ -133,6 +215,8 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
         - All errors are logged with descriptive messages
         - Pipeline uses lazy validation pattern (validates at runtime, not import)
         - VAD (Voice Activity Detection) enabled for natural conversation flow
+        - Message saving is non-blocking and won't affect voice latency (<3s requirement)
+        - If message save fails, error is logged but conversation continues normally
     """
     try:
         # Validate configuration (lazy validation pattern)
@@ -256,6 +340,47 @@ async def run_bot(room_url: str, token: str, user: Optional[User] = None) -> Opt
         # Create LLM context for managing conversation history with tools
         llm_context = OpenAILLMContext(messages=messages, tools=numerology_tools)
         logger.info(f"Registered numerology tools with LLM context")
+
+        # Hook message saving if conversation_id provided
+        if conversation_id:
+            logger.info(f"Enabling message saving for conversation {conversation_id}")
+
+            # Wrap context to intercept messages
+            original_add_message = llm_context.add_message
+
+            def add_message_with_save(message: dict):
+                """Intercept add_message calls to save messages to database."""
+                # Call original method
+                result = original_add_message(message)
+
+                # Save message asynchronously (fire-and-forget)
+                role_str = message.get("role", "")
+                content = message.get("content", "")
+
+                if role_str == "user" and content:
+                    # Save user message
+                    asyncio.create_task(
+                        _save_message_async(
+                            conversation_id,
+                            MessageRole.USER,
+                            content
+                        )
+                    )
+                elif role_str == "assistant" and content:
+                    # Save assistant message
+                    asyncio.create_task(
+                        _save_message_async(
+                            conversation_id,
+                            MessageRole.ASSISTANT,
+                            content
+                        )
+                    )
+
+                return result
+
+            # Replace add_message method with wrapped version
+            llm_context.add_message = add_message_with_save
+            logger.info("Message saving hooks installed")
 
         # Create context aggregator using the LLM service
         # This ensures proper function call result handling

@@ -9,7 +9,7 @@ including room management, timing, and duration calculation.
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
-from typing import Optional
+from typing import Optional, List
 
 
 class Conversation(SQLModel, table=True):
@@ -96,6 +96,10 @@ class Conversation(SQLModel, table=True):
     # Relationships
     user: Optional["User"] = Relationship(
         back_populates="conversations",
+    )
+    messages: List["ConversationMessage"] = Relationship(
+        back_populates="conversation",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
     def calculate_duration(self) -> None:

@@ -12,7 +12,12 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
+from sqlmodel import select
+from typing import List, Optional
+from pydantic import BaseModel
+
 from src.models.conversation import Conversation
+from src.models.conversation_message import ConversationMessage, MessageRole
 from src.models.user import User
 from src.services.daily_service import create_room, delete_room
 from src.voice_pipeline.pipecat_bot import run_bot
@@ -22,6 +27,29 @@ from src.core.database import get_session
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
+
+
+# Response schemas
+class MessageResponse(BaseModel):
+    """Schema for conversation message response."""
+    id: str
+    role: str
+    content: str
+    timestamp: str
+    message_metadata: dict
+
+    class Config:
+        from_attributes = True
+
+
+class ConversationMessagesResponse(BaseModel):
+    """Schema for paginated conversation messages response."""
+    conversation_id: str
+    messages: List[MessageResponse]
+    total: int
+    page: int
+    limit: int
+    has_more: bool
 
 
 @router.post("/start", status_code=status.HTTP_200_OK)
@@ -93,10 +121,15 @@ async def start_conversation(
 
         logger.info(f"Created Daily.co room: {room_data['room_name']}")
 
-        # Step 4: Spawn bot in background (non-blocking)
+        # Step 4: Spawn bot in background (non-blocking) with conversation_id for message saving
         logger.info(f"Spawning Pipecat bot for conversation {conversation.id}")
         asyncio.create_task(
-            run_bot(room_data["room_url"], room_data["meeting_token"], current_user)
+            run_bot(
+                room_data["room_url"],
+                room_data["meeting_token"],
+                conversation_id=conversation.id,
+                user=current_user
+            )
         )
 
         logger.info(f"Bot spawned for conversation {conversation.id}")
@@ -276,4 +309,164 @@ async def end_conversation(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to end conversation: {str(e)}"
+        ) from e
+
+
+@router.get("/{conversation_id}/messages", response_model=ConversationMessagesResponse)
+async def get_conversation_messages(
+    conversation_id: UUID,
+    page: int = 1,
+    limit: int = 50,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+) -> ConversationMessagesResponse:
+    """
+    Get messages for a conversation with pagination.
+
+    Retrieves all messages (user and assistant) for a specific conversation,
+    ordered by timestamp (oldest first). Supports pagination for conversations
+    with many messages.
+
+    Args:
+        conversation_id: UUID of the conversation
+        page: Page number (1-indexed, default: 1)
+        limit: Number of messages per page (default: 50, max: 100)
+        current_user: Authenticated user (from JWT token)
+        session: Database session
+
+    Returns:
+        ConversationMessagesResponse: Paginated messages with metadata:
+            {
+                "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+                "messages": [
+                    {
+                        "id": "...",
+                        "role": "user",
+                        "content": "What's my life path number?",
+                        "timestamp": "2025-11-23T14:00:00Z",
+                        "message_metadata": {}
+                    },
+                    ...
+                ],
+                "total": 45,
+                "page": 1,
+                "limit": 50,
+                "has_more": false
+            }
+
+    Raises:
+        HTTPException 401: If user is not authenticated
+        HTTPException 403: If conversation does not belong to user
+        HTTPException 404: If conversation not found
+        HTTPException 422: If page or limit parameters are invalid
+
+    Implementation Details:
+        1. Validate conversation exists and belongs to current user
+        2. Query messages with pagination (LIMIT/OFFSET)
+        3. Count total messages for pagination metadata
+        4. Return messages ordered by timestamp ascending
+        5. Calculate has_more flag based on total and current page
+
+    Security:
+        - Endpoint requires valid JWT authentication
+        - Validates conversation ownership before returning messages
+        - Only returns messages from user's own conversations
+
+    Performance:
+        - Uses database indexes on (conversation_id, timestamp)
+        - Efficient LIMIT/OFFSET pagination
+        - Recommended limit: 50 (default), max: 100
+    """
+    try:
+        # Validate parameters
+        if page < 1:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Page must be >= 1"
+            )
+        if limit < 1 or limit > 100:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Limit must be between 1 and 100"
+            )
+
+        # Step 1: Verify conversation exists and belongs to user
+        logger.info(f"Retrieving messages for conversation {conversation_id}, page {page}")
+        conversation = session.get(Conversation, conversation_id)
+
+        if not conversation:
+            logger.warning(f"Conversation {conversation_id} not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conversation not found"
+            )
+
+        if conversation.user_id != current_user.id:
+            logger.warning(
+                f"User {current_user.id} attempted to access messages for conversation {conversation_id} "
+                f"owned by user {conversation.user_id}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to access this conversation"
+            )
+
+        # Step 2: Count total messages
+        total_query = select(ConversationMessage).where(
+            ConversationMessage.conversation_id == conversation_id
+        )
+        total = len(session.exec(total_query).all())
+
+        # Step 3: Query messages with pagination
+        offset = (page - 1) * limit
+        query = (
+            select(ConversationMessage)
+            .where(ConversationMessage.conversation_id == conversation_id)
+            .order_by(ConversationMessage.timestamp)
+            .offset(offset)
+            .limit(limit)
+        )
+        messages = session.exec(query).all()
+
+        # Step 4: Format response
+        message_responses = [
+            MessageResponse(
+                id=str(msg.id),
+                role=msg.role.value,
+                content=msg.content,
+                timestamp=msg.timestamp.isoformat(),
+                message_metadata=msg.message_metadata
+            )
+            for msg in messages
+        ]
+
+        has_more = (offset + len(messages)) < total
+
+        logger.info(
+            f"Retrieved {len(messages)} messages for conversation {conversation_id}, "
+            f"page {page} (total: {total})"
+        )
+
+        return ConversationMessagesResponse(
+            conversation_id=str(conversation_id),
+            messages=message_responses,
+            total=total,
+            page=page,
+            limit=limit,
+            has_more=has_more
+        )
+
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        # Log unexpected errors
+        logger.error(
+            f"Unexpected error retrieving messages for conversation {conversation_id}: "
+            f"{type(e).__name__}: {str(e)}",
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve messages: {str(e)}"
         ) from e
