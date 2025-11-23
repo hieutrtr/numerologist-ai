@@ -1,0 +1,259 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.5</storyId>
+    <title>Load Conversation Context for AI</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-23</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-5-load-conversation-context-for-ai.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>backend developer</asA>
+    <iWant>the AI to load previous conversation summaries when starting</iWant>
+    <soThat>it can reference past discussions</soThat>
+    <tasks>
+- Task 1: Implement Conversation History Retrieval (AC: #1-2)
+  - Create function get_recent_conversations() in conversation service
+  - Query database for user's last 5 completed conversations
+  - Extract key information: main_topic, key_insights, numbers_discussed
+  - Generate concise summary (max 100 tokens per conversation)
+  - Return list of conversation summaries
+
+- Task 2: Integrate Context into Voice Pipeline (AC: #3-4)
+  - Update pipecat_bot.py to call get_recent_conversations() before bot starts
+  - Format conversation summaries for system prompt
+  - Update get_numerology_system_prompt() to accept conversation history parameter
+  - Inject conversation context into system prompt
+  - Ensure AI can reference past discussions naturally
+
+- Task 3: Token Limit Management (AC: #5)
+  - Calculate token count for conversation context using tiktoken
+  - Implement summarization if context exceeds 500 tokens
+  - Prioritize most recent conversations if needed
+  - Ensure total system prompt stays under model limits (GPT-5-mini: 128k context)
+
+- Task 4: Redis Caching Layer (AC: #6)
+  - Cache formatted conversation context in Redis with key: context:{user_id}
+  - Set TTL: 30 minutes
+  - Implement cache-aside pattern: check cache → DB → store cache
+  - Invalidate cache when new conversation completes
+
+- Task 5: Testing and Validation
+  - Write unit tests for get_recent_conversations() function
+  - Write unit tests for context formatting logic
+  - Test with users having 0, 1, 3, 5, and 10+ conversations
+  - Verify token counting accuracy
+  - Test Redis caching (hit/miss scenarios)
+  - Manual end-to-end test: Start conversation → AI references past discussion
+  - Verify AI can say "As we discussed last time..."
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. When bot starts, load recent 5 conversations for user
+2. Create summary of each past conversation
+3. Include summaries in system prompt context
+4. AI can reference "As we discussed last time..."
+5. Context doesn't exceed token limits (summarize if needed)
+6. Cached in Redis for fast access
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Voice Pipeline Integration</section>
+        <snippet>Pipecat-ai orchestrates voice conversation pipeline with Deepgram (STT), Azure OpenAI GPT-5-mini (LLM), ElevenLabs (TTS) via Daily.co WebRTC. System prompt is set before bot starts in create_conversation_bot() function.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Pattern: Pipecat Bot Lifecycle</section>
+        <snippet>Bot initialization loads user context, creates Daily room, builds system prompt with user profile, initializes Pipecat services, sets up LLM context with numerology functions, and runs pipeline.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Caching Patterns</section>
+        <snippet>All expensive operations follow check-cache → compute → store pattern using Redis. Cache key format: namespace:identifier with configurable TTL. Example: profile data cached with 1-year TTL.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Database Models - Conversation</section>
+        <snippet>Conversation table stores: id, user_id, daily_room_id, started_at, ended_at, duration_seconds, main_topic, key_insights, numbers_discussed. ConversationMessage stores full transcript with role, content, timestamp.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 5: Conversation History & Context Retention</title>
+        <section>Story 5.5: Load Conversation Context for AI</section>
+        <snippet>When bot starts, load recent 5 conversations for user, create summary of each, include in system prompt context. AI can reference "As we discussed last time...". Context cached in Redis for fast access.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/5-4-conversation-detail-view.md</path>
+        <title>Story 5.4: Conversation Detail View</title>
+        <section>API Integration</section>
+        <snippet>Conversation API returns: id, started_at, ended_at, duration, main_topic, key_insights with messages array containing role, content, timestamp. Requires JWT authentication.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/5-4-conversation-detail-view.md</path>
+        <title>Story 5.4: Conversation Detail View</title>
+        <section>Learnings from Previous Story</section>
+        <snippet>Conversation messages have role, content, timestamp fields. Backend provides ISO 8601 timestamps. Conversation data model well-established with messages stored properly.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>apps/api/app/voice_pipeline/pipecat_bot.py</path>
+        <kind>service</kind>
+        <symbol>create_conversation_bot</symbol>
+        <lines>N/A</lines>
+        <reason>Main bot initialization function where conversation context needs to be loaded before building system prompt</reason>
+      </artifact>
+      <artifact>
+        <path>apps/api/app/voice_pipeline/system_prompts.py</path>
+        <kind>service</kind>
+        <symbol>get_numerology_system_prompt</symbol>
+        <lines>N/A</lines>
+        <reason>System prompt builder that needs to accept conversation_history parameter to inject past conversation context</reason>
+      </artifact>
+      <artifact>
+        <path>apps/api/app/services/conversation_service.py</path>
+        <kind>service</kind>
+        <symbol>N/A</symbol>
+        <lines>N/A</lines>
+        <reason>Conversation business logic service where get_recent_conversations() function will be added</reason>
+      </artifact>
+      <artifact>
+        <path>apps/api/app/models/conversation.py</path>
+        <kind>model</kind>
+        <symbol>Conversation</symbol>
+        <lines>N/A</lines>
+        <reason>Database model with fields: main_topic, key_insights, numbers_discussed, started_at, ended_at for context extraction</reason>
+      </artifact>
+      <artifact>
+        <path>apps/api/app/core/redis.py</path>
+        <kind>service</kind>
+        <symbol>get_redis_client</symbol>
+        <lines>N/A</lines>
+        <reason>Redis client utilities for implementing caching layer with TTL for conversation context</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="tiktoken">Token counting for OpenAI models (included in pipecat dependencies)</package>
+        <package name="redis">Redis client for caching (already configured)</package>
+        <package name="sqlmodel">ORM for database queries (already in use)</package>
+        <package name="pipecat-ai">Voice pipeline orchestration framework</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Voice pipeline: System prompt must be set before bot starts, passed to OpenAILLMContext
+- Token limits: GPT-5-mini has 128k context window, reserve 80% for conversation, 20% for system prompt
+- Token counting: Use tiktoken library for accurate token counting before adding context
+- Caching: Follow check-cache → compute → store pattern with Redis
+- Cache key format: namespace:identifier (e.g., context:user_id)
+- Cache TTL: 30 minutes for conversation context (conversations don't change frequently)
+- Database: Query only completed conversations (ended_at != None)
+- Database: Limit to 5 most recent conversations, ordered by started_at DESC
+- Python naming: Functions use snake_case (get_recent_conversations, format_conversation_history)
+- Redis keys: Use namespace:identifier format (context:{user_id})
+- No raw SQL: Use SQLModel ORM for all database operations
+- Error handling: Gracefully handle cases where user has 0 conversations
+- Summary format: Max 100 tokens per conversation, prioritize most recent if exceeding limits
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>get_recent_conversations</name>
+      <kind>Python async function</kind>
+      <signature>async def get_recent_conversations(user_id: UUID, limit: int = 5) -> List[dict]</signature>
+      <path>apps/api/app/services/conversation_service.py</path>
+    </interface>
+    <interface>
+      <name>format_conversation_history</name>
+      <kind>Python function</kind>
+      <signature>def format_conversation_history(conversations: List[dict], max_tokens: int = 500) -> str</signature>
+      <path>apps/api/app/voice_pipeline/system_prompts.py</path>
+    </interface>
+    <interface>
+      <name>count_tokens</name>
+      <kind>Python function</kind>
+      <signature>def count_tokens(text: str, model: str = "gpt-4") -> int</signature>
+      <path>apps/api/app/voice_pipeline/system_prompts.py</path>
+    </interface>
+    <interface>
+      <name>get_conversation_context_cached</name>
+      <kind>Python async function</kind>
+      <signature>async def get_conversation_context_cached(user_id: UUID) -> str</signature>
+      <path>apps/api/app/services/conversation_service.py</path>
+    </interface>
+    <interface>
+      <name>get_numerology_system_prompt</name>
+      <kind>Python function (updated signature)</kind>
+      <signature>def get_numerology_system_prompt(user: User, profile: NumerologyProfile, conversation_history: str = "") -> str</signature>
+      <path>apps/api/app/voice_pipeline/system_prompts.py</path>
+    </interface>
+    <interface>
+      <name>Conversation Model</name>
+      <kind>SQLModel ORM Model</kind>
+      <signature>Fields: id, user_id, started_at, ended_at, main_topic, key_insights, numbers_discussed</signature>
+      <path>apps/api/app/models/conversation.py</path>
+    </interface>
+    <interface>
+      <name>Redis Cache Operations</name>
+      <kind>Redis async operations</kind>
+      <signature>await redis.get(key), await redis.set(key, value, ex=ttl)</signature>
+      <path>apps/api/app/core/redis.py</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+Backend uses pytest for testing with async test support. Tests located in apps/api/tests/ directory mirroring app structure. Unit tests mock database and Redis. Integration tests use test database. FastAPI provides TestClient for endpoint testing. Follow AAA pattern (Arrange, Act, Assert). Use fixtures for common setup like test users and conversations.
+    </standards>
+    <locations>
+- apps/api/tests/services/test_conversation_service.py (unit tests for conversation service functions)
+- apps/api/tests/voice_pipeline/test_pipecat_bot.py (integration tests for bot initialization)
+- apps/api/tests/voice_pipeline/test_system_prompts.py (unit tests for prompt formatting and token counting)
+    </locations>
+    <ideas>
+**Unit Tests (AC #1-2):**
+- test_get_recent_conversations_returns_latest_5: Create 10 conversations, assert returns 5 most recent
+- test_get_recent_conversations_excludes_active: Create active (ended_at=None) conversations, assert excluded
+- test_get_recent_conversations_orders_by_date: Verify results ordered by started_at DESC
+- test_get_recent_conversations_handles_zero: User with 0 conversations returns empty list
+
+**Unit Tests (AC #3-4):**
+- test_format_conversation_history_creates_summary: Verify formatted string includes date, topic, insights, numbers
+- test_format_conversation_history_handles_empty: Empty list returns empty string
+- test_format_conversation_history_truncates_insights: Long insights truncated to 100 chars
+
+**Unit Tests (AC #5):**
+- test_count_tokens_accuracy: Verify token count matches tiktoken output
+- test_format_conversation_history_within_token_limit: 5 conversations formatted under 500 tokens
+- test_format_conversation_history_reduces_on_overflow: If exceeds 500 tokens, reduce to 4, 3, 2, 1 conversations
+- test_format_conversation_history_minimal_fallback: If 1 conversation too long, return minimal context
+
+**Integration Tests (AC #6):**
+- test_redis_cache_hit: Call get_conversation_context_cached() twice, second uses cache (mock DB to verify no query)
+- test_redis_cache_miss: First call queries DB, stores in Redis
+- test_redis_cache_ttl: Verify cache expires after 30 minutes
+- test_cache_invalidation_on_new_conversation: Complete new conversation, verify cache cleared or updated
+
+**Integration Tests (AC #3-4):**
+- test_bot_includes_conversation_context: Create user with 3 past conversations, start bot, assert system prompt includes "Previous conversations:"
+- test_bot_handles_no_previous_conversations: New user with 0 conversations, bot starts without errors, system prompt generated
+- test_bot_ai_references_past: Manual test - verify AI can respond to "What did we talk about last time?"
+
+**End-to-End Test:**
+- Manual: Create test user with 3 conversations about life path, expression, soul urge numbers
+- Start new conversation, say "What did we discuss before?"
+- Verify AI references specific previous topics accurately
+- Verify AI doesn't recalculate known information from profile
+    </ideas>
+  </tests>
+</story-context>
