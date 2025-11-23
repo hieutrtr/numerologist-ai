@@ -1,0 +1,266 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.4</storyId>
+    <title>Conversation Detail View</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-23</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-4-conversation-detail-view.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to see the full transcript of a past conversation</iWant>
+    <soThat>I can review what the AI told me</soThat>
+    <tasks>
+      - Task 1: Create Conversation Detail Screen (AC: #1-2)
+      - Task 2: Implement Message Display (AC: #3-6)
+      - Task 3: Navigation and Polish (AC: #7)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Detail screen at `mobile/src/app/conversation/[id].tsx`
+    2. Shows conversation metadata (date, duration)
+    3. Displays full message history (user &amp; AI messages)
+    4. Messages formatted as chat bubbles
+    5. User messages on right, AI messages on left
+    6. Scrollable if long conversation
+    7. Can navigate back to history list
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 5: Conversation History &amp; Context Retention</title>
+        <section>Story 5.4</section>
+        <snippet>User taps conversation from history screen to see full transcript with messages formatted as chat bubbles. User messages right-aligned, AI messages left-aligned. Scrollable for long conversations with back navigation to history list.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Frontend - React Native with Expo</section>
+        <snippet>React Native with Expo framework, TypeScript, Expo Router for file-based routing with dynamic routes [id].tsx, SafeAreaView for device compatibility, NativeWind for Tailwind CSS styling.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Design Direction - Celestial Gold</section>
+        <snippet>Primary: #d4af37 (Gold) for user messages. Secondary: #8b5cf6 (Purple) for AI messages. Background Dark: #0d0d1a. Background Light: #1a1a33 for message bubbles. Text Primary: #fef3c7. Text Muted: #a8960b.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/5-2-get-conversation-history-endpoint.md</path>
+        <title>Story 5.2: Get Conversation History Endpoint</title>
+        <section>Completion Notes</section>
+        <snippet>Backend API GET /api/v1/conversations/{id} returns conversation with messages array. Each message: role (user/assistant), content, timestamp. Requires JWT auth. Returns 404 if not found, 403 if unauthorized.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/5-3-frontend-history-screen-ui.md</path>
+        <title>Story 5.3: Frontend History Screen UI</title>
+        <section>Implementation</section>
+        <snippet>Implemented FlatList with pagination, pull-to-refresh, loading/error/empty states. Uses date-fns for formatting. Follows Celestial Gold design system. ConversationCard component navigates to /conversation/{id} route.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>mobile/src/app/(tabs)/history.tsx</path>
+        <kind>screen</kind>
+        <symbol>HistoryScreen</symbol>
+        <lines>1-169</lines>
+        <reason>Reference implementation for loading/error/empty state patterns, FlatList usage, and data fetching with useState/useEffect hooks. Follow same patterns for detail screen.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/components/ConversationCard.tsx</path>
+        <kind>component</kind>
+        <symbol>ConversationCard</symbol>
+        <lines>1-95</lines>
+        <reason>Shows navigation pattern using router.push() and date formatting with date-fns. Use similar patterns for back navigation and timestamp display in message bubbles.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient, fetchConversations</symbol>
+        <lines>1-121</lines>
+        <reason>Axios client with auth interceptors. Extend with fetchConversationDetail(id) function following same pattern as fetchConversations. Auto-adds JWT token to requests.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/components/history/HistoryEmptyState.tsx</path>
+        <kind>component</kind>
+        <symbol>HistoryEmptyState</symbol>
+        <lines>1-31</lines>
+        <reason>Empty state pattern with MaterialIcons and Celestial Gold styling. Create similar component for empty messages state if conversation has no messages.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <mobile>
+        <package name="react" version="19.1.0">React library</package>
+        <package name="react-native" version="0.81.5">React Native framework</package>
+        <package name="expo" version="~54.0.22">Expo framework</package>
+        <package name="expo-router" version="^6.0.14">File-based routing with dynamic routes [id].tsx and useLocalSearchParams()</package>
+        <package name="axios" version="^1.13.1">HTTP client for API calls</package>
+        <package name="nativewind" version="^4.2.1">Tailwind CSS for React Native styling</package>
+        <package name="@expo/vector-icons" version="^14.0.2">MaterialIcons for UI elements</package>
+        <package name="date-fns">Date/time formatting (installed in Story 5.3)</package>
+        <package name="react-native-safe-area-context" version="^5.6.2">SafeAreaView for device insets</package>
+      </mobile>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Create dynamic route at mobile/src/app/conversation/[id].tsx using Expo Router conventions
+    - Extract id parameter using useLocalSearchParams() from expo-router
+    - Use FlatList or ScrollView for message list (FlatList preferred for 50+ messages)
+    - Follow Celestial Gold design system colors (Gold #d4af37 for user, Purple #8b5cf6 for AI)
+    - Use NativeWind className syntax for styling (Tailwind CSS classes)
+    - User messages: right-aligned (justify-end), gold accent border (border-primary/40)
+    - AI messages: left-aligned (justify-start), purple accent border (border-secondary/40)
+    - Message bubbles: max-w-[80%], p-md, rounded-lg, bg-primary/20 or bg-background-light
+    - Format timestamps with date-fns format(date, 'h:mm a') for time display
+    - Use SafeAreaView with bg-dark background
+    - Implement loading state (ActivityIndicator) while fetching conversation
+    - Implement error state if conversation not found (404) or API fails
+    - Implement empty state if conversation has no messages
+    - Use router.back() for back navigation to history screen
+    - Call GET /api/v1/conversations/{id} endpoint with JWT auth
+    - apiClient from services/api.ts automatically adds auth token
+    - Handle 401 errors (auto-logout handled by interceptor)
+    - Handle 403 errors (unauthorized access to conversation)
+    - Handle 404 errors (conversation not found)
+    - Test with various conversation lengths (0, 5, 50+ messages)
+    - Optimize re-renders with React.memo for MessageBubble component
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GET /api/v1/conversations/{id}</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        GET /api/v1/conversations/{id}
+        Headers: Authorization: Bearer {jwt_token}
+
+        Response:
+        {
+          "id": "string (UUID)",
+          "started_at": "string (ISO 8601)",
+          "ended_at": "string | null (ISO 8601)",
+          "duration": "number | null (seconds)",
+          "main_topic": "string | null",
+          "messages": [
+            {
+              "role": "user" | "assistant",
+              "content": "string",
+              "timestamp": "string (ISO 8601)"
+            }
+          ]
+        }
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py (Story 5.2)</path>
+    </interface>
+    <interface>
+      <name>ConversationDetailScreen</name>
+      <kind>React Native component</kind>
+      <signature>
+        export default function ConversationDetailScreen(): JSX.Element
+
+        Uses:
+        - useLocalSearchParams&lt;{ id: string }&gt;() to get route parameter
+        - useState for conversation, loading, error states
+        - useEffect to fetch conversation on mount
+        - router.back() for back navigation
+
+        State:
+        - conversation: ConversationDetail | null
+        - loading: boolean
+        - error: string | null
+
+        Functions:
+        - fetchConversation(id): Promise&lt;void&gt;
+      </signature>
+      <path>mobile/src/app/conversation/[id].tsx (new)</path>
+    </interface>
+    <interface>
+      <name>MessageBubble</name>
+      <kind>React Native component</kind>
+      <signature>
+        interface MessageBubbleProps {
+          role: 'user' | 'assistant';
+          content: string;
+          timestamp: string;
+        }
+
+        export function MessageBubble(props: MessageBubbleProps): JSX.Element
+
+        Styling:
+        - User messages: flex-row justify-end, bg-primary/20 border-primary/40
+        - AI messages: flex-row justify-start, bg-background-light border-secondary/40
+        - Both: max-w-[80%] p-md rounded-lg
+        - Timestamp: text-caption text-text-muted, format(date, 'h:mm a')
+      </signature>
+      <path>mobile/src/components/conversation/MessageBubble.tsx (new)</path>
+    </interface>
+    <interface>
+      <name>fetchConversationDetail</name>
+      <kind>API service function</kind>
+      <signature>
+        export interface ConversationMessage {
+          role: 'user' | 'assistant';
+          content: string;
+          timestamp: string;
+        }
+
+        export interface ConversationDetail {
+          id: string;
+          started_at: string;
+          ended_at: string | null;
+          duration: number | null;
+          main_topic: string | null;
+          messages: ConversationMessage[];
+        }
+
+        export const fetchConversationDetail = async (
+          id: string
+        ): Promise&lt;ConversationDetail&gt;
+      </signature>
+      <path>mobile/src/services/api.ts (extend)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Manual testing for React Native mobile app. Test on iOS simulator/device and Android simulator/device. Use Expo Go or development build. Verify visual appearance matches Celestial Gold design system. Test user interactions (tap, scroll, back navigation). Test with different data scenarios (0 messages, few messages, many messages). Test error handling (network errors, API errors, not found). Use React Native Debugger for inspecting state and API calls.</standards>
+    <locations>
+      mobile/src/app/conversation/[id].tsx (manual testing)
+      mobile/src/components/conversation/MessageBubble.tsx (manual testing)
+      Storybook or component testing (optional, if configured)
+    </locations>
+    <ideas>
+      - AC#1: Test dynamic route [id] parameter extraction from URL
+      - AC#2: Verify metadata displays (date with date-fns formatting, duration, topic)
+      - AC#3: Verify all messages from API render in FlatList/ScrollView
+      - AC#3: Verify messages display in chronological order (oldest first)
+      - AC#4: Verify chat bubble styling matches design system
+      - AC#5: Verify user messages right-aligned with gold border
+      - AC#5: Verify AI messages left-aligned with purple border
+      - AC#6: Test scrolling with 50+ messages (FlatList virtualization)
+      - AC#6: Test scroll-to-bottom behavior on load
+      - AC#7: Test back button navigation returns to history screen
+      - Edge case: Conversation not found (404 error) shows error message
+      - Edge case: Unauthorized access (403 error) shows error message
+      - Edge case: API error shows error message with retry option
+      - Edge case: No messages in conversation shows empty state
+      - Edge case: Very long message text wraps properly in bubble
+      - Edge case: Special characters and emojis display correctly
+      - Edge case: Conversation still active (ended_at is null)
+      - Performance: Test with 100+ messages (smooth scrolling)
+      - Performance: Verify React.memo optimization for MessageBubble
+      - Visual: Colors match Celestial Gold specification
+      - Visual: Message bubble max-width constraint (80%)
+      - Visual: Timestamp formatting (h:mm a format)
+      - Navigation: Deep link directly to conversation detail works
+      - Navigation: Tab navigation state preserved when returning
+    </ideas>
+  </tests>
+</story-context>
