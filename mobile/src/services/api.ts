@@ -136,7 +136,22 @@ export const fetchConversationDetail = async (
   id: string
 ): Promise<ConversationDetail> => {
   const response = await apiClient.get(`/api/v1/conversations/${id}`);
-  return response.data;
+
+  // Backend returns { conversation: {...}, messages: [...] }
+  // Transform to flat structure for frontend
+  const { conversation, messages } = response.data;
+  return {
+    id: conversation.id,
+    started_at: conversation.started_at,
+    ended_at: conversation.ended_at,
+    duration: conversation.duration,
+    main_topic: conversation.main_topic,
+    messages: messages.map((msg: any) => ({
+      role: msg.role,
+      content: msg.content,
+      timestamp: msg.timestamp,
+    })),
+  };
 };
 
 export default apiClient;

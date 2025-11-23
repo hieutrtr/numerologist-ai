@@ -10,6 +10,18 @@ interface MessageBubbleProps {
 export function MessageBubble({ role, content, timestamp }: MessageBubbleProps) {
   const isUser = role === 'user';
 
+  const formatTime = (isoString: string) => {
+    try {
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) {
+        return '--:--';
+      }
+      return format(date, 'h:mm a');
+    } catch (error) {
+      return '--:--';
+    }
+  };
+
   return (
     <View className={`flex-row mb-sm ${isUser ? 'justify-end' : 'justify-start'}`}>
       <View
@@ -21,7 +33,7 @@ export function MessageBubble({ role, content, timestamp }: MessageBubbleProps) 
       >
         <Text className="text-body text-text-primary mb-xs">{content}</Text>
         <Text className="text-caption text-text-muted text-right">
-          {format(new Date(timestamp), 'h:mm a')}
+          {formatTime(timestamp)}
         </Text>
       </View>
     </View>

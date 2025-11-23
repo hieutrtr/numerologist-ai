@@ -40,7 +40,15 @@ export default function ConversationDetailScreen() {
   };
 
   const formatDate = (isoString: string) => {
-    return format(new Date(isoString), 'MMM d, yyyy');
+    try {
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return format(date, 'MMM d, yyyy');
+    } catch (error) {
+      return 'Invalid date';
+    }
   };
 
   const formatDuration = (seconds: number | null) => {
