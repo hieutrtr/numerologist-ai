@@ -1,0 +1,264 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.3</storyId>
+    <title>Frontend History Screen UI</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-23</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-3-frontend-history-screen-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>a history screen showing past conversations</iWant>
+    <soThat>I can review what we talked about</soThat>
+    <tasks>
+      - Task 1: Create History Screen Component (AC: #1-3)
+      - Task 2: Implement Interactive Features (AC: #4-6)
+      - Task 3: Handle Edge Cases (AC: #7-8)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. History screen at `mobile/src/app/(tabs)/history.tsx`
+    2. Shows list of past conversations
+    3. Each item displays: date, duration, brief summary/topic
+    4. Tap to view full conversation details
+    5. Pull-to-refresh to reload list
+    6. Loading state while fetching
+    7. Empty state if no conversations yet
+    8. Pagination (load more on scroll)
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Flow 3: Reviewing Past Readings</section>
+        <snippet>History tab shows list of past conversations in reverse chronological order. Each card displays: Date, first question, preview of insights, life path number if calculated. Card-based layout with tap to expand full conversation. Uses Celestial Gold design system with primary gold (#d4af37) and purple accents (#8b5cf6).</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Design Direction - Celestial Gold</section>
+        <snippet>Primary: #d4af37 (Gold) for actions/highlights. Secondary: #8b5cf6 (Purple) for accents. Background Dark: #0d0d1a. Background Light: #1a1a33 for card surfaces. Text Primary: #fef3c7 (Pale gold). Text Muted: #a8960b for secondary info.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture - Numerologist AI</title>
+        <section>Frontend - React Native with Expo</section>
+        <snippet>React Native (Expo) for cross-platform mobile delivery. TypeScript configuration. Expo Router for file-based routing. NativeWind for styling (Tailwind CSS for React Native). SafeAreaView for device compatibility.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 5: Conversation History & Context Retention</title>
+        <section>Story 5.3</section>
+        <snippet>History screen shows list of past conversations with date, duration, brief summary/topic. Pull-to-refresh to reload. Loading and empty states. Pagination (load more on scroll). Taps navigate to conversation detail view.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/5-2-get-conversation-history-endpoint.md</path>
+        <title>Story 5.2: Get Conversation History Endpoint</title>
+        <section>Completion Notes</section>
+        <snippet>Backend API endpoint GET /api/v1/conversations returns paginated conversations. Default 20 per page (configurable, max 100). Response: { conversations: [], total, page, limit, has_more }. Each conversation: { id (UUID), started_at (ISO), ended_at (ISO or null), duration (seconds or null), main_topic (currently null) }. Requires JWT auth in Authorization header.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>mobile/src/app/(tabs)/history.tsx</path>
+        <kind>screen</kind>
+        <symbol>HistoryScreen</symbol>
+        <lines>1-23</lines>
+        <reason>Current placeholder history screen. Needs to be replaced with full implementation including FlatList, API integration, and conversation cards.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/services/api.ts</path>
+        <kind>service</kind>
+        <symbol>apiClient</symbol>
+        <lines>1-93</lines>
+        <reason>Axios instance configured with auth interceptors. Auto-adds JWT token from auth store to requests. Handles 401 auto-logout. Use this client to call backend API.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/components/conversation/EmptyState.tsx</path>
+        <kind>component</kind>
+        <symbol>EmptyState</symbol>
+        <lines>1-31</lines>
+        <reason>Existing empty state component for home screen. Can be adapted or used as reference for history empty state. Shows icon, welcome text, and decorative elements using design system colors.</reason>
+      </artifact>
+      <artifact>
+        <path>mobile/src/app/(tabs)/_layout.tsx</path>
+        <kind>layout</kind>
+        <symbol>TabLayout</symbol>
+        <lines>1-100</lines>
+        <reason>Bottom tab navigation layout configured in Story 2.9. History tab already defined with icon and styling. Navigation infrastructure ready to use.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <mobile>
+        <package name="react" version="19.1.0">React library</package>
+        <package name="react-native" version="0.81.5">React Native framework</package>
+        <package name="expo" version="~54.0.22">Expo framework</package>
+        <package name="expo-router" version="^6.0.14">File-based routing</package>
+        <package name="axios" version="^1.13.1">HTTP client for API calls</package>
+        <package name="nativewind" version="^4.2.1">Tailwind CSS for React Native</package>
+        <package name="@expo/vector-icons" version="^14.0.2">Icon library (MaterialIcons)</package>
+        <package name="@react-native-async-storage/async-storage" version="^2.2.0">Local storage</package>
+      </mobile>
+      <mobile-additional>
+        <package name="date-fns">Recommended for date/time formatting (needs to be added)</package>
+      </mobile-additional>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Use React Native FlatList for list rendering (virtualization for performance)
+    - Use Expo Router's useRouter() hook for navigation to detail view
+    - Use NativeWind className syntax for styling (Tailwind CSS classes)
+    - Follow Celestial Gold design system colors from UX spec
+    - Use RefreshControl from React Native for pull-to-refresh
+    - Use SafeAreaView for proper device insets
+    - Call GET /api/v1/conversations endpoint with pagination params
+    - Handle loading, error, and empty states gracefully
+    - Use apiClient from services/api.ts (auto-adds JWT token)
+    - Format timestamps and durations for user-friendly display
+    - Implement infinite scroll (onEndReached) for pagination
+    - Navigate to /conversation/[id] route for detail view
+    - Show 20 items per page by default (matches backend default)
+    - Display main_topic when available (currently null from backend)
+    - Use TypeScript for type safety
+    - Handle 401 errors (auto-logout handled by interceptor)
+    - Handle network errors gracefully
+    - Test with 0, 1, and 25+ conversations
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GET /api/v1/conversations</name>
+      <kind>REST endpoint</kind>
+      <signature>
+        GET /api/v1/conversations?page=1&amp;limit=20
+        Headers: Authorization: Bearer {jwt_token}
+
+        Response:
+        {
+          conversations: [
+            {
+              id: string (UUID),
+              started_at: string (ISO 8601),
+              ended_at: string | null (ISO 8601),
+              duration: number | null (seconds),
+              main_topic: string | null
+            }
+          ],
+          total: number,
+          page: number,
+          limit: number,
+          has_more: boolean
+        }
+      </signature>
+      <path>backend/src/api/v1/endpoints/conversations.py (Story 5.2)</path>
+    </interface>
+    <interface>
+      <name>HistoryScreen</name>
+      <kind>React Native component</kind>
+      <signature>
+        export default function HistoryScreen(): JSX.Element
+
+        State:
+        - conversations: Conversation[]
+        - loading: boolean
+        - refreshing: boolean
+        - error: string | null
+        - page: number
+        - hasMore: boolean
+
+        Functions:
+        - loadConversations(page, append)
+        - onRefresh()
+        - loadMore()
+        - formatDate(isoString)
+        - formatDuration(seconds)
+      </signature>
+      <path>mobile/src/app/(tabs)/history.tsx</path>
+    </interface>
+    <interface>
+      <name>ConversationCard</name>
+      <kind>React Native component</kind>
+      <signature>
+        interface ConversationCardProps {
+          conversation: {
+            id: string;
+            started_at: string;
+            ended_at: string | null;
+            duration: number | null;
+            main_topic: string | null;
+          };
+          onPress: () => void;
+        }
+
+        export function ConversationCard(props: ConversationCardProps): JSX.Element
+      </signature>
+      <path>mobile/src/components/ConversationCard.tsx (new)</path>
+    </interface>
+    <interface>
+      <name>fetchConversations</name>
+      <kind>API service function</kind>
+      <signature>
+        export const fetchConversations = async (
+          page: number = 1,
+          limit: number = 20
+        ): Promise&lt;ConversationListResponse&gt;
+
+        Returns:
+        {
+          conversations: Conversation[],
+          total: number,
+          page: number,
+          limit: number,
+          has_more: boolean
+        }
+      </signature>
+      <path>mobile/src/services/api.ts (extend)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Manual testing for React Native mobile app. Test on iOS simulator/device and Android simulator/device. Use Expo Go or development build. Verify visual appearance matches design system. Test user interactions (tap, scroll, pull-to-refresh). Test with different data scenarios (0, 1, many conversations). Test error handling (network errors, API errors). Use React Native Debugger for inspecting state and API calls.
+    </standards>
+    <locations>
+      mobile/src/app/(tabs)/history.tsx (manual testing)
+      mobile/src/components/ConversationCard.tsx (manual testing)
+      Storybook or component testing (optional, if configured)
+    </locations>
+    <ideas>
+      - AC#1-2: Test history screen renders with FlatList of conversations
+      - AC#3: Verify each card shows date, duration, summary/topic formatted correctly
+      - AC#3: Test date formatting (relative: "Today", "Yesterday", "Nov 23")
+      - AC#3: Test duration formatting ("5 min", "1 hr 30 min", "In progress")
+      - AC#4: Tap conversation card navigates to /conversation/[id] route
+      - AC#5: Pull down from top triggers refresh, shows RefreshControl spinner
+      - AC#5: After refresh, list updates with latest conversations
+      - AC#6: Initial load shows loading spinner (ActivityIndicator or skeleton)
+      - AC#6: API error shows error message with retry option
+      - AC#7: New user with no conversations shows empty state component
+      - AC#7: Empty state has icon, message, and optional action
+      - AC#8: Scroll to bottom loads next page of conversations
+      - AC#8: has_more=false disables further loading
+      - AC#8: Loading more shows footer spinner
+      - Edge case: Test with exactly 20 conversations (1 page)
+      - Edge case: Test with 21 conversations (pagination boundary)
+      - Edge case: Test with active conversation (ended_at is null)
+      - Edge case: Test main_topic null vs populated
+      - Edge case: Test very long conversation (hours)
+      - Network error: Test offline mode / no connection
+      - Performance: Test with 100+ conversations (FlatList virtualization)
+      - Visual: Verify colors match Celestial Gold design system
+      - Visual: Verify card layout and spacing
+      - Navigation: Test back button returns to history from detail
+    </ideas>
+  </tests>
+</story-context>

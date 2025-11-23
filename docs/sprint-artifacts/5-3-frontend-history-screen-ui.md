@@ -1,6 +1,6 @@
 # Story 5.3: Frontend History Screen UI
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 
@@ -247,7 +247,12 @@ const formatDuration = (seconds: number | null) => {
 
 ### Context Reference
 
-<!-- Path(s) to story context XML will be added here by context workflow -->
+- **Story Context**: [5-3-frontend-history-screen-ui.context.xml](./5-3-frontend-history-screen-ui.context.xml) - Generated 2025-11-23
+  - Documentation artifacts (UX Design Flow 3, Celestial Gold design system, Epic 5 requirements, Backend API from Story 5.2)
+  - Code artifacts (Current placeholder screen, API client with auth, EmptyState component, Tab navigation layout)
+  - Interfaces (REST endpoint, React Native components, API service functions)
+  - Development constraints (React Native patterns, FlatList, Expo Router, NativeWind styling, authentication)
+  - Test validation approach (Manual testing, edge cases, visual verification, performance testing)
 
 ### Agent Model Used
 
