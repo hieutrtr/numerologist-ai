@@ -1,6 +1,6 @@
 # Story 5.3: Frontend History Screen UI
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

@@ -89,4 +89,32 @@ export interface APIError {
   details?: any;
 }
 
+// Conversation types
+export interface Conversation {
+  id: string;
+  started_at: string;
+  ended_at: string | null;
+  duration: number | null;
+  main_topic: string | null;
+}
+
+export interface ConversationListResponse {
+  conversations: Conversation[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
+// API functions
+export const fetchConversations = async (
+  page: number = 1,
+  limit: number = 20
+): Promise<ConversationListResponse> => {
+  const response = await apiClient.get('/api/v1/conversations', {
+    params: { page, limit },
+  });
+  return response.data;
+};
+
 export default apiClient;
