@@ -9,10 +9,10 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select, func
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.models.conversation import Conversation
 from src.models.conversation_message import ConversationMessage, MessageRole
@@ -36,8 +36,7 @@ class MessageResponse(BaseModel):
     timestamp: str
     message_metadata: dict
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ConversationMessagesResponse(BaseModel):
@@ -48,6 +47,277 @@ class ConversationMessagesResponse(BaseModel):
     page: int
     limit: int
     has_more: bool
+
+
+class ConversationSummary(BaseModel):
+    """Schema for conversation summary in list view."""
+    id: str
+    started_at: str
+    ended_at: Optional[str]
+    duration: Optional[int]
+    main_topic: Optional[str]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ConversationListResponse(BaseModel):
+    """Schema for paginated conversation list response."""
+    conversations: List[ConversationSummary]
+    total: int
+    page: int
+    limit: int
+    has_more: bool
+
+
+class ConversationDetailResponse(BaseModel):
+    """Schema for conversation detail with messages."""
+    conversation: ConversationSummary
+    messages: List[MessageResponse]
+
+
+@router.get("/", response_model=ConversationListResponse)
+async def list_conversations(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    page: int = Query(1, ge=1, description="Page number (1-indexed)"),
+    limit: int = Query(20, ge=1, le=100, description="Items per page")
+) -> ConversationListResponse:
+    """
+    List user's conversations with pagination.
+
+    Returns a paginated list of conversations ordered by most recent first.
+    Each conversation includes id, timing information, and optional main topic.
+
+    Args:
+        current_user: Authenticated user (from JWT token)
+        session: Database session
+        page: Page number (default: 1)
+        limit: Items per page (default: 20, max: 100)
+
+    Returns:
+        ConversationListResponse: Paginated conversations with metadata:
+            {
+                "conversations": [
+                    {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "started_at": "2025-11-23T14:00:00Z",
+                        "ended_at": "2025-11-23T14:15:00Z",
+                        "duration": 900,
+                        "main_topic": "Life Path Number"
+                    },
+                    ...
+                ],
+                "total": 45,
+                "page": 1,
+                "limit": 20,
+                "has_more": true
+            }
+
+    Raises:
+        HTTPException 401: If user is not authenticated
+        HTTPException 422: If page or limit parameters are invalid
+
+    Implementation Details:
+        1. Query conversations filtered by user_id
+        2. Order by started_at descending (most recent first)
+        3. Apply pagination (LIMIT/OFFSET)
+        4. Count total conversations for pagination metadata
+        5. Calculate has_more flag based on total and current page
+
+    Security:
+        - Endpoint requires valid JWT authentication
+        - Only returns conversations owned by current user
+    """
+    try:
+        logger.info(f"Listing conversations for user {current_user.id}, page {page}")
+
+        # Count total conversations for user
+        total_count_stmt = (
+            select(func.count())
+            .select_from(Conversation)
+            .where(Conversation.user_id == current_user.id)
+        )
+        total = session.exec(total_count_stmt).one()
+
+        # Query conversations with pagination
+        offset = (page - 1) * limit
+        query = (
+            select(Conversation)
+            .where(Conversation.user_id == current_user.id)
+            .order_by(Conversation.started_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        conversations = session.exec(query).all()
+
+        # Format response
+        conversation_summaries = [
+            ConversationSummary(
+                id=str(conv.id),
+                started_at=conv.started_at.isoformat(),
+                ended_at=conv.ended_at.isoformat() if conv.ended_at else None,
+                duration=conv.duration_seconds,
+                main_topic=None  # Will be implemented in future story
+            )
+            for conv in conversations
+        ]
+
+        has_more = (offset + len(conversations)) < total
+
+        logger.info(
+            f"Retrieved {len(conversations)} conversations for user {current_user.id}, "
+            f"page {page} (total: {total})"
+        )
+
+        return ConversationListResponse(
+            conversations=conversation_summaries,
+            total=total,
+            page=page,
+            limit=limit,
+            has_more=has_more
+        )
+
+    except Exception as e:
+        logger.error(
+            f"Unexpected error listing conversations for user {current_user.id}: "
+            f"{type(e).__name__}: {str(e)}",
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve conversations: {str(e)}"
+        ) from e
+
+
+@router.get("/{conversation_id}", response_model=ConversationDetailResponse)
+async def get_conversation(
+    conversation_id: UUID,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+) -> ConversationDetailResponse:
+    """
+    Get full conversation with all messages.
+
+    Retrieves a specific conversation including all messages ordered by timestamp.
+    Requires user to own the conversation.
+
+    Args:
+        conversation_id: UUID of the conversation
+        current_user: Authenticated user (from JWT token)
+        session: Database session
+
+    Returns:
+        ConversationDetailResponse: Conversation with messages:
+            {
+                "conversation": {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "started_at": "2025-11-23T14:00:00Z",
+                    "ended_at": "2025-11-23T14:15:00Z",
+                    "duration": 900,
+                    "main_topic": "Life Path Number"
+                },
+                "messages": [
+                    {
+                        "id": "...",
+                        "role": "user",
+                        "content": "What's my life path number?",
+                        "timestamp": "2025-11-23T14:00:00Z",
+                        "message_metadata": {}
+                    },
+                    ...
+                ]
+            }
+
+    Raises:
+        HTTPException 401: If user is not authenticated
+        HTTPException 403: If conversation does not belong to user
+        HTTPException 404: If conversation not found
+
+    Implementation Details:
+        1. Verify conversation exists
+        2. Verify conversation belongs to current user
+        3. Fetch all messages ordered by timestamp
+        4. Return conversation details with messages
+
+    Security:
+        - Endpoint requires valid JWT authentication
+        - Validates conversation ownership before returning data
+        - Only returns conversations and messages from user's own conversations
+    """
+    try:
+        logger.info(f"Retrieving conversation {conversation_id} for user {current_user.id}")
+
+        # Verify conversation exists and belongs to user
+        conversation = session.get(Conversation, conversation_id)
+
+        if not conversation:
+            logger.warning(f"Conversation {conversation_id} not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conversation not found"
+            )
+
+        if conversation.user_id != current_user.id:
+            logger.warning(
+                f"User {current_user.id} attempted to access conversation {conversation_id} "
+                f"owned by user {conversation.user_id}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to access this conversation"
+            )
+
+        # Fetch all messages for this conversation
+        messages_query = (
+            select(ConversationMessage)
+            .where(ConversationMessage.conversation_id == conversation_id)
+            .order_by(ConversationMessage.timestamp.asc())
+        )
+        messages = session.exec(messages_query).all()
+
+        # Format response
+        conversation_summary = ConversationSummary(
+            id=str(conversation.id),
+            started_at=conversation.started_at.isoformat(),
+            ended_at=conversation.ended_at.isoformat() if conversation.ended_at else None,
+            duration=conversation.duration_seconds,
+            main_topic=None  # Will be implemented in future story
+        )
+
+        message_responses = [
+            MessageResponse(
+                id=str(msg.id),
+                role=msg.role.value,
+                content=msg.content,
+                timestamp=msg.timestamp.isoformat(),
+                message_metadata=msg.message_metadata
+            )
+            for msg in messages
+        ]
+
+        logger.info(
+            f"Retrieved conversation {conversation_id} with {len(messages)} messages "
+            f"for user {current_user.id}"
+        )
+
+        return ConversationDetailResponse(
+            conversation=conversation_summary,
+            messages=message_responses
+        )
+
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        logger.error(
+            f"Unexpected error retrieving conversation {conversation_id}: "
+            f"{type(e).__name__}: {str(e)}",
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve conversation: {str(e)}"
+        ) from e
 
 
 @router.post("/start", status_code=status.HTTP_200_OK)
