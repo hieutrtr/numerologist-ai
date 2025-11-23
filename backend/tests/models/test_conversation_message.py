@@ -15,9 +15,9 @@ from sqlmodel import Session, select
 from typing import Optional
 
 # GIVEN: These imports will fail until implementation exists
-from backend.src.models.conversation_message import ConversationMessage  # Model doesn't exist yet
-from backend.src.models.conversation import Conversation
-from backend.src.models.user import User
+from src.models.conversation_message import ConversationMessage  # Model doesn't exist yet
+from src.models.conversation import Conversation
+from src.models.user import User
 
 
 class TestConversationMessageModel:
@@ -55,7 +55,7 @@ class TestConversationMessageModel:
         assert message.role == "user"
         assert message.content == "What's my life path number?"
         assert isinstance(message.timestamp, datetime)
-        assert message.metadata == {}  # Default empty dict
+        assert message.message_metadata == {}  # Default empty dict
 
     def test_message_role_accepts_user_and_assistant(self, session: Session):
         """AC #2: Role field should accept 'user' or 'assistant' values"""
@@ -95,12 +95,12 @@ class TestConversationMessageModel:
             conversation_id=conversation_id,
             role="assistant",
             content="Your life path number is 7",
-            metadata=metadata
+            message_metadata=metadata
         )
 
         # THEN: Metadata should be stored as JSON
-        assert message.metadata == metadata
-        assert message.metadata["confidence"] == 0.95
+        assert message.message_metadata == metadata
+        assert message.message_metadata["confidence"] == 0.95
 
 
 class TestConversationMessageRelationships:
@@ -297,7 +297,7 @@ class TestConversationMessageTimestamps:
 def session():
     """Provide test database session with auto-cleanup"""
     # This fixture will fail until database is properly configured
-    from backend.src.core.database import get_test_session
+    from src.core.database import get_test_session
 
     with get_test_session() as session:
         yield session

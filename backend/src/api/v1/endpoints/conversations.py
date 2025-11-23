@@ -10,9 +10,7 @@ import logging
 from datetime import datetime, timezone
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session
-
-from sqlmodel import select
+from sqlmodel import Session, select, func
 from typing import List, Optional
 from pydantic import BaseModel
 
@@ -411,11 +409,13 @@ async def get_conversation_messages(
                 detail="Not authorized to access this conversation"
             )
 
-        # Step 2: Count total messages
-        total_query = select(ConversationMessage).where(
-            ConversationMessage.conversation_id == conversation_id
+        # Step 2: Count total messages (using database aggregation for performance)
+        total_count_stmt = (
+            select(func.count())
+            .select_from(ConversationMessage)
+            .where(ConversationMessage.conversation_id == conversation_id)
         )
-        total = len(session.exec(total_query).all())
+        total = session.exec(total_count_stmt).one()
 
         # Step 3: Query messages with pagination
         offset = (page - 1) * limit

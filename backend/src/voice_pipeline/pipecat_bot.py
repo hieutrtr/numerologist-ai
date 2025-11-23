@@ -68,10 +68,6 @@ from deepgram import LiveOptions
 from pipecat.transcriptions.language import Language
 
 # Message aggregators for conversation history
-from pipecat.processors.aggregators.llm_response import (
-    LLMAssistantContextAggregator,
-    LLMUserContextAggregator,
-)
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 
 # Application settings and models

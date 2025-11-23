@@ -9,7 +9,11 @@ including room management, timing, and duration calculation.
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.models.user import User
+    from src.models.conversation_message import ConversationMessage
 
 
 class Conversation(SQLModel, table=True):
