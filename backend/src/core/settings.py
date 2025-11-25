@@ -255,7 +255,7 @@ class Settings(BaseSettings):
     - "ja": Japanese
     - "zh": Chinese
     - "pt": Portuguese
-    - See Deepgram docs for full list: https://developers.deepgram.com/docs/language
+    - See Azure Speech docs for full list: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support
 
     Environment variable: VOICE_LANGUAGE
     Default: "en" (English)
@@ -295,9 +295,10 @@ class Settings(BaseSettings):
 
     deepgram_api_key: str = ""
     """
-    Deepgram API key for speech-to-text transcription.
+    [DEPRECATED] Deepgram API key - No longer used.
 
-    Get from: https://console.deepgram.com/ → API Keys
+    The voice pipeline now uses Azure Speech Services for STT.
+    This setting is kept for backward compatibility but is not required.
     Environment variable: DEEPGRAM_API_KEY
     """
 
@@ -336,6 +337,26 @@ class Settings(BaseSettings):
     Environment variable: AZURE_OPENAI_API_VERSION
     """
 
+    # -------------------------------------------------------------------------
+    # Azure Speech Service (STT) - Separate from Azure OpenAI
+    # -------------------------------------------------------------------------
+
+    azure_speech_api_key: str = ""
+    """
+    Azure Speech Services API key for speech-to-text.
+
+    Get from: https://portal.azure.com/ → Speech Services → Keys and Endpoint
+    Environment variable: AZURE_SPEECH_API_KEY
+    """
+
+    azure_speech_region: str = "eastus"
+    """
+    Azure Speech Services region.
+
+    Common regions: eastus, westus, westeurope, southeastasia
+    Environment variable: AZURE_SPEECH_REGION
+    """
+
     elevenlabs_api_key: str = ""
     """
     ElevenLabs API key for text-to-speech synthesis.
@@ -352,7 +373,7 @@ class Settings(BaseSettings):
     Environment variable: ELEVENLABS_VOICE_ID
     """
 
-    elevenlabs_model: str = "eleven_flash_v2_5"
+    elevenlabs_model: str = "eleven_turbo_v2_5"
     """
     ElevenLabs TTS model for voice synthesis.
 

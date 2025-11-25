@@ -7,7 +7,8 @@ of the voice conversation pipeline.
 Prerequisites:
     - All voice service API keys configured in backend/.env:
       * DAILY_API_KEY (Daily.co WebRTC)
-      * DEEPGRAM_API_KEY (speech-to-text)
+      * AZURE_SPEECH_API_KEY (speech-to-text)
+      * AZURE_SPEECH_REGION (Azure Speech region)
       * AZURE_OPENAI_API_KEY (language model)
       * AZURE_OPENAI_ENDPOINT (Azure endpoint URL)
       * ELEVENLABS_API_KEY (text-to-speech)
@@ -32,7 +33,7 @@ Testing Checklist:
 
 Troubleshooting:
     - If bot doesn't join: Check DAILY_API_KEY is correct
-    - If no transcription: Check DEEPGRAM_API_KEY and microphone permissions
+    - If no transcription: Check AZURE_SPEECH_API_KEY, AZURE_SPEECH_REGION, and microphone permissions
     - If no AI response: Check AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT
     - If no audio output: Check ELEVENLABS_API_KEY
     - If high latency: Check network connection and service status

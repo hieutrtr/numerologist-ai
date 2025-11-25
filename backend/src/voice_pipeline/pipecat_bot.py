@@ -3,7 +3,7 @@ Pipecat Voice AI Bot Implementation
 
 This module implements a voice-enabled AI bot using the Pipecat framework, integrating:
 - Daily.co WebRTC transport for real-time audio communication
-- Deepgram for speech-to-text transcription
+- Azure Speech Services for speech-to-text transcription
 - Azure OpenAI GPT-5-mini for language understanding and response generation
 - ElevenLabs for natural voice synthesis
 
@@ -11,7 +11,7 @@ The bot creates an end-to-end voice conversation pipeline that processes user sp
 generates AI responses, and speaks them back naturally with minimal latency.
 
 Architecture:
-    User Audio (mic) → Daily.co WebRTC → Deepgram STT → Azure OpenAI LLM
+    User Audio (mic) → Daily.co WebRTC → Azure Speech STT → Azure OpenAI LLM
     → ElevenLabs TTS → Daily.co WebRTC → User Audio (speakers)
 
 Usage:
@@ -29,7 +29,8 @@ Usage:
 
 Configuration:
     Requires environment variables (loaded via settings.py):
-    - DEEPGRAM_API_KEY: Speech-to-text service
+    - AZURE_SPEECH_API_KEY: Speech-to-text service
+    - AZURE_SPEECH_REGION: Azure Speech region (e.g., eastus)
     - AZURE_OPENAI_API_KEY: Language model service
     - AZURE_OPENAI_ENDPOINT: Azure OpenAI endpoint URL
     - ELEVENLABS_API_KEY: Text-to-speech service
@@ -38,7 +39,7 @@ Configuration:
 References:
     - Pipecat Documentation: https://docs.pipecat.ai/
     - Daily.co Python SDK: https://docs.daily.co/reference/daily-python
-    - Deepgram API: https://developers.deepgram.com/
+    - Azure Speech Services: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/
     - Azure OpenAI: https://learn.microsoft.com/en-us/azure/ai-services/openai/
     - ElevenLabs API: https://docs.elevenlabs.io/
 """
@@ -61,10 +62,9 @@ from pipecat.transports.daily.transport import DailyTransport, DailyParams
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 
 # Speech services
-from pipecat.services.deepgram.stt import DeepgramSTTService
+from pipecat.services.azure.stt import AzureSTTService
 from pipecat.services.azure.llm import AzureLLMService
 from pipecat.services.elevenlabs.tts import ElevenLabsTTSService
-from deepgram import LiveOptions
 from pipecat.transcriptions.language import Language
 
 # Message aggregators for conversation history
@@ -163,7 +163,7 @@ async def run_bot(
 
     This function creates and executes a complete voice conversation pipeline:
     1. Connects to Daily.co room via DailyTransport
-    2. Initializes speech services (Deepgram STT, Azure OpenAI LLM, ElevenLabs TTS)
+    2. Initializes speech services (Azure Speech STT, Azure OpenAI LLM, ElevenLabs TTS)
     3. Builds Pipecat pipeline with proper component ordering
     4. Initializes system prompt based on user context and language
     5. Saves all messages (user and assistant) to database asynchronously
@@ -235,12 +235,12 @@ async def run_bot(
         # Initialize speech services
         logger.info(f"Initializing speech services (language: {settings.voice_language})")
 
-        # Deepgram: Speech-to-Text with language configuration
-        logger.info(f"Configuring Deepgram for language: {settings.voice_language}")
+        # Azure Speech: Speech-to-Text with language configuration
+        logger.info(f"Configuring Azure Speech for language: {settings.voice_language}")
 
-        # Map language code to Language enum
+        # Map language code to Language enum (Azure uses specific locale formats)
         language_map = {
-            "en": Language.EN,
+            "en": Language.EN_US,
             "vi": Language.VI,
             "es": Language.ES,
             "fr": Language.FR,
@@ -249,19 +249,12 @@ async def run_bot(
             "zh": Language.ZH,
             "pt": Language.PT,
         }
-        language_enum = language_map.get(settings.voice_language, Language.EN)
+        language_enum = language_map.get(settings.voice_language, Language.EN_US)
 
-        stt = DeepgramSTTService(
-            api_key=settings.deepgram_api_key,
-            live_options=LiveOptions(
-                language=language_enum,
-                model="nova-3-general",
-                vad_events=True,  # Enable VAD event detection for silence detection
-                endpointing=True,  # Automatic endpoint detection (stops recording when speech ends)
-                interim_results=True,  # Show real-time transcription
-                punctuate=True,  # Add punctuation
-                smart_format=True,  # Format numbers, URLs, etc.
-            ),
+        stt = AzureSTTService(
+            api_key=settings.azure_speech_api_key,
+            region=settings.azure_speech_region,
+            language=language_enum,
         )
 
         # Azure OpenAI: Language Model
@@ -403,7 +396,7 @@ async def run_bot(
         logger.info("Building voice pipeline")
         pipeline = Pipeline([
             transport.input(),              # 1. Audio from user (WebRTC)
-            stt,                            # 2. Speech-to-text (Deepgram)
+            stt,                            # 2. Speech-to-text (Azure Speech Service)
             context_aggregator.user(),      # 3. Collect user message (using context aggregator)
             llm,                            # 4. Generate response (Azure OpenAI)
             tts,                            # 5. Text-to-speech (ElevenLabs)
@@ -447,16 +440,16 @@ def _validate_configuration() -> None:
                    indicating which key needs to be configured
 
     Notes:
-        - Checks three external service API keys: Deepgram, Azure OpenAI, ElevenLabs
+        - Checks three external service API keys: Azure Speech, Azure OpenAI, ElevenLabs
         - Validates Azure OpenAI endpoint URL separately
         - Error messages include instructions for obtaining API keys
     """
     missing_keys = []
 
-    if not settings.deepgram_api_key:
+    if not settings.azure_speech_api_key:
         missing_keys.append(
-            "DEEPGRAM_API_KEY (speech-to-text)\n"
-            "  Get from: https://console.deepgram.com/ → API Keys"
+            "AZURE_SPEECH_API_KEY (speech-to-text)\n"
+            "  Get from: https://portal.azure.com/ → Speech Services → Keys and Endpoint"
         )
 
     if not settings.azure_openai_api_key:
@@ -494,7 +487,8 @@ def _validate_configuration() -> None:
 Manual Testing Instructions:
 
 1. Ensure all API keys are configured in backend/.env:
-   - DEEPGRAM_API_KEY
+   - AZURE_SPEECH_API_KEY
+   - AZURE_SPEECH_REGION
    - AZURE_OPENAI_API_KEY
    - AZURE_OPENAI_ENDPOINT
    - ELEVENLABS_API_KEY

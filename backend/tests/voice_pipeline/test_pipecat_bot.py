@@ -28,7 +28,7 @@ from src.voice_pipeline import pipecat_bot
 def test_validate_configuration_success():
     """Test that _validate_configuration passes with all keys configured"""
     with patch("src.voice_pipeline.pipecat_bot.settings") as mock_settings:
-        mock_settings.deepgram_api_key = "test-key"
+        mock_settings.azure_speech_api_key = "test-key"
         mock_settings.azure_openai_api_key = "test-key"
         mock_settings.azure_openai_endpoint = "https://test.com"
         mock_settings.elevenlabs_api_key = "test-key"
@@ -37,10 +37,10 @@ def test_validate_configuration_success():
         pipecat_bot._validate_configuration()
 
 
-def test_validate_configuration_missing_deepgram():
-    """Test _validate_configuration raises ValueError for missing Deepgram key"""
+def test_validate_configuration_missing_azure_speech():
+    """Test _validate_configuration raises ValueError for missing Azure Speech key"""
     with patch("src.voice_pipeline.pipecat_bot.settings") as mock_settings:
-        mock_settings.deepgram_api_key = ""
+        mock_settings.azure_speech_api_key = ""
         mock_settings.azure_openai_api_key = "test"
         mock_settings.azure_openai_endpoint = "https://test.com"
         mock_settings.elevenlabs_api_key = "test"
@@ -49,14 +49,14 @@ def test_validate_configuration_missing_deepgram():
             pipecat_bot._validate_configuration()
 
         error_message = str(exc_info.value)
-        assert "DEEPGRAM_API_KEY" in error_message
+        assert "AZURE_SPEECH_API_KEY" in error_message
         assert "speech-to-text" in error_message
 
 
 def test_validate_configuration_missing_azure_key():
     """Test _validate_configuration raises ValueError for missing Azure API key"""
     with patch("src.voice_pipeline.pipecat_bot.settings") as mock_settings:
-        mock_settings.deepgram_api_key = "test"
+        mock_settings.azure_speech_api_key = "test"
         mock_settings.azure_openai_api_key = ""
         mock_settings.azure_openai_endpoint = "https://test.com"
         mock_settings.elevenlabs_api_key = "test"
@@ -72,7 +72,7 @@ def test_validate_configuration_missing_azure_key():
 def test_validate_configuration_missing_azure_endpoint():
     """Test _validate_configuration raises ValueError for missing Azure endpoint"""
     with patch("src.voice_pipeline.pipecat_bot.settings") as mock_settings:
-        mock_settings.deepgram_api_key = "test"
+        mock_settings.azure_speech_api_key = "test"
         mock_settings.azure_openai_api_key = "test"
         mock_settings.azure_openai_endpoint = ""
         mock_settings.elevenlabs_api_key = "test"
@@ -87,7 +87,7 @@ def test_validate_configuration_missing_azure_endpoint():
 def test_validate_configuration_missing_elevenlabs():
     """Test _validate_configuration raises ValueError for missing ElevenLabs key"""
     with patch("src.voice_pipeline.pipecat_bot.settings") as mock_settings:
-        mock_settings.deepgram_api_key = "test"
+        mock_settings.azure_speech_api_key = "test"
         mock_settings.azure_openai_api_key = "test"
         mock_settings.azure_openai_endpoint = "https://test.com"
         mock_settings.elevenlabs_api_key = ""
@@ -103,7 +103,7 @@ def test_validate_configuration_missing_elevenlabs():
 def test_validate_configuration_missing_multiple_keys():
     """Test that error message lists all missing API keys"""
     with patch("src.voice_pipeline.pipecat_bot.settings") as mock_settings:
-        mock_settings.deepgram_api_key = ""
+        mock_settings.azure_speech_api_key = ""
         mock_settings.azure_openai_api_key = ""
         mock_settings.azure_openai_endpoint = ""
         mock_settings.elevenlabs_api_key = ""
@@ -113,7 +113,7 @@ def test_validate_configuration_missing_multiple_keys():
 
         # Verify error message lists all missing keys
         error_message = str(exc_info.value)
-        assert "DEEPGRAM_API_KEY" in error_message
+        assert "AZURE_SPEECH_API_KEY" in error_message
         assert "AZURE_OPENAI_API_KEY" in error_message
         assert "AZURE_OPENAI_ENDPOINT" in error_message
         assert "ELEVENLABS_API_KEY" in error_message
@@ -122,7 +122,7 @@ def test_validate_configuration_missing_multiple_keys():
 def test_validate_configuration_error_messages_helpful():
     """Test that error messages include helpful information"""
     with patch("src.voice_pipeline.pipecat_bot.settings") as mock_settings:
-        mock_settings.deepgram_api_key = ""
+        mock_settings.azure_speech_api_key = ""
         mock_settings.azure_openai_api_key = "test"
         mock_settings.azure_openai_endpoint = "https://test.com"
         mock_settings.elevenlabs_api_key = "test"
@@ -132,7 +132,7 @@ def test_validate_configuration_error_messages_helpful():
 
         error_message = str(exc_info.value)
         # Check that error includes URL for obtaining API key
-        assert "console.deepgram.com" in error_message or "deepgram" in error_message.lower()
+        assert "portal.azure.com" in error_message or "Speech Services" in error_message
 
 
 # ============================================================================

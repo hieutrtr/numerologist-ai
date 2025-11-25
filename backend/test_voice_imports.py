@@ -35,13 +35,13 @@ def test_pipecat_transport_imports():
 
 
 def test_pipecat_stt_imports():
-    """Test Pipecat-ai speech-to-text (Deepgram) imports"""
+    """Test Pipecat-ai speech-to-text (Azure Speech) imports"""
     try:
-        from pipecat.services.deepgram.stt import DeepgramSTTService
-        print("✓ Pipecat-ai Deepgram STT import successful")
+        from pipecat.services.azure.stt import AzureSTTService
+        print("✓ Pipecat-ai Azure Speech STT import successful")
         return True
     except ImportError as e:
-        print(f"✗ Pipecat-ai Deepgram STT import failed: {e}")
+        print(f"✗ Pipecat-ai Azure Speech STT import failed: {e}")
         return False
 
 
@@ -60,12 +60,12 @@ def test_voice_service_sdk_imports():
     """Test individual voice service SDK imports"""
     try:
         from daily import Daily
-        from deepgram import DeepgramClient
+        from azure.cognitiveservices.speech import SpeechConfig
         from elevenlabs import ElevenLabs
         from openai import AzureOpenAI
         print("✓ Voice service SDKs import successful")
         print("  - Daily.co SDK")
-        print("  - Deepgram SDK")
+        print("  - Azure Speech SDK")
         print("  - ElevenLabs SDK")
         print("  - Azure OpenAI SDK")
         return True
